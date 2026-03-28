@@ -12,7 +12,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower_bound": 0.9008
+        "lower_bound": 0.900838914720947
       }
     },
     {
@@ -23,7 +23,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower_bound": 0.9737
+        "lower_bound": 0.973657279216826
       }
     },
     {
@@ -34,7 +34,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower_bound": 0.9374
+        "lower_bound": 0.937399796580391
       }
     },
     {
@@ -45,7 +45,7 @@
         "confidence": 0.99
       },
       "expected": {
-        "lower_bound": 0.8724
+        "lower_bound": 0.872376803787502
       }
     },
     {
@@ -56,7 +56,7 @@
         "confidence": 0.9
       },
       "expected": {
-        "lower_bound": 0.9141
+        "lower_bound": 0.914086223854285
       }
     },
     {
@@ -67,7 +67,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower_bound": 0.4188
+        "lower_bound": 0.41884779611253
       }
     },
     {
@@ -78,7 +78,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower_bound": 0.6489
+        "lower_bound": 0.648883499234899
       }
     }
   ]

@@ -30,7 +30,7 @@ evaluate_verdict <- function(successes, trials, threshold, confidence) {
     observed_rate = observed_rate,
     test_statistic = test_statistic,
     p_value = p_value,
-    false_positive_probability = if (passed) 0 else alpha
+    false_positive_probability = alpha
   )
 }
 

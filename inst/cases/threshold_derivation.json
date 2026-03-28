@@ -14,7 +14,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "threshold": 0.9008
+        "threshold": 0.900838914720947
       }
     },
     {
@@ -27,7 +27,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "threshold": 0.9374
+        "threshold": 0.937399796580391
       }
     },
     {
@@ -40,7 +40,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "threshold": 0.9737
+        "threshold": 0.973657279216826
       }
     },
     {
@@ -53,7 +53,7 @@
         "confidence": 0.99
       },
       "expected": {
-        "threshold": 0.8724
+        "threshold": 0.872376803787502
       }
     },
     {
@@ -65,7 +65,7 @@
         "threshold": 0.9
       },
       "expected": {
-        "implied_confidence": 0.9522,
+        "implied_confidence": 0.952209647798911,
         "is_sound": true
       }
     },
@@ -78,7 +78,7 @@
         "threshold": 0.85
       },
       "expected": {
-        "implied_confidence": 0.9974,
+        "implied_confidence": 0.997449300178152,
         "is_sound": true
       }
     },
@@ -91,7 +91,7 @@
         "threshold": 0.94
       },
       "expected": {
-        "implied_confidence": 0.6632,
+        "implied_confidence": 0.663150192704052,
         "is_sound": false
       }
     }

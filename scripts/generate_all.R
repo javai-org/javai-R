@@ -27,7 +27,8 @@ suites <- list(
 
 for (name in names(suites)) {
   path <- file.path(output_dir, paste0(name, ".json"))
-  jsonlite::write_json(suites[[name]], path, pretty = TRUE, auto_unbox = TRUE)
+  jsonlite::write_json(suites[[name]], path, pretty = TRUE, auto_unbox = TRUE,
+                       digits = NA)
   message("Wrote: ", path)
 }
 

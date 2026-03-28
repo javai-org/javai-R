@@ -12,8 +12,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.4038,
-        "upper": 0.5962,
+        "lower": 0.403831530365996,
+        "upper": 0.596168469634004,
         "point": 0.5
       }
     },
@@ -25,8 +25,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.8882,
-        "upper": 0.9785,
+        "lower": 0.888249530768081,
+        "upper": 0.978456320845632,
         "point": 0.95
       }
     },
@@ -38,7 +38,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.963,
+        "lower": 0.963006501793014,
         "upper": 1,
         "point": 1
       }
@@ -51,8 +51,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 3.4694e-18,
-        "upper": 0.037,
+        "lower": 3.46944695195361e-18,
+        "upper": 0.0369934982069857,
         "point": 0
       }
     },
@@ -64,8 +64,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.2307,
-        "upper": 0.8824,
+        "lower": 0.230724281276013,
+        "upper": 0.882379225767352,
         "point": 0.6
       }
     },
@@ -77,8 +77,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.9347,
-        "upper": 0.9619,
+        "lower": 0.934686179755749,
+        "upper": 0.961869737607251,
         "point": 0.95
       }
     },
@@ -90,8 +90,8 @@
         "confidence": 0.9
       },
       "expected": {
-        "lower": 0.4188,
-        "upper": 0.5812,
+        "lower": 0.41884779611253,
+        "upper": 0.58115220388747,
         "point": 0.5
       }
     },
@@ -103,8 +103,8 @@
         "confidence": 0.99
       },
       "expected": {
-        "lower": 0.3753,
-        "upper": 0.6247,
+        "lower": 0.37527962504484,
+        "upper": 0.62472037495516,
         "point": 0.5
       }
     },
@@ -116,8 +116,8 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.0055,
-        "upper": 0.07,
+        "lower": 0.00550196755016235,
+        "upper": 0.0700117907285439,
         "point": 0.02
       }
     },
@@ -129,7 +129,7 @@
         "confidence": 0.95
       },
       "expected": {
-        "lower": 0.2065,
+        "lower": 0.206549314377238,
         "upper": 1,
         "point": 1
       }

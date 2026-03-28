@@ -14,7 +14,7 @@
       },
       "expected": {
         "required_samples": 150,
-        "achieved_power": 0.8013
+        "achieved_power": 0.801302554374439
       }
     },
     {
@@ -27,7 +27,7 @@
       },
       "expected": {
         "required_samples": 236,
-        "achieved_power": 0.8
+        "achieved_power": 0.800024834831698
       }
     },
     {
@@ -40,7 +40,7 @@
       },
       "expected": {
         "required_samples": 153,
-        "achieved_power": 0.8013
+        "achieved_power": 0.801252783463783
       }
     },
     {
@@ -53,7 +53,7 @@
       },
       "expected": {
         "required_samples": 291,
-        "achieved_power": 0.9503
+        "achieved_power": 0.950340273106342
       }
     },
     {
@@ -66,7 +66,7 @@
       },
       "expected": {
         "required_samples": 3118,
-        "achieved_power": 0.8
+        "achieved_power": 0.800034230683624
       }
     },
     {
@@ -79,7 +79,7 @@
       },
       "expected": {
         "required_samples": 231,
-        "achieved_power": 0.8004
+        "achieved_power": 0.800402968951298
       }
     }
   ]

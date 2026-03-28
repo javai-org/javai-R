@@ -3,7 +3,7 @@ test_that("Clear pass is detected", {
 
   expect_true(result$passed)
   expect_equal(result$observed_rate, 0.96)
-  expect_equal(result$false_positive_probability, 0)
+  expect_equal(result$false_positive_probability, 0.05)
 })
 
 test_that("Clear fail is detected", {
