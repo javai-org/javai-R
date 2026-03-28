@@ -148,13 +148,12 @@ JSON cases. For example:
 
 The JSON files are the contract. The R code is the oracle.
 
-## Contributing
+## Feedback
 
-Contributions welcome — especially from statisticians who want to:
-
-- Add edge cases that stress-test implementations
-- Verify the R computations against textbook values
-- Propose new suites for emerging capabilities (DoE, sequential analysis, etc.)
+This project does not accept code contributions, but feedback is welcome —
+especially from statisticians. If you spot a flaw in the methodology, a
+questionable computation, or a missing edge case, please
+[open an issue](https://github.com/javai-org/javai-R/issues).
 
 ## License
 
