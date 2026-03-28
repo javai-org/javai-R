@@ -19,10 +19,12 @@ jobs:
         id: version
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
 
-      - name: Package case files
+      - name: Package case files with schema
         run: |
           cd inst/cases
           zip "../../cases-${{ steps.version.outputs.tag }}.zip" *.json
+          cd ../../schema
+          zip -g "../cases-${{ steps.version.outputs.tag }}.zip" cases.schema.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
