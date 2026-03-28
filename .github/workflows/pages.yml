@@ -186,18 +186,20 @@ jobs:
                   <div class="doc-card">
                     <h2>Statistical Companion</h2>
                     <p>
-                      Formal statistical foundations for the javai methodology. Covers
-                      hypothesis testing, confidence intervals, power analysis, threshold
-                      derivation, and latency percentile analysis.
+                      Primarily for statisticians, this document presents the statistical
+                      foundations of the javai methodology. Covers hypothesis testing,
+                      confidence intervals, power analysis, threshold derivation, and
+                      latency percentile analysis.
                     </p>
                     <a href="statistical-companion.pdf" class="btn">Download PDF</a>
                   </div>
                   <div class="doc-card">
                     <h2>Distributional Contracts</h2>
                     <p>
-                      Extends Design by Contract to stochastic systems. Lifts postconditions
-                      from Boolean predicates over individual executions to statistical
-                      assertions over repeated executions.
+                      For software language professionals, this document presents an
+                      extension of Design by Contract to stochastic systems. Lifts
+                      postconditions from Boolean predicates over individual executions
+                      to statistical assertions over repeated executions.
                     </p>
                     <a href="distributional-contracts.pdf" class="btn">Download PDF</a>
                   </div>
