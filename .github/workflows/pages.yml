@@ -58,6 +58,16 @@ jobs:
             --toc \
             --toc-depth=3 \
             -V title="Distributional Contracts for Stochastic Systems"
+          pandoc docs/GLOSSARY.md \
+            --from gfm+tex_math_dollars \
+            -o _site/glossary.pdf \
+            --pdf-engine=xelatex \
+            -V geometry:margin=1in \
+            -V documentclass=article \
+            -V fontsize=11pt \
+            -V mainfont="DejaVu Serif" \
+            -V monofont="DejaVu Sans Mono" \
+            -V title="Glossary"
 
       - name: Create index page
         run: |
@@ -202,6 +212,14 @@ jobs:
                       to statistical assertions over repeated executions.
                     </p>
                     <a href="distributional-contracts.pdf" class="btn">Download PDF</a>
+                  </div>
+                  <div class="doc-card">
+                    <h2>Glossary</h2>
+                    <p>
+                      Terminology used across the javai project family. Terms are defined
+                      in the context of the distributional contract methodology.
+                    </p>
+                    <a href="glossary.pdf" class="btn">Download PDF</a>
                   </div>
                 </div>
               </div>
