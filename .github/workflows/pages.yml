@@ -28,17 +28,20 @@ jobs:
       - name: Install pandoc and LaTeX
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+          sudo apt-get install -y pandoc texlive-xetex texlive-latex-recommended texlive-latex-extra fonts-dejavu
 
       - name: Convert markdown to PDF
         run: |
           mkdir -p _site
           pandoc docs/STATISTICAL-COMPANION.md \
+            --from gfm+tex_math_dollars \
             -o _site/statistical-companion.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
             -V documentclass=article \
             -V fontsize=11pt \
+            -V mainfont="DejaVu Serif" \
+            -V monofont="DejaVu Sans Mono" \
             --toc \
             --toc-depth=3 \
             -V title="Statistical Companion Document" \

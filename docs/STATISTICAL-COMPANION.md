@@ -1341,7 +1341,7 @@ $$p_{\text{lower}} = \frac{n}{n + z^2}$$
 
 ### Rule of Three (quick approximation for zero failures)
 
-$$p \geq 1 - \frac{3}{n} \quad \text{(95% confidence)}$$
+$$p \geq 1 - \frac{3}{n} \quad \text{(95\% confidence)}$$
 
 ### Sample Size for Precision
 
