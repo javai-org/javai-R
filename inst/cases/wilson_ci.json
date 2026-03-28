@@ -1,0 +1,138 @@
+{
+  "suite": "wilson_ci",
+  "description": "Wilson score confidence intervals (two-sided)",
+  "method": "qnorm-based Wilson score interval",
+  "tolerance": 1e-10,
+  "cases": [
+    {
+      "name": "fair_coin_100_trials_95pct",
+      "inputs": {
+        "successes": 50,
+        "trials": 100,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.4038,
+        "upper": 0.5962,
+        "point": 0.5
+      }
+    },
+    {
+      "name": "high_rate_95_of_100_95pct",
+      "inputs": {
+        "successes": 95,
+        "trials": 100,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.8882,
+        "upper": 0.9785,
+        "point": 0.95
+      }
+    },
+    {
+      "name": "perfect_baseline_100_of_100_95pct",
+      "inputs": {
+        "successes": 100,
+        "trials": 100,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.963,
+        "upper": 1,
+        "point": 1
+      }
+    },
+    {
+      "name": "zero_successes_0_of_100_95pct",
+      "inputs": {
+        "successes": 0,
+        "trials": 100,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 3.4694e-18,
+        "upper": 0.037,
+        "point": 0
+      }
+    },
+    {
+      "name": "small_sample_3_of_5_95pct",
+      "inputs": {
+        "successes": 3,
+        "trials": 5,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.2307,
+        "upper": 0.8824,
+        "point": 0.6
+      }
+    },
+    {
+      "name": "large_sample_950_of_1000_95pct",
+      "inputs": {
+        "successes": 950,
+        "trials": 1000,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.9347,
+        "upper": 0.9619,
+        "point": 0.95
+      }
+    },
+    {
+      "name": "fair_coin_100_trials_90pct",
+      "inputs": {
+        "successes": 50,
+        "trials": 100,
+        "confidence": 0.9
+      },
+      "expected": {
+        "lower": 0.4188,
+        "upper": 0.5812,
+        "point": 0.5
+      }
+    },
+    {
+      "name": "fair_coin_100_trials_99pct",
+      "inputs": {
+        "successes": 50,
+        "trials": 100,
+        "confidence": 0.99
+      },
+      "expected": {
+        "lower": 0.3753,
+        "upper": 0.6247,
+        "point": 0.5
+      }
+    },
+    {
+      "name": "low_rate_2_of_100_95pct",
+      "inputs": {
+        "successes": 2,
+        "trials": 100,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.0055,
+        "upper": 0.07,
+        "point": 0.02
+      }
+    },
+    {
+      "name": "single_trial_success_95pct",
+      "inputs": {
+        "successes": 1,
+        "trials": 1,
+        "confidence": 0.95
+      },
+      "expected": {
+        "lower": 0.2065,
+        "upper": 1,
+        "point": 1
+      }
+    }
+  ]
+}

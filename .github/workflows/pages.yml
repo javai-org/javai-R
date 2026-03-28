@@ -1,0 +1,89 @@
+name: Publish statistical companion to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/STATISTICAL-COMPANION.md'
+      - '.github/workflows/pages.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+
+      - name: Convert markdown to PDF
+        run: |
+          mkdir -p _site
+          pandoc docs/STATISTICAL-COMPANION.md \
+            -o _site/statistical-companion.pdf \
+            --pdf-engine=pdflatex \
+            -V geometry:margin=1in \
+            -V documentclass=article \
+            -V fontsize=11pt \
+            --toc \
+            --toc-depth=3 \
+            -V title="Statistical Companion Document" \
+            -V subtitle="Formal Statistical Foundations for the javai Methodology"
+
+      - name: Create index page
+        run: |
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>javai-R — Statistical Companion</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; max-width: 640px; margin: 4rem auto; padding: 0 1rem; color: #24292f; }
+              h1 { font-size: 1.5rem; }
+              p { line-height: 1.6; }
+              a { color: #0969da; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>javai-R — Statistical Companion</h1>
+            <p>Formal statistical foundations for the <a href="https://javai.org">javai</a> probabilistic testing methodology.</p>
+            <p><a href="statistical-companion.pdf">Download PDF</a></p>
+          </body>
+          </html>
+          EOF
+
+      - name: Add CNAME for custom domain
+        run: echo "r.javai.org" > _site/CNAME
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

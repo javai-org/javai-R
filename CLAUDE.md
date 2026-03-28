@@ -1,4 +1,4 @@
-# javai-r
+# javai-R
 
 This is the R member of the javai project family. It generates
 language-agnostic reference datasets for statistical computations used across
@@ -6,12 +6,12 @@ all javai probabilistic testing frameworks.
 
 ## Role
 
-javai-r is the **statistical oracle**. It uses R — the gold standard for
+javai-R is the **statistical oracle**. It uses R — the gold standard for
 statistical computing — to produce canonical expected outputs. Framework
 implementations (punit, feotest, baseltest, ...) verify conformance against
 these outputs.
 
-javai-r does not implement a testing framework. It produces reference data.
+javai-R does not implement a testing framework. It produces reference data.
 
 ## Structure
 
@@ -46,7 +46,7 @@ Rscript scripts/generate_all.R
 
 - **punit** and **feotest** consume `inst/cases/*.json` in their conformance
   tests.
-- **javai-orchestrator** tracks javai-r in the project registry and feature
+- **javai-orchestrator** tracks javai-R in the project registry and feature
   inventory.
-- javai-r is an independent git repository, included as a submodule in
+- javai-R is an independent git repository, included as a submodule in
   javai-orchestrator.

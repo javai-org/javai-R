@@ -9,6 +9,7 @@
 #' @param confidence Numeric. Confidence level used for the test.
 #' @return A list with passed, observed_rate, test_statistic, p_value,
 #'   false_positive_probability.
+#' @export
 evaluate_verdict <- function(successes, trials, threshold, confidence) {
   observed_rate <- successes / trials
   passed <- observed_rate >= threshold

@@ -8,6 +8,7 @@
 #' @param test_samples Integer. Number of test samples to be run.
 #' @param confidence Numeric. Confidence level.
 #' @return Numeric. The derived threshold.
+#' @export
 threshold_sample_size_first <- function(baseline_successes, baseline_trials,
                                         test_samples, confidence) {
   # Step 1: derive baseline rate
@@ -29,6 +30,7 @@ threshold_sample_size_first <- function(baseline_successes, baseline_trials,
 #' @param threshold Numeric. The explicit threshold.
 #' @param tol Numeric. Convergence tolerance for binary search.
 #' @return A list with implied_confidence and is_sound (>= 0.80).
+#' @export
 threshold_first_implied_confidence <- function(baseline_successes,
                                                 baseline_trials,
                                                 threshold,

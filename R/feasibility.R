@@ -11,6 +11,7 @@
 #' @param sample_size Integer. The configured sample size.
 #' @param confidence Numeric. Confidence level.
 #' @return A list with feasible, minimum_samples, and the criterion.
+#' @export
 check_feasibility <- function(target_proportion, sample_size, confidence) {
   alpha <- 1 - confidence
   z <- qnorm(1 - alpha)  # one-sided

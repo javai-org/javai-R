@@ -8,6 +8,7 @@
 #' @param confidence Numeric. Confidence level (1 - alpha).
 #' @param power Numeric. Statistical power (1 - beta).
 #' @return A list with required_samples and achieved_power.
+#' @export
 required_sample_size <- function(baseline_rate, min_detectable_effect,
                                   confidence, power) {
   alpha <- 1 - confidence

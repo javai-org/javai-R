@@ -8,6 +8,7 @@
 #' @param trials Integer. Total number of trials.
 #' @param confidence Numeric. Confidence level (e.g. 0.95).
 #' @return A list with lower, upper, and point estimate.
+#' @export
 wilson_ci <- function(successes, trials, confidence) {
   alpha <- 1 - confidence
   z <- qnorm(1 - alpha / 2)
@@ -34,6 +35,7 @@ wilson_ci <- function(successes, trials, confidence) {
 #' @param trials Integer. Total number of trials.
 #' @param confidence Numeric. Confidence level (e.g. 0.95).
 #' @return Numeric. The lower bound.
+#' @export
 wilson_lower <- function(successes, trials, confidence) {
   alpha <- 1 - confidence
   z <- qnorm(1 - alpha)  # one-sided

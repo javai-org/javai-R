@@ -57,7 +57,7 @@ repository so that consumers can read them without needing R installed.
 ### Install as an R package
 
 ```r
-devtools::install_github("javai-org/javai-r")
+devtools::install_github("javai-org/javai-R")
 ```
 
 ### Run the R tests
@@ -90,14 +90,61 @@ The `tolerance` field specifies the maximum acceptable absolute difference
 between a framework's output and the reference value. Framework conformance
 tests should use this tolerance for floating-point comparison.
 
+## Releases
+
+Conformance case files are published as versioned GitHub Release artifacts.
+Consuming projects download a pinned release rather than depending on this
+repository directly.
+
+Each release attaches a zip archive (e.g., `cases-v0.1.0.zip`) containing the
+JSON files from `inst/cases/` in a flat structure.
+
+### Download URL
+
+```
+https://github.com/javai-org/javai-R/releases/download/vX.Y.Z/cases-vX.Y.Z.zip
+```
+
+### Creating a release
+
+1. Regenerate and verify locally:
+
+   ```r
+   Rscript scripts/generate_all.R
+   devtools::test()
+   ```
+
+2. Commit any changes to `inst/cases/`.
+
+3. Update the version in `DESCRIPTION`.
+
+4. Tag and push:
+
+   ```sh
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+   The GitHub Actions workflow packages the committed case files and creates the
+   release automatically.
+
+### Versioning
+
+Releases follow semantic versioning:
+
+- **MAJOR**: breaking changes to JSON schema or case structure.
+- **MINOR**: new suites or new cases added to existing suites.
+- **PATCH**: corrections to expected values or tolerance adjustments.
+
 ## Consuming the reference data
 
-Framework projects read the JSON files and assert conformance. For example:
+Framework projects download a pinned release and assert conformance against the
+JSON cases. For example:
 
-- **punit** (Java): a JUnit test reads the JSON, deserialises the cases, and
-  asserts each computation matches within tolerance.
-- **feotest** (Rust): a `#[test]` reads the JSON via `serde_json` and asserts
-  conformance.
+- **punit** (Java): a Gradle task downloads and caches the release zip; JUnit
+  tests read the JSON and assert each computation matches within tolerance.
+- **feotest** (Rust): a build step downloads the zip; `#[test]` functions read
+  the JSON via `serde_json` and assert conformance.
 
 The JSON files are the contract. The R code is the oracle.
 
