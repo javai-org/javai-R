@@ -5,3 +5,6 @@
 .DS_Store
 *.Rcheck/
 man/*.Rd
+/.idea/
+*.iml
+.claude/settings.local.json
