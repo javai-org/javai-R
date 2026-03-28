@@ -1,4 +1,4 @@
-# javai-r
+# javai-R
 
 Reference statistical computations for the [javai](https://javai.org) project
 family, implemented in R.
