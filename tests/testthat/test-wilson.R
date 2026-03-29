@@ -59,6 +59,31 @@ test_that("Wilson lower bound is below two-sided lower bound", {
   expect_true(lb < ci$point)
 })
 
+test_that("Wilson lower bound handles boundary p_hat = 0", {
+  result <- wilson_lower(0, 100, 0.95)
+
+  expect_true(result >= 0)
+  expect_true(result < 0.05)  # should be very small
+})
+
+test_that("Wilson lower bound handles boundary p_hat = 1", {
+  result <- wilson_lower(100, 100, 0.95)
+
+  expect_true(result < 1)
+  expect_true(result > 0.9)  # should be close to 1
+})
+
+test_that("Wilson lower bound handles single trial extremes", {
+  # Single failure: lower bound should be 0 or very near 0
+  lb_fail <- wilson_lower(0, 1, 0.95)
+  expect_true(lb_fail >= 0)
+
+  # Single success: lower bound should be positive but well below 1
+  lb_pass <- wilson_lower(1, 1, 0.95)
+  expect_true(lb_pass > 0)
+  expect_true(lb_pass < 1)
+})
+
 test_that("Wilson lower bound decreases with higher confidence", {
   lb_90 <- wilson_lower(95, 100, 0.90)
   lb_95 <- wilson_lower(95, 100, 0.95)

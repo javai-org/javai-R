@@ -25,7 +25,9 @@ generate_all <- function(output_dir = NULL) {
     threshold_derivation = generate_threshold_derivation_cases(),
     power_analysis = generate_power_analysis_cases(),
     feasibility = generate_feasibility_cases(),
-    verdict = generate_verdict_cases()
+    verdict = generate_verdict_cases(),
+    latency_percentile = generate_latency_percentile_cases(),
+    latency_threshold = generate_latency_threshold_cases()
   )
 
   for (name in names(suites)) {

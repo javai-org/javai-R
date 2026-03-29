@@ -20,8 +20,8 @@ wilson_ci <- function(successes, trials, confidence) {
   margin <- (z / denom) * sqrt(p_hat * (1 - p_hat) / n + z^2 / (4 * n^2))
 
   list(
-    lower = centre - margin,
-    upper = centre + margin,
+    lower = max(0, centre - margin),
+    upper = min(1, centre + margin),
     point = p_hat
   )
 }
@@ -46,7 +46,7 @@ wilson_lower <- function(successes, trials, confidence) {
   centre <- (p_hat + z^2 / (2 * n)) / denom
   margin <- (z / denom) * sqrt(p_hat * (1 - p_hat) / n + z^2 / (4 * n^2))
 
-  centre - margin
+  max(0, centre - margin)
 }
 
 #' Generate Wilson CI reference cases
@@ -166,6 +166,36 @@ generate_wilson_lower_cases <- function() {
       name = "small_sample_5_of_5_95pct",
       inputs = list(successes = 5L, trials = 5L, confidence = 0.95),
       expected = list(lower_bound = wilson_lower(5, 5, 0.95))
+    ),
+    # Pathological: zero successes — complete failure
+    list(
+      name = "zero_successes_0_of_100_95pct",
+      inputs = list(successes = 0L, trials = 100L, confidence = 0.95),
+      expected = list(lower_bound = wilson_lower(0, 100, 0.95))
+    ),
+    # Pathological: zero successes, small sample
+    list(
+      name = "zero_successes_0_of_5_95pct",
+      inputs = list(successes = 0L, trials = 5L, confidence = 0.95),
+      expected = list(lower_bound = wilson_lower(0, 5, 0.95))
+    ),
+    # Pathological: zero successes at 99% confidence
+    list(
+      name = "zero_successes_0_of_100_99pct",
+      inputs = list(successes = 0L, trials = 100L, confidence = 0.99),
+      expected = list(lower_bound = wilson_lower(0, 100, 0.99))
+    ),
+    # Pathological: single trial failure
+    list(
+      name = "single_trial_failure_0_of_1_95pct",
+      inputs = list(successes = 0L, trials = 1L, confidence = 0.95),
+      expected = list(lower_bound = wilson_lower(0, 1, 0.95))
+    ),
+    # Pathological: single trial success
+    list(
+      name = "single_trial_success_1_of_1_95pct",
+      inputs = list(successes = 1L, trials = 1L, confidence = 0.95),
+      expected = list(lower_bound = wilson_lower(1, 1, 0.95))
     )
   )
 

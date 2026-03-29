@@ -42,6 +42,14 @@ schema/         # JSON schema for the case format
 Rscript scripts/generate_all.R
 ```
 
+## Downstream requirements
+
+Whenever the test suite defined by this project is modified or extended,
+create a requirements document for each of the following sibling projects:
+**punit** and **feotest**. Place the requirements in the `plan/` folder that
+both of these projects have. Name the document `REQ-R-xxx.md` where `xxx`
+is reflective of the changes (e.g., `REQ-R-latency-percentile.md`).
+
 ## Relationship to other projects
 
 - **punit** and **feotest** consume `inst/cases/*.json` in their conformance

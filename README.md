@@ -27,7 +27,14 @@ independently. No need to trust a Java or Rust implementation.
 
 ## What's covered
 
-### Statistics engine conformance (current)
+The reference data spans two quality dimensions of the javai methodology:
+**pass-rate analysis** (binomial, Wilson score based) and **latency analysis**
+(non-parametric, empirical percentile based). For the full statistical
+treatment, see the [Statistical Companion](docs/STATISTICAL-COMPANION.md). For
+the contract model that these computations serve, see
+[Distributional Contracts](docs/DISTRIBUTIONAL-CONTRACTS.md).
+
+### Pass-rate conformance
 
 | Suite | File | Covers |
 |---|---|---|
@@ -37,6 +44,13 @@ independently. No need to trust a Java or Rust implementation.
 | Power analysis | `inst/cases/power_analysis.json` | Sample size calculation via power analysis |
 | Feasibility | `inst/cases/feasibility.json` | Verification feasibility checking |
 | Verdict | `inst/cases/verdict.json` | Pass/fail verdict evaluation with z-test |
+
+### Latency conformance
+
+| Suite | File | Covers |
+|---|---|---|
+| Latency percentile | `inst/cases/latency_percentile.json` | Nearest-rank empirical percentiles and summary statistics |
+| Latency threshold | `inst/cases/latency_threshold.json` | Upper confidence bound threshold derivation from baselines |
 
 ### Design of experiments (planned)
 
