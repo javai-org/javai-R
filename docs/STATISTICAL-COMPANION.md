@@ -1,7 +1,7 @@
 # Statistical Companion Document
 
-**Version**: 1.1
-**Last updated**: 2026-04-14
+**Version**: 1.2
+**Last updated**: 2026-04-15
 
 Copyright © 2026, Michael Franz Mannion BSc (Hons) MBA
 
@@ -11,21 +11,23 @@ All attribution licensing is ARL.
 
 ---
 
+## Document History
+
+| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|---|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                          |
+| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                         |
+| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side. |
+
+Each milestone strictly extends the previous one in the scope of what the methodology claims; none supersedes the Bernoulli/Wilson foundation laid in Milestone 1.
+
+---
+
 ## Introduction: The Assumption of Certainty in Software Testing
 
-For decades, the dominant paradigm in software testing has rested on an implicit assumption: **systems under test behave with certainty**. Given the same input, a correctly functioning system produces the same output. This assumption has shaped our tools, our practices, and our intuitions about what "correct" means.
+For decades, the dominant paradigm in software testing has rested on an implicit assumption: **systems under test behave with certainty**. Given the same input, a correctly functioning system produces the same output. Tests produce **binary outcomes** — pass or fail — a single failure is definitive evidence of a defect, and uncertainty, when it intrudes, is treated as a "flaky test" to be mocked away. Continuous integration, test-driven development, and quality gates all sit on that foundation.
 
-Under this paradigm, tests produce **binary outcomes**—pass or fail—and a single failure is definitive evidence of a defect. Test frameworks report success as a count of green checkmarks, and any red mark warrants investigation. The entire edifice of continuous integration, test-driven development, and quality gates is built on this foundation.
-
-Of course, uncertainty has always existed. Network timeouts, race conditions, clock skew, and resource contention introduce variability into even carefully designed systems — both in *what* they produce and in *how long* they take to produce it. But the traditional response has been to **treat uncertainty as a defect to eliminate**—a source of "flaky tests" to be fixed, mocked away, or suppressed. The goal was to restore the deterministic ideal.
-
-### The LLM Inflection Point
-
-As long as undesirable glitches or crashes occur sufficiently rarely, and their consequences remain relatively harmless, the sloppy handling of indeterminism may go unnoticed, be ignored, or be downplayed. Such phenomena are effectively normalized.
-
-However, this posture cannot possibly work in the context of Large Language Models, in which uncertainty is not a bug to fix but an **intrinsic characteristic of the technology**. Even with identical input parameters, a model will likely produce different outputs. This is the system working as designed. The same input genuinely produces different outputs, and the distribution of those outputs *is* the system's behavior.
-
-This represents a qualitative shift in the testing challenge:
+Pockets of statistical practice have always existed alongside this mainstream — reliability engineering, performance engineering, queueing analysis, randomised testing, stochastic simulation — but they have sat outside the automated-test workflow rather than inside it. What is new, and what makes the question pressing now, is that **Large Language Models** promote uncertainty from a nuisance to an intrinsic property of the system under test. Identical inputs produce different outputs, by design; the *distribution* of outputs **is** the behaviour. That promotion makes statistically disciplined repeated-trial testing a first-class concern of mainstream software engineering, not the specialist subfield it used to be.
 
 | Traditional Testing       | Testing Under Uncertainty |
 |---------------------------|---------------------------|
@@ -34,52 +36,38 @@ This represents a qualitative shift in the testing challenge:
 | Failure is binary         | Failure is probabilistic  |
 | Single test is definitive | Single test is a sample   |
 
-The average software developer has encountered uncertainty, but typically as an annoyance to work around. LLMs bring it into the foreground as a **permanent feature** of the systems we build. A customer service chatbot that "usually" gives correct answers is not buggy—it's behaving exactly as its underlying model does.
-
 ### Two Dimensions of Stochasticity
 
-The uncertainty introduced by non-deterministic systems manifests along two independent dimensions:
+Uncertain-system behaviour manifests along two independent dimensions:
 
-1. **Functional stochasticity** — whether the system produces a correct result. Given identical input, an LLM may generate valid JSON in 95 out of 100 invocations and malformed output in the remaining 5. The *correctness* of the output is a random variable.
+1. **Functional stochasticity** — whether the system produces a correct result. Given identical input, an LLM may generate valid JSON in 95 out of 100 invocations and malformed output in the remaining 5. Correctness is a random variable.
+2. **Temporal stochasticity** — how long the system takes to respond, even among successful invocations. Latency is not a fixed property; it is a distribution.
 
-2. **Temporal stochasticity** — how long the system takes to respond. Even among successful invocations, response times vary substantially. A service that averages 200ms may spike to 2 seconds on any given call. Latency is not a fixed property of the system; it is a *distribution*.
+The dimensions are independent. A fast response can be incorrect; a slow response can be correct. Both require repeated observation and distributional reasoning. The javai methodology treats them with different statistical machinery — a binomial model for functional outcomes (§§1–5), non-parametric empirical percentiles for latency (§12) — and requires both to pass for the overall test to pass.
 
-These dimensions are independent. A fast response can be incorrect; a slow response can be correct. A service can meet its reliability target while routinely breaching its latency SLA, or vice versa. Treating either dimension in isolation misses half the picture.
+Memory consumption, token usage, and cost per call also vary and could be modelled the same way, but the methodology concentrates on correctness and latency because these two dimensions have the most direct impact on end users; resource consumption is usually managed through infrastructure tooling rather than test assertions.
 
-Traditional testing addresses neither dimension statistically. A single successful response says nothing about the success *rate*; a single fast response says nothing about the *tail latency* that affects the worst-served users. Both require repeated observation and distributional reasoning — the same shift from binary to probabilistic thinking.
+### What This Document Contains
 
-The javai methodology addresses both dimensions within a unified framework. Pass-rate assertions (Sections 1–5) model functional stochasticity as Bernoulli trials under approximate independence and stationarity, aggregated binomially. Latency assertions (Section 12) characterise temporal stochasticity through non-parametric empirical percentiles. Both are evaluated independently and both must pass for the test to pass, reflecting the reality that a system must be both correct *and* responsive.
+The document mixes three kinds of content, and it is useful to name them upfront so the reader knows the epistemic status of each claim:
 
-Other observable properties of stochastic services — memory consumption, token usage, cost per call — also vary across invocations. The javai methodology focuses on functional correctness and latency because these two dimensions have the most direct impact on end users and developers: does the service work, and is it fast enough? Resource consumption is orthogonal and, while worth monitoring, is typically managed through infrastructure tooling rather than test assertions.
+- **Exact statistical results** — e.g. the Bernoulli/binomial model, Wilson score intervals, and the binomial order-statistic upper bound on a quantile. These are theorems, cited and verifiable.
+- **Operational approximations** — e.g. normal-asymptotic sample-size planning formulas, and the Wilson lower bound used as a one-sided threshold. These are practical approximations chosen for their stability and familiarity; their limits are stated where they appear.
+- **Engineering guardrails** — e.g. feasibility gates, the VERIFICATION/SMOKE split, covariate tracking, baseline expiration, transparent-statistics output. These are framework-enforced disciplines that make disciplined inference *visible* and *auditable*; they do not replace the underlying statistics.
 
-### The Need for Statistical Rigor
-
-This shift demands a corresponding evolution in testing methodology. We cannot simply run a test once and declare success. Nor can we run it many times and hope for the best. We need:
-
-1. **Principled sample sizes**: How many trials provide sufficient evidence?
-2. **Quantified uncertainty**: What confidence can we place in our conclusions?
-3. **Controlled error rates**: How do we balance false positives against false negatives?
-4. **Reproducible thresholds**: How do we set pass/fail criteria that are defensible?
-
-These are fundamentally **statistical questions**, and they deserve statistical answers. The javai project family exists to bring the rigor of hypothesis testing, confidence intervals, and power analysis to the practical problem of testing systems characterized by uncertainty.
-
-This document provides the formal foundations for that approach. And while the hot topic of LLMs brings the reality of uncertainty into the foreground, the principles developed here are applicable to any system that exhibits uncertain behavior.
+Where a device below belongs to one of these categories, it is labelled. Readers should not expect design policies to have the calibration guarantees of theorems, or vice versa.
 
 ### The javai Project Family
 
-The statistical methodology described in this document is implemented across multiple language-native frameworks:
+The methodology is implemented across language-native frameworks:
 
-| Framework | Language | Repository |
-|-----------|----------|------------|
-| [punit](https://github.com/javai-org/punit) | Java | JUnit 5 extension — the reference implementation |
-| [feotest](https://github.com/javai-org/feotest) | Rust | Idiomatic Rust, not a port |
+| Framework | Language | Role |
+|-----------|----------|------|
+| [punit](https://github.com/javai-org/punit) | Java | JUnit 5 extension — reference implementation |
+| [feotest](https://github.com/javai-org/feotest) | Rust | Idiomatic Rust port |
 | [baseltest](https://github.com/javai-org/baseltest) | Python | (planned) |
 
-Each framework implements the same statistical core independently, in its own language and idiom. The mathematics described in this document is the shared specification; the implementations are independent.
-
-#### Conformance Verification
-
-The [javai-R](https://github.com/javai-org/javai-R) project generates language-agnostic reference datasets using R — the gold standard for statistical computing. Each framework verifies that its statistics engine produces results matching the R-generated reference data within stated tolerances. This ensures that all implementations deliver identical statistical verdicts, regardless of language.
+Each implements the same statistical core independently. Language-agnostic reference data for conformance testing is generated by the R-based [javai-R](https://github.com/javai-org/javai-R) project; all per-language implementations must reproduce those outputs within stated tolerances. Detailed cross-language conformance architecture is documented in the project READMEs.
 
 ---
 
@@ -95,89 +83,22 @@ This document provides a rigorous statistical treatment of the methods employed 
 
 ---
 
-## Reference Scenarios
+## Two Testing Paradigms: Compliance and Regression
 
-The methodology accommodates two distinct testing scenarios. Both are equally valid; they differ only in where the threshold comes from.
+The methodology supports two distinct testing paradigms. They share the same hypothesis-test skeleton but differ in where the threshold comes from and how results are interpreted.
 
-### Scenario A: Compliance Testing with a Payment Processing API
+| Paradigm | Threshold source | Statistical question | Example |
+|----------|------------------|----------------------|---------|
+| **Compliance** | Contract / SLA / SLO / policy — given, not estimated | "Does the system meet its mandated requirement?" | Payment API with contractual $p_{\text{SLA}} = 0.995$ uptime |
+| **Regression** | Empirical estimate from a MEASURE experiment | "Has the system degraded from its measured baseline?" | LLM customer-service system with $\hat{p}_{\text{exp}} = 0.951$ from $n = 1000$ samples |
 
-**Application**: A third-party payment processing API with a contractual uptime guarantee.
+Both paradigms test the same one-sided hypothesis:
 
-**Service Level Agreement (SLA) Requirement**: The contract states: "The API shall successfully process transactions at least 99.5% of the time."
+$$H_0: p \geq p_{\text{threshold}} \quad\text{(acceptable)} \qquad H_1: p < p_{\text{threshold}} \quad\text{(unacceptable)}$$
 
-**Success Criterion**: A trial is successful if the API returns a successful response (HTTP 2xx with valid transaction confirmation).
+The three differences are the **source** of $p_{\text{threshold}}$ (given vs. derived), the **interpretation** of failure (SLA violation vs. regression), and the **prerequisite step** (none vs. MEASURE). Everything else — the binomial model, the Wilson machinery, the feasibility gate, the VERIFICATION/SMOKE distinction — applies identically.
 
-**Key parameters**:
-- $p_{\text{SLA}} = 0.995$ (given by contract)
-- No baseline experiment required
-- Statistical question: "Does the system meet its contractual obligation?"
-
-### Scenario B: Regression Testing with an LLM-Based Customer Service
-
-**Application**: A customer service system that uses a Large Language Model (LLM) to generate structured JSON responses from natural language queries.
-
-**Use Case**: Given a query (e.g., "What's the shipping status for order #12345?"), the system should return valid JSON with the required fields (`orderId`, `status`, `estimatedDelivery`).
-
-**Success Criterion**: A trial is successful if:
-1. The response is syntactically valid JSON
-2. The response contains all required fields
-3. The field values are semantically appropriate (not hallucinated)
-
-**Key parameters**:
-- $\hat{p}_{\text{exp}} = 0.951$ (measured from 1000-sample experiment)
-- Threshold derived from empirical baseline
-- Statistical question: "Has the system degraded from its measured baseline?"
-
----
-
-## Two Testing Scenarios
-
-The methodology supports two distinct testing scenarios. They share the same statistical foundations but differ in where the threshold comes from and how results are interpreted.
-
-| Scenario               | Threshold Source                   | Statistical Question                                  |
-|------------------------|------------------------------------|-------------------------------------------------------|
-| **Compliance Testing** | Contract, SLA, SLO, policy         | "Does the system meet the mandated requirement?"      |
-| **Regression Testing** | Empirical estimate from experiment | "Has the system degraded from its measured baseline?" |
-
-### Compliance Testing
-
-The threshold is a **normative claim**—a business or contractual requirement:
-
-- The threshold $p_{\text{SLA}}$ is given, not estimated.
-- No baseline experiment is required.
-- The test verifies conformance to an external standard.
-- **Verification vs. Smoke**: For an evidential claim (VERIFICATION intent), the sample size must be sufficient to support the threshold. If not, the developer must explicitly declare the intent as SMOKE.
-- Failure means: "Evidence that the system does not meet the requirement" (in VERIFICATION) or "Potential regression detected" (in SMOKE).
-
-**When to use**: Third-party APIs with SLAs, internal services with SLOs, compliance requirements, contractual obligations.
-
-### Regression Testing
-
-The threshold is an **empirical estimate** derived from measurement:
-
-- The threshold is derived from experimental data $(\hat{p}_{\text{exp}}, n_{\text{exp}})$
-- A baseline experiment (a "measure experiment") is required first
-- The test detects regression from the measured baseline
-- Failure means: "Evidence that the system has degraded"
-
-**When to use**: LLM-based systems, ML models, any system where developers need to discover acceptable performance through experimentation.
-
-### Mathematical Structure is Identical
-
-Both paradigms use the same hypothesis test structure:
-
-$$
-H_0: p \geq p_{\text{threshold}} \quad \text{(acceptable)}
-$$
-
-$$
-H_1: p < p_{\text{threshold}} \quad \text{(unacceptable)}
-$$
-
-The difference is in:
-1. **Source** of $p_{\text{threshold}}$ (given vs. derived)
-2. **Interpretation** of results (SLA violation vs. regression)
-3. **Prerequisite steps** (none vs. MEASURE experiment)
+For an evidential claim under either paradigm (VERIFICATION intent), the sample size must be sufficient to support the threshold; otherwise the developer must declare the test as SMOKE. Section 5.7 defines this split.
 
 ---
 
@@ -185,7 +106,7 @@ The difference is in:
 
 ### 1.1 Bernoulli Trial Framework
 
-Each invocation of the use case is modeled as an independent Bernoulli trial:
+Each invocation of the use case is treated as a Bernoulli trial under a **working approximation** of independence and stationarity:
 
 $$X_i \sim \text{Bernoulli}(p)$$
 
@@ -193,6 +114,8 @@ where:
 - $X_i \in \{0, 1\}$ is the outcome of the *i*-th trial (1 = success, 0 = failure)
 - $p \in [0, 1]$ is the true (unknown) success probability
 - Trials are assumed independent and identically distributed (i.i.d.)
+
+The word *working* is load-bearing: independence and stationarity are modelling assumptions that hold approximately in practice, not discovered truths about the system under test. §1.3 separates the formal assumptions from the operational threats to those assumptions, and §8 describes the framework-level guardrails that make assumption drift *visible* without pretending to repair it.
 
 ### 1.2 Binomial Aggregation
 
@@ -206,7 +129,7 @@ $$E[\hat{p}] = p, \quad \text{Var}(\hat{p}) = \frac{p(1-p)}{n}$$
 
 ### 1.3 Assumptions and Limitations
 
-The Bernoulli model assumes:
+The Bernoulli model rests on three **formal assumptions**, each paired with the **operational threats** that could silently violate it in practice:
 
 1. **Independence**: Each trial is independent. In practice, this may be violated if, for example:
    - The LLM provider implements request-level caching
@@ -349,6 +272,8 @@ Rather than implement conditional method selection, the methodology uses Wilson 
 
 ### 2.4 Sample Size Determination
 
+> **Epistemic status**: planning approximation based on normal asymptotics. Adequate for sample-size budgeting; not of the same epistemic type as the Wilson constructions elsewhere in this document.
+
 To achieve a desired margin of error *e* with confidence $(1-\alpha)$, the required sample size is approximately:
 
 $$n = \frac{z_{\alpha/2}^2 \cdot \hat{p}(1-\hat{p})}{e^2}$$
@@ -402,7 +327,7 @@ The difference lies in how $p_{\text{threshold}}$ is determined and interpreted:
 | **Regression** | Derived from $\hat{p}_{\text{exp}}$ | No degradation from baseline | Regression has occurred |
 
 We seek a decision rule that:
-- Controls the Type I error rate (false positive) at level $\alpha$
+- Targets a Type I error rate (false positive) at level $\alpha$ under the working model
 - Maximizes power to detect true violations/degradation
 
 ### 3.3 One-Sided Lower Confidence Bound
@@ -608,20 +533,18 @@ $$p_{\text{threshold}} = 0.9973 - 1.645 \times 0.0052 = 0.9973 - 0.0086 \approx 
 
 ### 4.5 Theoretical Note: Beta-Binomial Alternative
 
-For statisticians reviewing this methodology: the **Beta-Binomial posterior predictive** approach offers a theoretically superior treatment that fully propagates baseline uncertainty and produces integer thresholds. However, the javai methodology uses the Wilson bound because:
+For statisticians reviewing this methodology: the **Beta-Binomial posterior predictive** approach is the theoretically cleaner treatment. It fully propagates baseline uncertainty into a predictive distribution for future test counts, naturally yields integer thresholds, and avoids the confidence-vs-prediction gap that the Wilson construction exhibits when baseline and test sample sizes differ materially (§3.3 caveat, and §12.4.3 for the latency analogue). The javai methodology nevertheless uses the Wilson bound as its default construction because:
 
-- It requires no prior specification
-- It is simpler to implement and audit
-- It produces results that are practically equivalent for typical sample sizes
-- It remains within the frequentist paradigm familiar to most practitioners
+- **No prior negotiation.** Selecting $(a, b)$ — or defending Jeffreys' $a = b = 0.5$ — is not a conversation most engineering teams can have in the time a regression test is configured. Wilson requires nothing beyond counts and a confidence level.
+- **Auditability in regulated settings.** A frequentist lower confidence bound has a single, externally verifiable interpretation. A posterior predictive bound adds a prior that an auditor must understand, accept, or challenge; the extra degree of freedom is epistemically honest but operationally expensive in regulated or contractual contexts.
+- **Cross-language stability.** Wilson reduces to elementary arithmetic (qnorm + closed form) and reproduces bit-exactly across languages. Beta-Binomial CDFs rely on the regularised incomplete beta function, whose numerical behaviour at extreme $(a, b)$ differs between libraries — a real conformance problem across punit, feotest, and baseltest.
+- **Close enough in the operating range.** For the sample sizes typical of measure experiments ($n \geq 100$) and the pass rates typical of production LLM services ($\hat{p} \in [0.9, 1.0]$), Wilson lower bounds and Beta-Binomial predictive lower bounds agree to within a fraction of a percentage point. The larger risk in practice is a stale baseline or a mis-specified covariate, not the choice of interval method.
 
-Organizations with strong Bayesian infrastructure or specific requirements for integer thresholds may wish to implement their own threshold derivation using the posterior predictive:
+The trade-off is deliberate, not evasive. Organisations with strong Bayesian infrastructure, or use cases with extreme sample-size imbalance between baseline and test, may wish to substitute the posterior predictive:
 
 $$K_t \mid k, n \sim \text{BetaBinomial}(n_t, a + k, b + n - k)$$
 
-where $(a, b)$ are prior hyperparameters (Jeffreys: $a = b = 0.5$).
-
-See Gelman et al. (2013) for a complete treatment.
+where $(a, b)$ are prior hyperparameters (Jeffreys: $a = b = 0.5$). See Gelman et al. (2013) and Bayarri & Berger (2004) for treatments. The javai framework does not preclude this substitution at the implementation layer; what it standardises is the Wilson default and the conformance reference data that flows from it.
 
 ---
 
@@ -645,7 +568,7 @@ Given a test with $n_{\text{test}}$ samples and threshold $p_{\text{threshold}}$
 | **Test passes** | Correct (True Negative)       | Type II Error (False Negative) |
 | **Test fails**  | Type I Error (False Positive) | Correct (True Positive)        |
 
-- **Type I error rate** ($\alpha$): Controlled by threshold derivation. If threshold is set at $(1-\alpha)$ confidence, then $P(\text{False Positive}) = \alpha$.
+- **Type I error rate** ($\alpha$): Targeted by threshold derivation. If the threshold is set at $(1-\alpha)$ confidence on the baseline and the true success probability equals the experimental rate, then $P(\text{False Positive}) \approx \alpha$ under the working model. The word *approximately* is load-bearing: the construction adjusts only the threshold side, not the joint baseline-and-test predictive distribution, and calibration degrades when test-sample size is small relative to baseline (see §3.3 and §12.4.3 for the analogous caveat on the latency side).
 
 - **Type II error rate** ($\beta$): Depends on:
   - True effect size (how much degradation occurred)
@@ -653,6 +576,8 @@ Given a test with $n_{\text{test}}$ samples and threshold $p_{\text{threshold}}$
   - Threshold
 
 ### 5.3 Statistical Power
+
+> **Epistemic status**: planning approximation based on normal asymptotics. The power formulas below are adequate for deciding "is this test worth running?" but should not be read as exact calibration claims under small or imbalanced sample sizes.
 
 Power is the probability of correctly detecting degradation when it exists:
 
@@ -840,6 +765,8 @@ These caveats appear in both summary and verbose output modes.
 ---
 
 ## 6. The Three Operational Approaches: Mathematical Formulation
+
+> **Epistemic status**: decision-policy regimes, not distinct inferential theories. The three "approaches" below describe which test-configuration parameters the framework fixes and which it derives, not three different statistical methods. They all sit inside the same Bernoulli/binomial model, and the sample-size and confidence formulas used within them are the **asymptotic / normal-approximation** planning formulas from §2.4 and §5.3, not Wilson constructions.
 
 The three operational approaches apply to **both** paradigms. The key difference is the source of the threshold:
 
@@ -1047,9 +974,11 @@ When running multiple probabilistic tests:
 - **Per-test error rate**: Each test has false positive rate $\alpha$
 - **Family-wise error rate**: Probability of at least one false positive increases with number of tests
 
-For *m* independent tests at level $\alpha$:
+For $m$ **independent** tests at level $\alpha$:
 
 $$P(\text{at least one false positive}) = 1 - (1-\alpha)^m$$
+
+The independence assumption is often violated in practice: tests over the same use case share a baseline, tests within a suite often share an underlying service, and tests across a CI run are temporally clustered. Under positive dependence (common in regression suites that share baselines or infrastructure), the family-wise rate grows more slowly than the formula above — the formula is therefore a *conservative* upper bound for typical usage. Under arbitrary dependence structures, sharper bounds require knowing or modelling the joint distribution of test statistics, which the javai methodology does not attempt.
 
 | Number of tests | Per-test α = 0.05 | Per-test α = 0.01 |
 |-----------------|-------------------|-------------------|
@@ -1151,7 +1080,7 @@ If $p$ differs between baseline and test:
 
 - The comparison is between **different populations**
 - The hypothesis test answers the wrong question
-- Type I and Type II error rates are no longer controlled
+- Type I and Type II error rates are no longer meaningfully targeted
 - Verdicts are statistically meaningless (though they appear valid)
 
 #### 8.3.3 Why This Is Hard
@@ -1193,6 +1122,8 @@ The framework provides tools; developers must use them wisely:
 | Refresh stale baselines      | Prominent expiration alerts                 | Run measure experiments when prompted       |
 
 ### 8.4 Guardrails for Assumption Validity
+
+> **Epistemic status**: diagnostic guardrails / validity aids, not statistical corrections. The mechanisms below (covariates, expiration, provenance, warning semantics) do not *repair* a violated assumption; they surface its likely presence so an operator can judge whether the verdict is still trustworthy. A test that runs under non-conforming covariates still produces a statistically questionable verdict — the framework just refuses to let that fact be silent.
 
 The statistical validity of probabilistic testing depends on the assumptions outlined in Section 1.3. While no framework can guarantee these assumptions hold, the javai methodology provides **guardrails**—features that surface violations, qualify results, and encourage practices that preserve statistical validity.
 
@@ -1322,43 +1253,51 @@ This approach preserves statistical honesty without creating operational paralys
 
 ## 9. Summary of Key Formulas
 
-### Estimation
+Every formula below is tagged with its **epistemic status**:
+
+- **Exact** — a theorem under the stated model assumptions.
+- **Wilson-based** — exact in the Wilson-score sense, but applied one-sidedly here as a conservative operational threshold.
+- **Asymptotic / Normal-approximation** — a planning formula valid when $n$ is large and $p$ is away from 0 and 1.
+- **Heuristic** — a rule of thumb, useful operationally, not a confidence statement.
+- **Non-parametric / distribution-free** — exact for any continuous $F$ under i.i.d. sampling.
+
+### Estimation *(Exact — MLE)*
 
 $$\hat{p} = \frac{k}{n}, \quad \text{SE}(\hat{p}) = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
 
-### Wald Confidence Interval (two-sided)
+### Wald Confidence Interval (two-sided) *(Asymptotic — pedagogical, not used by the methodology)*
 
 $$\hat{p} \pm z_{\alpha/2} \cdot \text{SE}(\hat{p})$$
 
-### Wilson Score Interval
+### Wilson Score Interval *(Wilson-based — default interval method)*
 
 $$\frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
 
-### One-Sided Lower Bound (for threshold derivation)
+### One-Sided Lower Bound, for threshold derivation *(Asymptotic — operational surrogate, see §3.3)*
 
 $$p_{\text{threshold}} = \hat{p} - z_\alpha \cdot \text{SE}$$
 
-### Wilson Lower Bound (for $\hat{p} = 1$)
+### Wilson Lower Bound, for $\hat{p} = 1$ *(Wilson-based — boundary case)*
 
 $$p_{\text{lower}} = \frac{n}{n + z^2}$$
 
-### Rule of Three (quick approximation for zero failures)
+### Rule of Three, for zero failures *(Heuristic — quick approximation at 95% confidence)*
 
-$$p \geq 1 - \frac{3}{n} \quad \text{(95\% confidence)}$$
+$$p \geq 1 - \frac{3}{n}$$
 
-### Sample Size for Precision
+### Sample Size for Precision *(Asymptotic — planning approximation based on normal asymptotics)*
 
 $$n = \frac{z_{\alpha/2}^2 \cdot p(1-p)}{e^2}$$
 
-### Sample Size for Power
+### Sample Size for Power *(Asymptotic — planning approximation based on normal asymptotics)*
 
 $$n = \left(\frac{z_\alpha \sqrt{p_0(1-p_0)} + z_\beta \sqrt{p_1(1-p_1)}}{p_0 - p_1}\right)^2$$
 
-### Empirical Percentile (nearest-rank)
+### Empirical Percentile (nearest-rank) *(Exact — definition)*
 
 $$Q(p) = t_{(\lceil p \cdot n_s \rceil)}, \quad t_{(1)} \leq \cdots \leq t_{(n_s)}$$
 
-### Latency Threshold Derivation (binomial order-statistic upper bound)
+### Latency Threshold Derivation (binomial order-statistic upper bound) *(Non-parametric / distribution-free — exact for continuous $F_T$; conservative under ties)*
 
 $$\tau_j = t_{(k_j)}, \qquad k_j = \min\left\{ k : P\!\left(\text{Bin}(n_s, p_j) \geq k\right) \leq \alpha \right\}$$
 
@@ -1475,19 +1414,21 @@ STATISTICAL INFERENCE
   p-value:             P(Z < -0.95) = 0.171
 
 VERDICT
-  Result:              PASS (but borderline)
-  Interpretation:      The observed success rate of 99.2% is below the SLA
-                       threshold of 99.5%, but the evidence is insufficient
-                       to conclude a violation (p = 0.171 > 0.05).
+  Statistical verdict:   NO EVIDENCE OF VIOLATION
+                         The one-sided test does not reject H₀ at α=0.05
+                         (p = 0.171). The 95% CI [98.4%, 100%] includes the
+                         SLA threshold.
 
-                       The 95% confidence interval [98.4%, 100%] includes
-                       the SLA threshold, so we cannot reject the hypothesis
-                       that the system meets its contractual obligation.
+  Observed-rate status:  BELOW NOMINAL TARGET
+                         Observed 99.2% < SLA 99.5%. The sample provides
+                         insufficient evidence to conclude violation, but
+                         the point estimate is on the wrong side of the
+                         threshold.
 
-  Caveat:              The observed rate (99.2%) is below the SLA threshold
-                       (99.5%). The threshold is met at this confidence level,
-                       but this warrants monitoring. Consider increasing
-                       sample size for more conclusive evidence.
+  Operational caution:   MONITOR / GATHER MORE DATA
+                         Increase sample size if a more conclusive verdict
+                         is required. The current test would fail to detect
+                         a true rate as low as 98.0% with meaningful power.
 
 ══════════════════════════════════════════════════════════════════════════════
 ```
@@ -1495,7 +1436,7 @@ VERDICT
 **Key differences in compliance output**:
 - Hypothesis framing uses "meets SLA requirement" / "violates SLA"
 - Threshold Reference shows provenance (`thresholdOrigin`, `contractRef`) instead of empirical basis
-- Verdict interpretation is framed in terms of contractual compliance
+- The verdict is deliberately split into three strands rather than overloaded onto a single PASS/FAIL label: the **statistical verdict** reports the hypothesis-test conclusion, the **observed-rate status** reports whether the point estimate sits on the right side of the threshold, and the **operational caution** describes what an operator should do next. These can disagree — a test can be statistically non-rejecting while the observed rate sits below target, and reporting them separately prevents the overloaded "PASS (but borderline)" label from masking a genuine operational concern.
 
 ### 10.5 Mathematical Notation
 
@@ -1527,123 +1468,30 @@ The transparent output enables statisticians to verify:
 
 ## 11. Statistical Discipline Through Design
 
-The javai methodology is designed not just to *perform* statistical tests, but to *encourage* statistical discipline. This section summarizes how the methodology's features embody principles of good statistical practice.
+Sections 2–10 developed the statistical machinery in isolation. This short section names the **framework-level disciplines** that bind the machinery into a practice, so that developers who are not statisticians can still produce statistically defensible verdicts.
 
-### 11.1 The Problem with "Just Run More Tests"
+The disciplines are orthogonal design policies, not theorems:
 
-A naive approach to non-deterministic testing is: "Run the test many times and see if it mostly passes." This approach fails because:
+| Discipline | What it surfaces | Where it lives |
+|------------|------------------|----------------|
+| Explicit thresholds and provenance | Origin of every pass/fail decision | §7.4 threshold provenance, transparent-statistics output |
+| Feasibility gating for affirmative claims | Sample-size adequacy *before* the test runs | §5.7 VERIFICATION vs SMOKE |
+| Covariate tracking | Non-stationarity across baseline vs. test contexts | §8.4.1 |
+| Baseline expiration | Staleness of empirical baselines | §8.4.2 |
+| Warnings over silence | Imperfect conditions, not pretending otherwise | throughout |
+| Full audit trail | Reproducibility and post-hoc investigation | §7.4, transparent-statistics mode |
 
-- **No principled sample size**: How many is "many"? Without power analysis, sample sizes are guesses.
-- **No controlled error rates**: What confidence do we have in verdicts? Without hypothesis testing, confidence is undefined.
-- **No threshold derivation**: What pass rate is acceptable? Without baselines, thresholds are arbitrary.
-- **No assumption checking**: Are comparisons valid? Without guardrails, violations are invisible.
+Two points are worth naming plainly.
 
-The javai methodology addresses each of these failures with specific features.
+**First**, these disciplines do not *repair* violated assumptions. They make assumption drift *visible*. A test that runs under a stale baseline still produces a statistically questionable verdict — the framework just refuses to let that fact be silent.
 
-### 11.2 How the Methodology Encourages Good Practice
-
-| Statistical Principle               | Common Violation                  | javai Guardrail                                |
-|-------------------------------------|-----------------------------------|------------------------------------------------|
-| **Principled sample sizes**         | Arbitrary numbers (10, 100, 1000) | Power analysis, confidence-first approach      |
-| **Controlled error rates**          | Unknown false positive rates      | Threshold derivation with specified α          |
-| **Empirically-grounded thresholds** | Hardcoded guesses                 | MEASURE experiments, regression testing        |
-| **Assumption validity**             | Silent violations                 | Covariate tracking, expiration warnings        |
-| **Reproducibility**                 | Undocumented conditions           | Baseline provenance, machine-readable metadata |
-| **Transparency**                    | Black-box verdicts                | Transparent statistics mode                    |
-
-### 11.3 Explicit Over Implicit
-
-The javai methodology favors explicitness:
-
-| Aspect                | Implicit (Hidden)    | Explicit (javai)                   |
-|-----------------------|----------------------|------------------------------------|
-| Threshold origin      | Hardcoded number     | `thresholdOrigin`, `contractRef`   |
-| Baseline conditions   | Unmarked file        | Covariate profile in spec          |
-| Baseline age          | Check file timestamp | Expiration period, expiration status |
-| Comparison validity   | Assumed              | Non-conformance warnings           |
-| Statistical reasoning | Hidden in code       | Transparent statistics output      |
-
-This explicitness serves multiple audiences:
-
-- **Developers**: Understand what they're testing and why
-- **Reviewers**: Verify that test configuration is appropriate
-- **Auditors**: Confirm that methodology is sound
-- **Operators**: Investigate unexpected results with full context
-
-### 11.4 Warnings as Statistical Honesty
-
-The javai methodology's warning system reflects a commitment to statistical honesty:
-
-> The purpose of statistical analysis is not to produce clean answers, but to quantify uncertainty and surface limitations.
-
-When the framework issues a warning about covariate non-conformance or baseline expiration, it is saying:
-
-> "I performed the calculation you requested. Here is the answer. However, you should know that the conditions underlying this calculation may not be ideal. Here's specifically what concerns me."
-
-This is more useful than either:
-- **Silent acceptance**: Producing a verdict without surfacing limitations
-- **Silent rejection**: Refusing to produce a verdict due to imperfect conditions
-
-In practice, conditions are rarely perfect. Statistical discipline means quantifying and documenting imperfection, not pretending it doesn't exist.
-
-### 11.5 Stationarity as a Managed Condition
-
-Traditional statistical frameworks treat stationarity as an **assumption**—something that must be true for the analysis to be valid, but that is typically asserted rather than verified.
-
-The javai methodology treats stationarity as a **managed condition**:
-
-| Traditional Approach           | javai Approach                             |
-|--------------------------------|--------------------------------------------|
-| Assume stationarity holds      | Declare relevant factors (covariates)      |
-| Hope baselines are still valid | Set explicit validity periods (expiration) |
-| Silently violate assumptions   | Surface violations as warnings             |
-| Binary: valid or invalid       | Graduated: valid, cautionary, expired      |
-
-This shift—from hidden assumption to managed condition—is at the heart of the javai approach to statistical validity.
-
-### 11.6 The Audit Trail
-
-Every test verdict can be traced to its foundations:
-
-```
-Verdict: PASS (97/100 = 97% ≥ min pass rate 90.4%)
-    ↓
-Threshold: 90.4% (derived from baseline at 95% confidence)
-    ↓
-Baseline: ShoppingUseCase-ax43-dsf2.yaml
-    ↓
-Empirical Basis: 951/1000 = 95.1% (measured 2026-01-10)
-    ↓
-Conditions: weekday=Mo-Fr, time=09:03-09:25, region=EU
-    ↓
-Validity: 27 days remaining (expires 2026-02-09)
-    ↓
-Conformance: ⚠️ time_of_day non-conforming (test ran at 14:30)
-```
-
-This audit trail enables:
-
-- **Post-hoc investigation**: Why did this test fail last Tuesday?
-- **Compliance documentation**: Proof that testing methodology is sound
-- **Historical analysis**: How have pass rates changed over time?
-- **Debugging**: Is this a real regression or a baseline mismatch?
-
-### 11.7 Summary: Statistics in Service of Engineering
-
-The javai methodology's statistical machinery serves a practical goal: **reliable, reproducible verdicts about non-deterministic systems**.
-
-The features described in this section—covariate tracking, baseline expiration, provenance, transparent statistics—are not academic exercises. They address real problems that arise when testing systems like LLMs:
-
-- "Why does this test pass on Tuesday and fail on Saturday?"
-- "Is this failure real or just variance?"
-- "Can I trust a baseline from three months ago?"
-- "What assumptions am I making, and are they valid?"
-
-By surfacing these questions—and providing frameworks for answering them—the javai methodology brings statistical discipline to probabilistic testing without requiring developers to be statisticians.
+**Second**, "more samples" is not a substitute for these disciplines. Sample size controls precision and power; it does not create a principled threshold, verify stationarity, or produce an audit trail. The machinery of §§1–10 and the disciplines of §11 are complements, not alternatives.
 
 ---
 
 ## 12. Latency: Empirical Percentile Analysis
+
+> **Epistemic status of this section.** The percentile estimator (§12.2.2) and the binomial order-statistic upper bound on a baseline quantile (§12.4.2) are **exact distribution-free results** for i.i.d. samples from a continuous latency distribution. The threshold *interpretation* is a **confidence bound on the true baseline quantile**, not a predictive interval for a future test experiment's observed percentile — the two are not the same, and conflating them is the single most likely mistake a reader will make with this section. §12.4.3 makes the caveat precise; skip there directly if you only read one sub-section. The feasibility gate (§12.5.3) and the enforcement-mode split (§12.6) are **design policies**, not theorems.
 
 ### 12.1 The Statistical Challenge of Latency
 
@@ -1785,6 +1633,8 @@ $$k_j = \texttt{qbinom}(1 - \alpha, \, n_s, \, p_j) + 1, \quad \text{clamped to 
 - **Floor at the baseline percentile**: $k_j \geq \lceil p_j \cdot n_s \rceil$, so $\tau_j \geq Q_{\text{baseline}}(p_j)$ always. No separate $\max$ guard is needed; it falls out of the construction.
 - **Graceful failure at small $n_s$**: when $n_s$ is too small to resolve $p_j$ at confidence $1-\alpha$, $k_j$ saturates at $n_s$ and $\tau_j = t_{(n_s)} = \max$. The methodology handles this through the feasibility gate (§12.5.3), not through silent degeneracy.
 
+**Continuity and ties.** The exactness argument above assumes a continuous latency distribution — under continuity, ties occur with probability zero and every rank has a well-defined population interpretation. In practice, wall-clock latencies are reported in integer milliseconds, which induces ties. For the purposes of the upper-bound construction this does not matter: with tied values, the rank of the true quantile remains distributed as at most $\text{Bin}(n_s, p_j)$ (ties can only shift rank downward), so $\tau_j = t_{(k_j)}$ remains a valid upper confidence bound. It is no longer tight — the bound becomes **conservative**, not anti-conservative. The framework accepts this mild conservatism in exchange for the engineering benefits of integer-ms thresholds; practitioners who care about the tightness gap should report latencies at higher resolution (microseconds) before applying the construction.
+
 #### 12.4.3 Statistical Interpretation
 
 A test with observed $\hat{Q}_{\text{test}}(p_j) \leq \tau_j$ means: the observed percentile is consistent with a true quantile no worse than the baseline, at confidence $1-\alpha$.
@@ -1793,9 +1643,11 @@ A breach ($\hat{Q}_{\text{test}}(p_j) > \tau_j$) means: the observed percentile 
 
 **Note on confidence vs. prediction**: The construction above is a confidence bound on the *true* baseline quantile $Q_{\text{true}}(p_j)$, not a prediction interval for the *next experiment's* $\hat{Q}_{\text{test}}(p_j)$. When baseline and test sample sizes are comparable, the test-side sampling variance roughly doubles the relevant uncertainty and false-positive rates will exceed the nominal $\alpha$. The methodology documents this as a known conservatism gap: for regression testing, breaches remain statistically meaningful (they exceed a legitimate upper bound on the baseline), but the false-positive rate of the binomial bound alone is between $\alpha$ and $2\alpha$ depending on the test-side $n_s$. Operators who require tight false-positive calibration should size test experiments substantially larger than baselines, at which point the confidence-bound interpretation is the binding constraint.
 
-#### 12.4.4 Empirical Validation Against Bootstrap
+#### 12.4.4 Supporting Comparison: Bootstrap
 
-To substantiate the claim that the binomial order-statistic bound is statistically well-calibrated on realistic heavy-tailed distributions, `scripts/bootstrap_compare.R` in the javai-R repository computes the 95% one-sided upper bound on $Q_{0.95}$ and $Q_{0.99}$ using (i) a 10,000-replicate percentile bootstrap (type-1 quantile) and (ii) the exact binomial order-statistic construction defined in §12.4.2. Reference baselines are lognormal draws: $n_s = 200$ at ($\mu=\log 200$, $\sigma=0.4$) and $n_s = 935$ at ($\mu=\log 500$, $\sigma=0.3$), seeded for reproducibility.
+**Epistemic status**: illustration, not validation. The binomial order-statistic construction stands on the theorem cited in §12.4.2; no empirical resemblance is needed to establish its correctness. The comparison below is included only to give engineering readers a familiar reference point and to show that on realistic heavy-tailed distributions the exact construction and a resampling estimator do not disagree in pathological ways. A reader should not read bootstrap agreement as confirming the theorem; bootstrap itself is an asymptotic method with known downward bias for heavy-tail quantiles.
+
+`scripts/bootstrap_compare.R` in the javai-R repository computes the 95% one-sided upper bound on $Q_{0.95}$ and $Q_{0.99}$ using (i) a 10,000-replicate percentile bootstrap (type-1 quantile) and (ii) the exact binomial order-statistic construction defined in §12.4.2. Reference baselines are lognormal draws: $n_s = 200$ at ($\mu=\log 200$, $\sigma=0.4$) and $n_s = 935$ at ($\mu=\log 500$, $\sigma=0.3$), seeded for reproducibility.
 
 | Sample    | $n_s$ | $p$  | Point estimate $Q(p)$ | Bootstrap 95% upper | Binomial bound (rank) | $\Delta$ (ms) |
 |-----------|-------|------|-----------------------|---------------------|-----------------------|---------------|
@@ -1927,6 +1779,18 @@ The two dimensions are evaluated independently and combined with logical conjunc
 9. Hyndman, R. J., & Fan, Y. (1996). Sample quantiles in statistical packages. *The American Statistician*, 50(4), 361-365. [Percentile interpolation methods]
 
 10. David, H. A., & Nagaraja, H. N. (2003). *Order Statistics* (3rd ed.). Wiley-Interscience. [Order statistics and empirical percentiles]
+
+11. Conover, W. J. (1999). *Practical Nonparametric Statistics* (3rd ed.). Wiley. [Non-parametric quantile confidence intervals via order statistics; the binomial construction of §12.4.2]
+
+12. Hollander, M., & Wolfe, D. A. (1999). *Nonparametric Statistical Methods* (2nd ed.). Wiley. [Parallel reference for the order-statistic upper bound]
+
+13. Wilks, S. S. (1941). Determination of sample sizes for setting tolerance limits. *Annals of Mathematical Statistics*, 12(1), 91-96. [Foundational treatment of distribution-free tolerance intervals]
+
+14. Krishnamoorthy, K., & Mathew, T. (2009). *Statistical Tolerance Regions: Theory, Applications, and Computation*. Wiley. [Modern treatment of distribution-free tolerance and quantile bounds]
+
+15. Bayarri, M. J., & Berger, J. O. (2004). The interplay of Bayesian and frequentist analysis. *Statistical Science*, 19(1), 58-80. [Framework for reconciling predictive-Bayesian and frequentist inference, cited in §4.5]
+
+16. Geisser, S. (1993). *Predictive Inference: An Introduction*. Chapman and Hall. [Predictive treatment of binomial future performance]
 
 ---
 
