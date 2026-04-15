@@ -26,15 +26,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install pandoc and LaTeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-latex-recommended texlive-latex-extra fonts-dejavu
-
       - name: Convert documents to PDF
+        env:
+          PANDOC_IMAGE: pandoc/latex:3.9-ubuntu
         run: |
           mkdir -p _site
-          pandoc docs/STATISTICAL-COMPANION.md \
+          PANDOC="docker run --rm -v ${PWD}:/data -w /data ${PANDOC_IMAGE}"
+
+          $PANDOC docs/STATISTICAL-COMPANION.md \
             --from gfm+tex_math_dollars \
             --lua-filter=scripts/wrap-tables.lua \
             -o _site/statistical-companion.pdf \
@@ -48,7 +47,8 @@ jobs:
             --toc-depth=3 \
             -V title="Statistical Companion Document" \
             -V subtitle="Formal Statistical Foundations for the javai Methodology"
-          pandoc docs/DISTRIBUTIONAL-CONTRACTS.md \
+
+          $PANDOC docs/DISTRIBUTIONAL-CONTRACTS.md \
             --from gfm+tex_math_dollars \
             --lua-filter=scripts/wrap-tables.lua \
             -o _site/distributional-contracts.pdf \
@@ -61,7 +61,8 @@ jobs:
             --toc \
             --toc-depth=3 \
             -V title="Distributional Contracts for Stochastic Systems"
-          pandoc docs/GLOSSARY.md \
+
+          $PANDOC docs/GLOSSARY.md \
             --from gfm+tex_math_dollars \
             --lua-filter=scripts/wrap-tables.lua \
             -o _site/glossary.pdf \
