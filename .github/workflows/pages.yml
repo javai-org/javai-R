@@ -35,6 +35,7 @@ jobs:
           mkdir -p _site
           pandoc docs/STATISTICAL-COMPANION.md \
             --from gfm+tex_math_dollars \
+            --lua-filter=scripts/wrap-tables.lua \
             -o _site/statistical-companion.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
@@ -48,6 +49,7 @@ jobs:
             -V subtitle="Formal Statistical Foundations for the javai Methodology"
           pandoc docs/DISTRIBUTIONAL-CONTRACTS.md \
             --from gfm+tex_math_dollars \
+            --lua-filter=scripts/wrap-tables.lua \
             -o _site/distributional-contracts.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
@@ -60,6 +62,7 @@ jobs:
             -V title="Distributional Contracts for Stochastic Systems"
           pandoc docs/GLOSSARY.md \
             --from gfm+tex_math_dollars \
+            --lua-filter=scripts/wrap-tables.lua \
             -o _site/glossary.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
