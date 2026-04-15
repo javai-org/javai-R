@@ -1,5 +1,8 @@
 # Statistical Companion Document
 
+**Version**: 1.1
+**Last updated**: 2026-04-14
+
 Copyright © 2026, Michael Franz Mannion BSc (Hons) MBA
 
 ## Formal Statistical Foundations for the javai Methodology
@@ -45,7 +48,7 @@ These dimensions are independent. A fast response can be incorrect; a slow respo
 
 Traditional testing addresses neither dimension statistically. A single successful response says nothing about the success *rate*; a single fast response says nothing about the *tail latency* that affects the worst-served users. Both require repeated observation and distributional reasoning — the same shift from binary to probabilistic thinking.
 
-The javai methodology addresses both dimensions within a unified framework. Pass-rate assertions (Sections 1–5) model functional stochasticity as a binomial process. Latency assertions (Section 12) characterise temporal stochasticity through empirical percentile distributions. Both are evaluated independently and both must pass for the test to pass, reflecting the reality that a system must be both correct *and* responsive.
+The javai methodology addresses both dimensions within a unified framework. Pass-rate assertions (Sections 1–5) model functional stochasticity as Bernoulli trials under approximate independence and stationarity, aggregated binomially. Latency assertions (Section 12) characterise temporal stochasticity through non-parametric empirical percentiles. Both are evaluated independently and both must pass for the test to pass, reflecting the reality that a system must be both correct *and* responsive.
 
 Other observable properties of stochastic services — memory consumption, token usage, cost per call — also vary across invocations. The javai methodology focuses on functional correctness and latency because these two dimensions have the most direct impact on end users and developers: does the service work, and is it fast enough? Resource consumption is orthogonal and, while worth monitoring, is typically managed through infrastructure tooling rather than test assertions.
 
@@ -1355,9 +1358,11 @@ $$n = \left(\frac{z_\alpha \sqrt{p_0(1-p_0)} + z_\beta \sqrt{p_1(1-p_1)}}{p_0 - 
 
 $$Q(p) = t_{(\lceil p \cdot n_s \rceil)}, \quad t_{(1)} \leq \cdots \leq t_{(n_s)}$$
 
-### Latency Threshold Derivation (conservative percentile tolerance)
+### Latency Threshold Derivation (binomial order-statistic upper bound)
 
-$$\tau_j = \max\left(Q_{\text{baseline}}(p_j), \; \left\lceil Q_{\text{baseline}}(p_j) + z_\alpha \cdot \frac{s}{\sqrt{n_s}} \right\rceil\right)$$
+$$\tau_j = t_{(k_j)}, \qquad k_j = \min\left\{ k : P\!\left(\text{Bin}(n_s, p_j) \geq k\right) \leq \alpha \right\}$$
+
+Equivalently, $k_j = \texttt{qbinom}(1 - \alpha, n_s, p_j) + 1$, clamped to $[\lceil p_j \cdot n_s \rceil, \; n_s]$. Exact, distribution-free, integer-ms by construction.
 
 ---
 
@@ -1654,23 +1659,27 @@ These characteristics violate the assumptions of parametric models such as the n
 
 ### 12.2 Empirical Percentile Estimation
 
-#### 12.2.1 Population Definition
+#### 12.2.1 Population Definition and the Tripartite Contract
 
-Not all samples contribute to the latency distribution. The methodology defines the **latency population** as the distribution of **successful-response latency**:
+A naive single-population view of latency is statistically hazardous: mixing fast failures, slow failures, and successful responses into one distribution describes none of them faithfully. The javai methodology therefore decomposes the service-level contract into three orthogonal sub-contracts, each with its own estimand and its own inferential machinery:
 
-$$\mathcal{L} = \{ t_i : X_i = 1 \}$$
+| Sub-contract              | Estimand                           | Statistical treatment                                                                            |
+|---------------------------|------------------------------------|--------------------------------------------------------------------------------------------------|
+| **Correctness**           | $P(\text{semantic success})$       | Binomial (§§1–5)                                                                                 |
+| **Availability**          | $P(\text{infrastructure success})$ | Binomial (same machinery; currently treated jointly with correctness in the pass-rate dimension) |
+| **Latency-given-success** | $T \mid X = 1$                     | Non-parametric empirical percentiles (§12.2.2)                                                   |
 
-Equivalently, the latency estimand is the conditional distribution:
+The latency dimension characterises **only the third sub-contract**: the distribution of wall-clock execution time *conditional on* a successful response. Formally:
 
-$$T \mid X = 1$$
+$$\mathcal{L} = \{ t_i : X_i = 1 \}, \qquad T \mid X = 1$$
 
-where $t_i$ is the wall-clock execution time of the $i$-th trial and $X_i$ is its Bernoulli outcome. Only successful samples ($X_i = 1$) are included.
+where $t_i$ is the execution time of the $i$-th trial and $X_i \in \{0, 1\}$ is its Bernoulli outcome. Let $n_s = |\mathcal{L}|$ denote the number of successful samples and let $t_{(1)} \leq \cdots \leq t_{(n_s)}$ be their order statistics.
 
-**Rationale**: Failed samples produce execution times that are not directly comparable with successful response times. A fast failure (immediate validation rejection, $t \approx 0$) and a slow failure (timeout at $t = 30{,}000\text{ms}$) both reflect error paths, not the latency of successful operation. Including them would contaminate the distribution and produce percentile estimates that describe neither the successful nor the failed population.
+**Rationale for conditioning**: Failed samples produce execution times that are not comparable with successful response times. A fast failure (immediate validation rejection, $t \approx 0$) and a slow failure (timeout at $t = 30{,}000\text{ms}$) both reflect error paths, not the latency of successful operation. Pooling them would produce percentile estimates that describe neither the successful nor the failed population.
 
-**Important semantic note**: This is a **conditional latency distribution**, not the unconditional user-experienced response-time distribution over all attempts. Pass rate and latency therefore describe two complementary dimensions: the probability of success, and the latency distribution given success.
+**The perverse-incentive hazard**: Because the latency contract is conditional on success, a service could in principle "improve" its observed $Q_{0.95}$ by converting slow-successes into fast-timeouts — moving mass from the latency distribution into the failure column. This is not a defect of the conditioning; it is the reason the three sub-contracts are evaluated **jointly with logical conjunction** (§12.3.2). A service cannot trade correctness or availability for latency under the javai verdict rule, because every sub-contract must pass independently. Reviewers and auditors should satisfy themselves that the correctness and availability thresholds are tight enough that this trade cannot be exploited silently.
 
-Let $n_s = |\mathcal{L}|$ denote the number of successful samples and let $t_{(1)} \leq t_{(2)} \leq \cdots \leq t_{(n_s)}$ be the order statistics of the successful latencies.
+**What this is not**: The latency distribution treated here is not the user-experienced response-time distribution marginalised over all attempts. A user who receives an error sees no latency value. Organisations that need an unconditional response-time SLA should combine the three sub-contracts explicitly, e.g. by asserting availability at a level sufficient to bound the marginal tail.
 
 #### 12.2.2 Nearest-Rank Interpolation
 
@@ -1685,25 +1694,23 @@ where $t_{(k)}$ denotes the $k$-th order statistic.
 **Worked example**: For $n_s = 200$ successful samples:
 
 | Percentile | $p$  | $\lceil p \cdot 200 \rceil - 1$ | Order statistic |
-|------------|------|----------------------------------|-----------------|
-| p50        | 0.50 | 99                               | $t_{(100)}$     |
-| p90        | 0.90 | 179                              | $t_{(180)}$     |
-| p95        | 0.95 | 189                              | $t_{(190)}$     |
-| p99        | 0.99 | 197                              | $t_{(198)}$     |
+|------------|------|---------------------------------|-----------------|
+| p50        | 0.50 | 99                              | $t_{(100)}$     |
+| p90        | 0.90 | 179                             | $t_{(180)}$     |
+| p95        | 0.95 | 189                             | $t_{(190)}$     |
+| p99        | 0.99 | 197                             | $t_{(198)}$     |
 
 **Why nearest-rank?** Linear interpolation methods (e.g., Type 7 in R) produce fractional percentile estimates. For latency thresholds expressed in integer milliseconds and compared against SLA values, the discrete nearest-rank method produces integer-valued estimates that align naturally with how thresholds are specified and reported.
 
 #### 12.2.3 Summary Statistics
 
-In addition to percentiles, the framework computes:
+In addition to percentiles, the framework reports:
 
 - **Mean**: $\bar{t} = \frac{1}{n_s} \sum_{i=1}^{n_s} t_i$
 
-- **Sample standard deviation**: $s = \sqrt{\frac{1}{n_s - 1} \sum_{i=1}^{n_s} (t_i - \bar{t})^2}$
-
 - **Maximum**: $t_{(n_s)}$
 
-The mean and standard deviation are used in threshold derivation (Section 12.4). The percentiles and maximum characterise the distribution shape.
+The mean and the percentiles (including the maximum, which is $Q(1.0)$) characterise the distribution shape for reporting purposes. Threshold derivation (§12.4) is non-parametric and operates directly on the order statistics — it does not require a sample standard deviation, and the framework deliberately omits $s$ from the baseline payload to prevent misuse as a summary scale of a distribution that is not well-characterised by its second moment.
 
 ### 12.3 Latency Assertions
 
@@ -1735,10 +1742,10 @@ This reflects the operational reality that a service must be both *correct* and 
 
 Latency thresholds can originate from two sources:
 
-| Source | Symbol | How specified | Statistical question |
-|--------|--------|---------------|---------------------|
-| **Explicit** | $\tau_j$ (given) | Annotation or configuration | "Does the system meet the declared latency target?" |
-| **Baseline-derived** | $\hat{\tau}_j$ (estimated) | Automatic from spec | "Has latency degraded from the measured baseline?" |
+| Source               | Symbol                     | How specified               | Statistical question                                |
+|----------------------|----------------------------|-----------------------------|-----------------------------------------------------|
+| **Explicit**         | $\tau_j$ (given)           | Annotation or configuration | "Does the system meet the declared latency target?" |
+| **Baseline-derived** | $\hat{\tau}_j$ (estimated) | Automatic from spec         | "Has latency degraded from the measured baseline?"  |
 
 This mirrors the compliance vs. regression dichotomy for pass-rate thresholds (Section 3). Explicit thresholds are normative claims; baseline-derived thresholds are empirical estimates with a statistical margin.
 
@@ -1750,59 +1757,81 @@ When a measure experiment records the latency distribution, the observed percent
 
 **Example**: A baseline observes $Q_{0.95} = 480\text{ms}$ from $n_s = 935$ samples. A subsequent test with $n_s = 192$ samples observes $Q_{0.95} = 495\text{ms}$. Is this a degradation, or normal variance?
 
-#### 12.4.2 Upper Confidence Bound
+The latency dimension is the non-parametric analogue of the Wilson-score construction used for pass rates (§3.4). To preserve statistical symmetry between the two sides of the contract, the threshold must be derived from a construction that is:
 
-The methodology derives latency thresholds as **one-sided upper confidence bounds** on the baseline percentile. The formula uses the standard error of the mean as a proxy for percentile uncertainty:
+1. **Exact or near-exact** under the minimal assumptions stated in §12.2.1 (i.i.d. successful latencies).
+2. **Distribution-free** — free of any parametric shape or density assumption.
+3. **Integer-millisecond** by construction, aligning with how SLA thresholds are expressed and compared.
 
-$$\hat{\tau}_j = Q_{\text{baseline}}(p_j) + z_\alpha \cdot \frac{s}{\sqrt{n_s}}$$
+A construction satisfying all three falls out naturally from the binomial sampling distribution of order-statistic ranks, developed below.
 
-where:
-- $Q_{\text{baseline}}(p_j)$ is the baseline percentile value
-- $z_\alpha = \Phi^{-1}(1 - \alpha)$ is the one-sided critical value (e.g., $z_{0.05} = 1.645$)
-- $s$ is the baseline sample standard deviation
-- $n_s$ is the baseline sample count (successful samples only)
+#### 12.4.2 Binomial Order-Statistic Upper Bound
 
-The derived threshold is then:
+For i.i.d. latency samples $T_1, \ldots, T_{n_s}$ with continuous distribution, the rank of the population quantile $Q(p_j)$ within the sorted sample follows a binomial sampling distribution. Specifically, the number of observations $\leq Q(p_j)$ is distributed as $\text{Bin}(n_s, p_j)$. This fact — standard in any non-parametric textbook (Conover, 1999; Hollander & Wolfe, 1999) — yields an **exact distribution-free upper confidence bound** on the true quantile:
 
-$$\tau_j = \max\left(Q_{\text{baseline}}(p_j), \, \lceil \hat{\tau}_j \rceil\right)$$
+$$\tau_j = t_{(k_j)} \quad \text{where} \quad k_j = \min\left\{ k \in \{1, \ldots, n_s\} : P(B \geq k) \leq \alpha \right\}, \quad B \sim \text{Bin}(n_s, p_j)$$
 
-The ceiling ensures integer millisecond thresholds, and the $\max$ ensures the threshold is never tighter than the raw baseline observation.
+Equivalently, $k_j$ is the smallest rank such that the probability of seeing $k$ or more observations at or below the true $Q(p_j)$ is at most $\alpha$. In practice this is one line of code:
+
+$$k_j = \texttt{qbinom}(1 - \alpha, \, n_s, \, p_j) + 1, \quad \text{clamped to } [\lceil p_j \cdot n_s \rceil, \; n_s]$$
+
+**Why this is the right construction.** The upper confidence bound on $Q(p_j)$ at level $1-\alpha$ is defined as the smallest value $\tau$ such that $P(\hat{Q}(p_j) > \tau \mid Q_{\text{true}}(p_j) \leq \tau) \leq \alpha$ under the null of no degradation. Because ranks are binomially distributed regardless of the underlying latency distribution, the construction is exact for any continuous $F_T$ — no density estimate, no normal approximation, no second moment. It is the non-parametric counterpart of the Wilson bound used on the pass-rate side, and restores the statistical symmetry the javai methodology requires between the two halves of the contract.
+
+**Properties**:
+
+- **Integer-ms by construction**: $\tau_j$ is an observed latency. No rounding, no ceiling, no artefacts.
+- **Monotone in $\alpha$**: higher confidence gives a higher rank and hence a looser (more conservative) threshold.
+- **Monotone in $p_j$**: higher percentiles yield higher ranks.
+- **Floor at the baseline percentile**: $k_j \geq \lceil p_j \cdot n_s \rceil$, so $\tau_j \geq Q_{\text{baseline}}(p_j)$ always. No separate $\max$ guard is needed; it falls out of the construction.
+- **Graceful failure at small $n_s$**: when $n_s$ is too small to resolve $p_j$ at confidence $1-\alpha$, $k_j$ saturates at $n_s$ and $\tau_j = t_{(n_s)} = \max$. The methodology handles this through the feasibility gate (§12.5.3), not through silent degeneracy.
 
 #### 12.4.3 Statistical Interpretation
 
-This derivation answers a more modest engineering question:
+A test with observed $\hat{Q}_{\text{test}}(p_j) \leq \tau_j$ means: the observed percentile is consistent with a true quantile no worse than the baseline, at confidence $1-\alpha$.
 
-> "What is a conservative upper tolerance for this baseline percentile, allowing for ordinary sampling variation?"
+A breach ($\hat{Q}_{\text{test}}(p_j) > \tau_j$) means: the observed percentile exceeds the one-sided binomial upper bound on the baseline quantile, providing evidence of latency degradation at the stated confidence level.
 
-A test with observed $Q(p_j) \leq \tau_j$ means: the observed percentile is within the tolerance derived from the measured baseline and its overall spread.
+**Note on confidence vs. prediction**: The construction above is a confidence bound on the *true* baseline quantile $Q_{\text{true}}(p_j)$, not a prediction interval for the *next experiment's* $\hat{Q}_{\text{test}}(p_j)$. When baseline and test sample sizes are comparable, the test-side sampling variance roughly doubles the relevant uncertainty and false-positive rates will exceed the nominal $\alpha$. The methodology documents this as a known conservatism gap: for regression testing, breaches remain statistically meaningful (they exceed a legitimate upper bound on the baseline), but the false-positive rate of the binomial bound alone is between $\alpha$ and $2\alpha$ depending on the test-side $n_s$. Operators who require tight false-positive calibration should size test experiments substantially larger than baselines, at which point the confidence-bound interpretation is the binding constraint.
 
-A breach ($Q(p_j) > \tau_j$) means: the observed percentile exceeds that baseline-derived tolerance, providing evidence suggestive of latency degradation.
+#### 12.4.4 Empirical Validation Against Bootstrap
 
-#### 12.4.4 Limitations of this Approach
+To substantiate the claim that the binomial order-statistic bound is statistically well-calibrated on realistic heavy-tailed distributions, `scripts/bootstrap_compare.R` in the javai-R repository computes the 95% one-sided upper bound on $Q_{0.95}$ and $Q_{0.99}$ using (i) a 10,000-replicate percentile bootstrap (type-1 quantile) and (ii) the exact binomial order-statistic construction defined in §12.4.2. Reference baselines are lognormal draws: $n_s = 200$ at ($\mu=\log 200$, $\sigma=0.4$) and $n_s = 935$ at ($\mu=\log 500$, $\sigma=0.3$), seeded for reproducibility.
 
-The formula $\hat{\tau}_j = Q(p_j) + z \cdot s / \sqrt{n_s}$ uses the standard error of the *mean* as a proxy for the uncertainty of the *percentile*. It should therefore be understood as an engineering approximation, not as a formal non-parametric confidence interval for the quantile. For the true sampling distribution of an order statistic, the density of the distribution at the percentile point is required — which is unknown in the non-parametric setting.
+| Sample    | $n_s$ | $p$  | Point estimate $Q(p)$ | Bootstrap 95% upper | Binomial bound (rank) | $\Delta$ (ms) |
+|-----------|-------|------|-----------------------|---------------------|-----------------------|---------------|
+| lognormal | 200   | 0.95 | 356                   | 393                 | 419 (k=196)           | +26           |
+| lognormal | 200   | 0.99 | 448                   | 589                 | 589 (k=200)           | 0             |
+| lognormal | 935   | 0.95 | 787                   | 810                 | 812 (k=900)           | +2            |
+| lognormal | 935   | 0.99 | 980                   | 1098                | 1125 (k=931)          | +27           |
 
-The approximation is conservative in practice for the following reasons:
+Two observations:
 
-- The standard deviation $s$ reflects the overall spread of the distribution, not just the local density at the percentile point
-- The $\max$ floor ensures thresholds are never tighter than the raw observation
-- The ceiling rounding provides an additional (small) buffer
+1. **The binomial bound is uniformly no less conservative than the bootstrap**, as expected for an exact finite-sample construction compared to a resampling estimator that is itself subject to Monte Carlo variance and (for quantiles of heavy-tailed distributions) known downward bias.
+2. **Agreement is within a handful of order-statistic steps** in every row, and exact in the $n_s=200$, $p=0.99$ case where the bound saturates at the maximum — a signal the feasibility gate (§12.5.3) should have been invoked (that row exists to demonstrate graceful saturation, not as a recommended configuration).
 
-For baseline sample sizes typical of measure experiments ($n_s \geq 500$), the approximation produces thresholds that are close to what a bootstrap confidence interval would yield, at far lower computational cost. For small baselines ($n_s < 100$), the derived thresholds may be wider than necessary — a conservative error that produces fewer false positives rather than more.
+Exact numerical outputs and the bootstrap seeds are preserved in `inst/cases/latency_threshold_bootstrap.json` so downstream consumers can verify the comparison without an R installation.
+
+The superseded $s/\sqrt{n_s}$ approximation used in v1.0 of this document is removed. It understated tail-percentile uncertainty for heavy-tailed distributions by a factor that grew with skewness; the binomial bound has no such defect.
 
 #### 12.4.5 Worked Example
 
-**Baseline**: $n_s = 935$, $s = 145\text{ms}$, $Q_{0.95} = 580\text{ms}$, confidence $= 0.95$
+**Baseline**: $n_s = 935$ successful samples, $Q_{0.95} = 580\text{ms}$, confidence $= 0.95$ (so $\alpha = 0.05$).
 
-$$z_{0.05} = 1.645$$
+The rank of the upper bound is:
 
-$$\text{SE} = \frac{145}{\sqrt{935}} = \frac{145}{30.58} = 4.74\text{ms}$$
+$$k_{0.95} = \texttt{qbinom}(0.95, \, 935, \, 0.95) + 1$$
 
-$$\hat{\tau}_{0.95} = 580 + 1.645 \times 4.74 = 580 + 7.80 = 587.80$$
+$B \sim \text{Bin}(935, 0.95)$ has mean $888.25$ and standard deviation $\sqrt{935 \cdot 0.95 \cdot 0.05} \approx 6.66$. `qbinom(0.95, 935, 0.95)` returns $899$ — that is, $P(B \leq 899) \approx 0.959$, the smallest value for which the cumulative probability reaches $0.95$. Therefore $k_{0.95} = 900$, which satisfies $P(B \geq 900) \approx 0.041 \leq 0.05$.
 
-$$\tau_{0.95} = \max(580, \lceil 587.80 \rceil) = 588\text{ms}$$
+The baseline rank for the point estimate is $\lceil 0.95 \cdot 935 \rceil = 889$, so the bound sits $11$ ranks above the point estimate.
 
-A subsequent test observing $Q_{0.95} = 580\text{ms}$ would pass ($580 \leq 588$). An observation of $Q_{0.95} = 600\text{ms}$ would breach ($600 > 588$).
+$$\tau_{0.95} = t_{(900)}$$
+
+That is, the latency threshold is the 900th-smallest observation in the baseline — an observed value in milliseconds, by construction.
+
+A subsequent test with $\hat{Q}_{0.95, \text{test}} \leq t_{(900)}$ passes; any observation above $t_{(900)}$ breaches the threshold and constitutes evidence of degradation at 95% confidence.
+
+Compare with the superseded v1.0 formula, which would have produced $\tau_{0.95} = 588\text{ms}$ from a sample standard deviation of $145\text{ms}$. Whether that corresponds to $t_{(900)}$ or to some lower rank depends entirely on the tail density of the specific service — a dependence the new construction eliminates.
 
 ### 12.5 Sample Size Requirements for Percentile Estimation
 
@@ -1817,14 +1846,16 @@ An empirical percentile $Q(p)$ is computed from the $\lceil p \cdot n_s \rceil$-
 
 The methodology enforces minimum sample counts for each percentile level based on the requirement that the percentile estimate be based on at least one observation *below* it in the sorted order:
 
-| Percentile | $p$  | Minimum $n_s$ | Rationale |
-|------------|------|----------------|-----------|
-| p50        | 0.50 | 5              | With $n_s = 5$: index = 2, two values below, two above |
-| p90        | 0.90 | 10             | With $n_s = 10$: index = 9, one value above |
-| p95        | 0.95 | 20             | With $n_s = 20$: index = 19, one value above |
-| p99        | 0.99 | 100            | With $n_s = 100$: index = 99, one value above. Below 100, p99 = max |
+| Percentile | $p$  | Minimum $n_s$ | Rationale                                                           |
+|------------|------|---------------|---------------------------------------------------------------------|
+| p50        | 0.50 | 5             | With $n_s = 5$: index = 2, two values below, two above              |
+| p90        | 0.90 | 10            | With $n_s = 10$: index = 9, one value above                         |
+| p95        | 0.95 | 20            | With $n_s = 20$: index = 19, one value above                        |
+| p99        | 0.99 | 100           | With $n_s = 100$: index = 99, one value above. Below 100, p99 = max |
 
 These thresholds ensure that the percentile estimate is not degenerate (i.e., not simply the minimum or maximum of the sample).
+
+**Scope note on p99.9 and beyond**: The supported percentile levels are $\{0.50, 0.90, 0.95, 0.99\}$. Extreme-tail percentiles such as p99.9 are out of scope for the current methodology: a non-degenerate p99.9 estimate requires $n_s \geq 1{,}000$ successful samples, and a statistically useful binomial order-statistic upper bound at 95% confidence requires considerably more. Services with genuine p99.9 SLAs generally warrant dedicated tail-focused instrumentation (production telemetry, HdrHistogram-style log-linear bucketing, or extreme-value modelling) rather than per-test-run estimation. A future revision of the methodology may incorporate extreme-value-theory treatments for this regime.
 
 #### 12.5.3 The Feasibility Gate
 
@@ -1849,7 +1880,7 @@ This mirrors the SMOKE/VERIFICATION asymmetry for pass-rate testing (Section 5.7
 Latency assertions support two enforcement modes, reflecting the practical reality that latency profiles are environment-dependent:
 
 | Mode | Breach behaviour | Default | Rationale |
-|------|-----------------|---------|-----------|
+| --- | --- | --- | --- |
 | **Advisory** | Warning in output; test passes | Yes | Baseline may have been recorded on different hardware |
 | **Enforced** | Test fails | No | Latency is a first-class SLA dimension |
 
@@ -1862,11 +1893,11 @@ When enforcement is enabled, latency breaches fail the test, and the VERIFICATIO
 The table below summarises how the two quality dimensions parallel each other in statistical treatment:
 
 | Aspect | Pass Rate | Latency |
-|--------|-----------|---------|
+| --- | --- | --- |
 | **Statistical model** | Parametric (binomial) | Non-parametric (empirical percentiles) |
 | **Estimand** | Success probability $p$ | Percentile quantiles $Q(p_j)$ |
-| **Threshold derivation** | Wilson score lower bound | Upper confidence bound on percentile |
-| **Baseline storage** | $(\hat{p}, k, n)$ | $(Q_{0.50}, Q_{0.90}, Q_{0.95}, Q_{0.99}, s, n_s)$ |
+| **Threshold derivation** | Wilson score lower bound | Binomial order-statistic upper bound |
+| **Baseline storage** | $(\hat{p}, k, n)$ | $(t_{(1)}, \ldots, t_{(n_s)}, n_s)$ |
 | **Feasibility gate** | $N_{\min}$ from Wilson bound | $n_{s,\min}$ from percentile reliability |
 | **Indicative marking** | Undersized sample note | Undersized sample note |
 | **Enforcement** | Always enforced | Advisory by default; opt-in enforcement |
