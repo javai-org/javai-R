@@ -36,6 +36,7 @@ jobs:
           $PANDOC docs/STATISTICAL-COMPANION.md \
             --from gfm+tex_math_dollars \
             --lua-filter=scripts/wrap-tables.lua \
+            --include-in-header=scripts/pdf-footer.tex \
             -o _site/statistical-companion.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
@@ -51,6 +52,7 @@ jobs:
           $PANDOC docs/DISTRIBUTIONAL-CONTRACTS.md \
             --from gfm+tex_math_dollars \
             --lua-filter=scripts/wrap-tables.lua \
+            --include-in-header=scripts/pdf-footer.tex \
             -o _site/distributional-contracts.pdf \
             --pdf-engine=xelatex \
             -V geometry:margin=1in \
