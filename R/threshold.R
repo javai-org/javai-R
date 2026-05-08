@@ -1,38 +1,72 @@
-#' Derive threshold using sample-size-first approach
+#' Derive threshold using the sample-size-first approach (companion §3.4 / §4.3)
 #'
-#' Given a baseline (successes/trials) and a test sample size, derives the
-#' minimum pass rate threshold using the Wilson one-sided lower bound.
+#' Given a baseline (successes/trials) and a *test* sample size, derives the
+#' minimum pass rate the test must observe so that, if the true rate equals
+#' the baseline's effective rate, the false-positive rate is at most
+#' (1 - confidence). The threshold is sample-size sensitive: smaller test
+#' samples carry wider sampling noise and therefore require a lower
+#' threshold to maintain the same false-positive rate.
+#'
+#' Construction:
+#'  - **General case** (k < n): the effective baseline rate is the point
+#'    estimate `p_hat = k/n`, and the threshold is the one-sided Wilson
+#'    lower bound at `(p_hat, test_samples, confidence)` per §3.4.
+#'  - **Perfect-baseline case** (k == n): the point estimate `p_hat = 1`
+#'    must not be used directly (a perfect empirical observation does not
+#'    prove perfect population reliability). Per §4.3.2, the effective
+#'    baseline rate is first compressed to the Wilson lower bound on the
+#'    baseline itself, `p_0 = wilson_lower(k, n, confidence) = n / (n + z^2)`,
+#'    and then the threshold is the Wilson lower bound at
+#'    `(p_0, test_samples, confidence)`.
 #'
 #' @param baseline_successes Integer. Successes observed in baseline.
 #' @param baseline_trials Integer. Total baseline trials.
 #' @param test_samples Integer. Number of test samples to be run.
 #' @param confidence Numeric. Confidence level.
-#' @return Numeric. The derived threshold.
+#' @return Numeric. The derived threshold the test must clear.
 #' @export
 threshold_sample_size_first <- function(baseline_successes, baseline_trials,
                                         test_samples, confidence) {
-  # Step 1: derive baseline rate
-  baseline_rate <- baseline_successes / baseline_trials
-
-  # Step 2: Wilson lower bound on the baseline gives the threshold
-  # The threshold is the Wilson one-sided lower bound of the baseline
-  wilson_lower(baseline_successes, baseline_trials, confidence)
+  effective_baseline_rate <- effective_baseline_rate(
+    baseline_successes, baseline_trials, confidence)
+  wilson_lower_from_rate(effective_baseline_rate, test_samples, confidence)
 }
 
-#' Derive implied confidence from an explicit threshold
+#' Effective baseline rate for threshold derivation
 #'
-#' Given a baseline rate, sample size, and explicit threshold, finds the
-#' confidence level at which the Wilson lower bound equals the threshold.
-#' Uses binary search (no closed-form inverse for Wilson).
+#' Returns the rate the threshold-derivation construction treats as the
+#' baseline's true success probability:
+#'  - the point estimate `p_hat = k/n` in the general case;
+#'  - the Wilson lower bound `n / (n + z^2)` when `k == n` (companion §4.3.2,
+#'    Step 1) so that a perfect empirical observation is not promoted to
+#'    proof of perfect population reliability.
+#'
+#' @keywords internal
+effective_baseline_rate <- function(baseline_successes, baseline_trials, confidence) {
+  if (baseline_successes == baseline_trials) {
+    wilson_lower(baseline_successes, baseline_trials, confidence)
+  } else {
+    baseline_successes / baseline_trials
+  }
+}
+
+#' Derive implied confidence from an explicit threshold (companion §6.3)
+#'
+#' Given a baseline, a test sample size, and an explicit threshold, finds
+#' the confidence level at which the threshold-derivation construction
+#' (`threshold_sample_size_first`) would have produced this threshold.
+#' Uses binary search; there is no closed-form inverse.
 #'
 #' @param baseline_successes Integer. Successes in baseline.
 #' @param baseline_trials Integer. Trials in baseline.
-#' @param threshold Numeric. The explicit threshold.
+#' @param test_samples Integer. Number of test samples to be run.
+#' @param threshold Numeric. The explicit threshold whose implied confidence is sought.
 #' @param tol Numeric. Convergence tolerance for binary search.
 #' @return A list with implied_confidence and is_sound (>= 0.80).
 #' @export
 threshold_first_implied_confidence <- function(baseline_successes,
                                                 baseline_trials,
+                                                test_samples,
                                                 threshold,
                                                 tol = 1e-10) {
   lo <- 0.001
@@ -40,9 +74,12 @@ threshold_first_implied_confidence <- function(baseline_successes,
 
   for (i in seq_len(200)) {
     mid <- (lo + hi) / 2
-    lb <- wilson_lower(baseline_successes, baseline_trials, mid)
-    if (abs(lb - threshold) < tol) break
-    if (lb > threshold) {
+    derived <- threshold_sample_size_first(
+      baseline_successes, baseline_trials, test_samples, mid)
+    if (abs(derived - threshold) < tol) break
+    # threshold_sample_size_first is monotone-decreasing in confidence:
+    # higher confidence => wider Wilson margin => lower threshold.
+    if (derived > threshold) {
       lo <- mid
     } else {
       hi <- mid
@@ -62,7 +99,7 @@ threshold_first_implied_confidence <- function(baseline_successes,
 #' @export
 generate_threshold_derivation_cases <- function() {
   cases <- list(
-    # Sample-size-first cases
+    # Sample-size-first cases — general (k < n)
     list(
       name = "ssf_95_of_100_test50_95pct",
       approach = "sample_size_first",
@@ -85,6 +122,7 @@ generate_threshold_derivation_cases <- function() {
         threshold = threshold_sample_size_first(950, 1000, 100, 0.95)
       )
     ),
+    # Sample-size-first case — perfect-baseline two-step (companion §4.3.2)
     list(
       name = "ssf_perfect_baseline_test50_95pct",
       approach = "sample_size_first",
@@ -97,6 +135,42 @@ generate_threshold_derivation_cases <- function() {
       )
     ),
     list(
+      name = "ssf_perfect_baseline_n1000_test100_95pct",
+      approach = "sample_size_first",
+      inputs = list(
+        baseline_successes = 1000L, baseline_trials = 1000L,
+        test_samples = 100L, confidence = 0.95
+      ),
+      expected = list(
+        # Companion §4.3.2 worked example: ≈ 0.9686
+        threshold = threshold_sample_size_first(1000, 1000, 100, 0.95)
+      )
+    ),
+    # Sample-size-first sensitivity to test sample size — companion §3.5
+    list(
+      name = "ssf_950_of_1000_test50_95pct",
+      approach = "sample_size_first",
+      inputs = list(
+        baseline_successes = 950L, baseline_trials = 1000L,
+        test_samples = 50L, confidence = 0.95
+      ),
+      expected = list(
+        threshold = threshold_sample_size_first(950, 1000, 50, 0.95)
+      )
+    ),
+    list(
+      name = "ssf_950_of_1000_test200_95pct",
+      approach = "sample_size_first",
+      inputs = list(
+        baseline_successes = 950L, baseline_trials = 1000L,
+        test_samples = 200L, confidence = 0.95
+      ),
+      expected = list(
+        threshold = threshold_sample_size_first(950, 1000, 200, 0.95)
+      )
+    ),
+    # Sample-size-first at higher confidence
+    list(
       name = "ssf_95_of_100_test50_99pct",
       approach = "sample_size_first",
       inputs = list(
@@ -107,40 +181,46 @@ generate_threshold_derivation_cases <- function() {
         threshold = threshold_sample_size_first(95, 100, 50, 0.99)
       )
     ),
-    # Threshold-first cases
+    # Threshold-first cases (now require test_samples per companion §6.3)
     list(
-      name = "tf_baseline_95pct_threshold_90",
+      name = "tf_baseline_95pct_test100_threshold_90",
       approach = "threshold_first",
       inputs = list(
         baseline_successes = 95L, baseline_trials = 100L,
-        threshold = 0.90
+        test_samples = 100L, threshold = 0.90
       ),
-      expected = threshold_first_implied_confidence(95, 100, 0.90)
+      expected = threshold_first_implied_confidence(95, 100, 100, 0.90)
     ),
     list(
-      name = "tf_baseline_95pct_threshold_85",
+      name = "tf_baseline_95pct_test100_threshold_85",
       approach = "threshold_first",
       inputs = list(
         baseline_successes = 95L, baseline_trials = 100L,
-        threshold = 0.85
+        test_samples = 100L, threshold = 0.85
       ),
-      expected = threshold_first_implied_confidence(95, 100, 0.85)
+      expected = threshold_first_implied_confidence(95, 100, 100, 0.85)
     ),
     list(
-      name = "tf_baseline_95pct_threshold_94",
+      name = "tf_baseline_95pct_test100_threshold_94",
       approach = "threshold_first",
       inputs = list(
         baseline_successes = 95L, baseline_trials = 100L,
-        threshold = 0.94
+        test_samples = 100L, threshold = 0.94
       ),
-      expected = threshold_first_implied_confidence(95, 100, 0.94)
+      expected = threshold_first_implied_confidence(95, 100, 100, 0.94)
     )
   )
 
   list(
     suite = "threshold_derivation",
-    description = "Threshold derivation via sample-size-first and threshold-first approaches",
-    method = "Wilson lower bound (sample-size-first); binary search for implied confidence (threshold-first)",
+    description = paste(
+      "Threshold derivation per the statistical companion: §3.4 for the",
+      "general case, §4.3.2 for the perfect-baseline two-step, §6.3 for",
+      "threshold-first inversion. The threshold is the one-sided Wilson",
+      "lower bound at the *test* sample size; smaller test samples lower",
+      "the threshold (§3.5)."
+    ),
+    method = "Wilson lower bound at test sample size (§3.4 / §4.3.2); binary search for implied confidence (§6.3)",
     tolerance = 1e-6,
     cases = cases
   )

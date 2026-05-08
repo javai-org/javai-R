@@ -92,3 +92,26 @@ test_that("Wilson lower bound decreases with higher confidence", {
   expect_true(lb_90 > lb_95)
   expect_true(lb_95 > lb_99)
 })
+
+test_that("wilson_lower_from_rate matches wilson_lower for integer (k, n)", {
+  # The discrete entry point is a thin wrapper over the continuous one;
+  # they must agree exactly when p_hat = k / n.
+  expect_equal(
+    wilson_lower_from_rate(95 / 100, 100, 0.95),
+    wilson_lower(95, 100, 0.95))
+  expect_equal(
+    wilson_lower_from_rate(0,   100, 0.95),
+    wilson_lower(0,   100, 0.95))
+  expect_equal(
+    wilson_lower_from_rate(1,   100, 0.95),
+    wilson_lower(100, 100, 0.95))
+})
+
+test_that("wilson_lower_from_rate accepts continuous p_hat", {
+  # Threshold-derivation feeds non-rational rates back into the formula
+  # (e.g. an effective baseline rate p_0 derived from another Wilson
+  # computation). The continuous form must accept these without rounding.
+  result <- wilson_lower_from_rate(0.9973, 100, 0.95)
+  expect_true(result < 0.9973)
+  expect_true(result > 0.9)
+})

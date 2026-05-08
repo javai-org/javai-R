@@ -26,10 +26,11 @@ wilson_ci <- function(successes, trials, confidence) {
   )
 }
 
-#' Wilson score lower bound (one-sided)
+#' Wilson score lower bound (one-sided), discrete inputs
 #'
-#' Computes the one-sided lower bound of the Wilson score interval.
-#' Used for threshold derivation in the sample-size-first approach.
+#' Computes the one-sided lower bound of the Wilson score interval given
+#' integer (successes, trials). This is the canonical confidence statement
+#' on the true rate underlying observations.
 #'
 #' @param successes Integer. Number of successes.
 #' @param trials Integer. Total number of trials.
@@ -37,10 +38,29 @@ wilson_ci <- function(successes, trials, confidence) {
 #' @return Numeric. The lower bound.
 #' @export
 wilson_lower <- function(successes, trials, confidence) {
+  wilson_lower_from_rate(successes / trials, trials, confidence)
+}
+
+#' Wilson score lower bound (one-sided), continuous-rate inputs
+#'
+#' Computes the one-sided Wilson lower bound at a supplied rate p_hat and
+#' sample size n. This is the form the threshold-derivation construction
+#' uses (companion §3.4 / §4.3.2): given an effective baseline rate, what
+#' threshold should an n-sample test use so that, if the true rate equals
+#' p_hat, the false-positive rate is α?
+#'
+#' For integer (k, n), `wilson_lower_from_rate(k/n, n, conf)` matches
+#' `wilson_lower(k, n, conf)` exactly. The two share an implementation —
+#' the discrete form is a thin wrapper that supplies p_hat = k/n.
+#'
+#' @param p_hat Numeric. The proportion (in [0, 1]) used as the formula's centre.
+#' @param n Integer. The sample size used in the formula.
+#' @param confidence Numeric. Confidence level (e.g. 0.95).
+#' @return Numeric. The lower bound.
+#' @export
+wilson_lower_from_rate <- function(p_hat, n, confidence) {
   alpha <- 1 - confidence
   z <- qnorm(1 - alpha)  # one-sided
-  p_hat <- successes / trials
-  n <- trials
 
   denom <- 1 + z^2 / n
   centre <- (p_hat + z^2 / (2 * n)) / denom

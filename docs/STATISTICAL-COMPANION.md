@@ -13,11 +13,12 @@ All attribution licensing is ARL.
 
 ## Document History
 
-| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|---|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                          |
-| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                         |
-| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side. |
+| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|---|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                         |
+| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                 |
+| 4 | **2026-05** | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged. |
 
 Each milestone strictly extends the previous one in the scope of what the methodology claims; none supersedes the Bernoulli/Wilson foundation laid in Milestone 1.
 
@@ -330,7 +331,9 @@ We seek a decision rule that:
 - Targets a Type I error rate (false positive) at level $\alpha$ under the working model
 - Maximizes power to detect true violations/degradation
 
-### 3.3 One-Sided Lower Confidence Bound
+### 3.3 Normal-Approximation Intuition for One-Sided Bounds
+
+The formula in this subsection is shown only to motivate the idea of a one-sided lower bound. The javai methodology does not use this Wald form for threshold derivation; actual thresholds are computed using the Wilson construction in §3.4.
 
 The $(1-\alpha)$ one-sided lower confidence bound is:
 
@@ -486,28 +489,54 @@ $$p_{\text{lower}} = \frac{n}{n + z^2}$$
 
 #### 4.3.2 Worked Example
 
-**Baseline**: $n = 1000$ trials, $k = 1000$ successes (100% observed)
+**Baseline**: $n_{\text{exp}} = 1000$ trials, $k_{\text{exp}} = 1000$ successes, so $\hat{p}_{\text{exp}} = 1.0$.
 
-**Step 1**: Compute Wilson lower bound (95% one-sided, $z = 1.645$):
+**Confidence**: 95% one-sided, so $z = 1.645$.
 
-$$p_0 = \frac{1000}{1000 + 2.706} = \frac{1000}{1002.706} \approx 0.9973$$
+**Step 1: Compute the Wilson lower bound for the perfect baseline**
 
-**Step 2**: Derive test threshold for $n_{\text{test}} = 100$:
+Because the experiment observed zero failures, the point estimate $\hat{p}_{\text{exp}} = 1.0$ must not be used directly as the effective baseline. A perfect empirical observation does not prove perfect population reliability.
 
-$$\text{SE}_{\text{test}} = \sqrt{\frac{0.9973 \times 0.0027}{100}} \approx 0.0052$$
+For $k = n$, the one-sided Wilson lower bound simplifies to:
 
-$$p_{\text{threshold}} = 0.9973 - 1.645 \times 0.0052 = 0.9973 - 0.0086 \approx 0.989$$
+$$p_0 = \frac{n}{n + z^2}$$
 
-**Interpretation**: For 100-sample tests, the threshold is 0.989 (at most 1 failure permitted). Compare this to the naive approach, which would set threshold = 1.0 (zero failures permitted), producing an undefined false positive rate.
+Substituting $n = 1000$ and $z = 1.645$:
+
+$$p_0 = \frac{1000}{1000 + 1.645^2} = \frac{1000}{1002.706} \approx 0.9973$$
+
+This value, $p_0 \approx 0.9973$, is the effective baseline used for subsequent threshold derivation. It represents the lower confidence-supported success probability implied by observing 1000 successes in 1000 trials.
+
+**Step 2: Derive the test threshold using the Wilson lower bound**
+
+For a regression test with $n_{\text{test}} = 100$, the threshold is not computed with the Wald approximation $p_0 - z \cdot \text{SE}$. The javai methodology applies the same one-sided Wilson lower-bound construction used throughout this document:
+
+$$p_{\text{threshold}} = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}}$$
+
+Substituting $p_0 = 0.9973$, $n_{\text{test}} = 100$, and $z = 1.645$:
+
+$$p_{\text{threshold}} \approx 0.9686$$
+
+**Interpretation**: For a 100-sample regression test, the Wilson-derived threshold is approximately **0.969**. Therefore, the test passes if the observed success rate is at least 96.9%.
+
+Because test outcomes are discrete, this corresponds to requiring at least:
+
+$$\lceil 100 \times 0.9686 \rceil = 97$$
+
+successes out of 100.
+
+This is intentionally less strict than requiring 100 successes out of 100, or even 99 out of 100. The experiment's perfect observation establishes strong evidence of high reliability, but the subsequent test still has sampling variability. The Wilson construction accounts for that uncertainty without treating the original perfect baseline as proof of $p = 1$.
 
 #### 4.3.3 Reference Table: Thresholds for 100% Baselines
 
+Each test threshold below is the one-sided Wilson lower bound for $p_0$ at the test sample size, with $z = 1.645$ (95% confidence) — the same construction as §4.3.2 Step 2.
+
 | Baseline $n$ | $p_0$ (Wilson 95%) | Test $n=50$ threshold | Test $n=100$ threshold |
 |--------------|--------------------|-----------------------|------------------------|
-| 100          | 0.9737             | 0.936                 | 0.947                  |
-| 300          | 0.9911             | 0.969                 | 0.976                  |
-| 1000         | 0.9973             | 0.985                 | 0.989                  |
-| 3000         | 0.9991             | 0.992                 | 0.994                  |
+| 100          | 0.9737             | 0.906                 | 0.932                  |
+| 300          | 0.9911             | 0.933                 | 0.958                  |
+| 1000         | 0.9973             | 0.944                 | 0.969                  |
+| 3000         | 0.9991             | 0.947                 | 0.972                  |
 
 ### 4.4 Extended Example: Highly Reliable API
 
@@ -519,17 +548,23 @@ $$p_{\text{threshold}} = 0.9973 - 1.645 \times 0.0052 = 0.9973 - 0.0086 \approx 
 
 **Calculation**:
 
-1. Wilson lower bound: $p_0 = \frac{2000}{2000 + 2.706} = 0.9986$
+1. Effective baseline (Wilson lower bound at $k = n$, $z = 1.645$):
 
-2. For 100-sample test:
-   - $\text{SE} = \sqrt{0.9986 \times 0.0014 / 100} = 0.0037$
-   - $p_{\text{threshold}} = 0.9986 - 1.645 \times 0.0037 = 0.993$
+   $$p_0 = \frac{2000}{2000 + 1.645^2} = \frac{2000}{2002.706} \approx 0.9986$$
 
-3. For 50-sample test:
-   - $\text{SE} = \sqrt{0.9986 \times 0.0014 / 50} = 0.0053$
-   - $p_{\text{threshold}} = 0.9986 - 1.645 \times 0.0053 = 0.990$
+2. For a 100-sample test, apply the one-sided Wilson lower bound at $p_0$ and $n_{\text{test}} = 100$:
 
-**Result**: Even for this highly reliable system, the methodology produces statistically principled thresholds with valid confidence level interpretation.
+   $$p_{\text{threshold}} = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}} \approx 0.971$$
+
+   Discrete equivalent: $\lceil 100 \times 0.971 \rceil = 98$ successes out of 100.
+
+3. For a 50-sample test, the same construction with $n_{\text{test}} = 50$ gives:
+
+   $$p_{\text{threshold}} \approx 0.946$$
+
+   Discrete equivalent: $\lceil 50 \times 0.946 \rceil = 48$ successes out of 50.
+
+**Result**: Even for this highly reliable system, the methodology produces statistically principled thresholds with valid confidence-level interpretation. The larger test (n=100) yields a tighter threshold than the smaller (n=50), reflecting the smaller test's greater sampling variability.
 
 ### 4.5 Theoretical Note: Beta-Binomial Alternative
 
