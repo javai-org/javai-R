@@ -19,6 +19,7 @@ All attribution licensing is ARL.
 | 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                         |
 | 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                 |
 | 4 | **2026-05** | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged. |
+| 5 | **2026-05** | **Justification of the i.i.d. working assumption.** §1.3 gains a new §1.3.1 setting out the conditions under which the Bernoulli i.i.d. premise is defensible for LLM testing, with citations to Anthropic (2026) for provider model-versioning policy and Chen, Zaharia & Zou (2023) for the empirical counterweight. Existing §1.3 material moves unchanged into §1.3.2 (formal assumptions and operational threats) and §1.3.3 (developer responsibility for trial independence — previously unnumbered). No statistical content changes. |
 
 Each milestone strictly extends the previous one in the scope of what the methodology claims; none supersedes the Bernoulli/Wilson foundation laid in Milestone 1.
 
@@ -116,7 +117,7 @@ where:
 - $p \in [0, 1]$ is the true (unknown) success probability
 - Trials are assumed independent and identically distributed (i.i.d.)
 
-The word *working* is load-bearing: independence and stationarity are modelling assumptions that hold approximately in practice, not discovered truths about the system under test. §1.3 separates the formal assumptions from the operational threats to those assumptions, and §8 describes the framework-level guardrails that make assumption drift *visible* without pretending to repair it.
+The word *working* is load-bearing: independence and stationarity are modelling assumptions that hold approximately in practice, not discovered truths about the system under test. §1.3.1 sets out why the assumption is nevertheless defensible as a starting point for a typical LLM experiment; §1.3.2 separates the formal assumptions from the operational threats to those assumptions; §8 describes the framework-level guardrails that make assumption drift *visible* without pretending to repair it.
 
 ### 1.2 Binomial Aggregation
 
@@ -129,6 +130,30 @@ The sample proportion $\hat{p} = K/n$ is an unbiased estimator of *p*:
 $$E[\hat{p}] = p, \quad \text{Var}(\hat{p}) = \frac{p(1-p)}{n}$$
 
 ### 1.3 Assumptions and Limitations
+
+The Bernoulli model is a working approximation, not a discovered truth. §1.3.1 sets out why the assumption is reasonable for a typical LLM experiment; §1.3.2 enumerates the formal assumptions and the operational threats to each; §1.3.3 describes the developer's role in upholding the independence premise.
+
+#### 1.3.1 Why the Working Approximation is Defensible
+
+A natural objection to the Bernoulli model for LLM testing is that an LLM is not a coin: its outputs depend on weights that the test author neither owns nor controls, served by infrastructure that the test author cannot inspect. Why should the success probability $p$ be treated as constant within an experimental run, given that *something* about the served system can change at any time?
+
+The answer rests on a layered view of what determines a trial's outcome. In decreasing order of magnitude, a verdict is shaped by:
+
+1. **Model weights** — the parameters that define the model's capabilities and dispositions.
+2. **Serving stack** — quantisation, kernel choices, batching, speculative decoding, mixture-of-experts routing.
+3. **Sampling configuration** — temperature, top-p, max tokens, set by the caller.
+4. **Numerical realisation** — floating-point ordering on the inference hardware, sensitive to batch composition.
+5. **Input distribution** — the prompts and contract context fed to the model.
+
+Layer 1 is the dominant term and is the layer for which the assumption of stability is most defensible. Major LLM providers commit, as a matter of policy, that their model identifiers resolve to immutable weights for the lifetime of the model's deprecation window. Anthropic's documentation states this explicitly: *"Every Claude model ID is a pinned snapshot. Models with a date in the ID (for example, `20250929`) are fixed to that specific release. Starting with the Claude 4.6 generation, model IDs use a dateless format that is also a pinned snapshot, not an evergreen pointer"* (Anthropic, 2026). For older generations, providers also expose **floating aliases** — convenience pointers that resolve to the current dated snapshot at call time and may be re-bound when a newer snapshot ships. Calling through a pinned snapshot fixes layer 1 across the experimental run by provider commitment; calling through a floating alias does not.
+
+Empirical study has documented material drift in model behaviour over months when calls are routed through floating aliases (Chen, Zaharia & Zou, 2023). The methodology absorbs this finding: the prescribed posture is to test against pinned snapshots and to set explicit baseline-validity windows (§8.4.2) that require operators to reconfirm $p$ before stale comparisons are drawn.
+
+Layers 2 and 4 are the source of the well-documented residual non-determinism observed even at temperature zero with fixed sampling configuration: the same prompt to the same snapshot can yield different outputs in successive calls. This affects the *variance* of the trial outcome — exactly the phenomenon the binomial model is built to absorb — without changing $p$ in the population sense the model requires. Provided the input distribution (layer 5) is also stable across the run — a fixed list of prompts, or independent draws from a stable generator — the verdict sequence is well-modelled as a sequence of Bernoulli trials with constant $p$.
+
+The assumption is therefore defensible *under stated conditions*: a pinned model snapshot, a fixed system prompt, a fixed sampling configuration, no conversation state carried between calls, and a stable input-sampling process, all within a single experimental run of bounded wall-clock duration. Outside these conditions — most importantly, calls through a floating alias, or experiments whose duration spans a known provider rollout window — the assumption can fail, and the diagnostics of §8.3 and the guardrails of §8.4 exist for exactly that case.
+
+#### 1.3.2 Formal Assumptions and Operational Threats
 
 The Bernoulli model rests on three **formal assumptions**, each paired with the **operational threats** that could silently violate it in practice:
 
@@ -151,7 +176,7 @@ The Bernoulli model rests on three **formal assumptions**, each paired with the 
 
 3. **Binary outcomes**: Each trial has exactly two outcomes. Complex quality metrics may require more sophisticated models.
 
-#### Developer Responsibility for Trial Independence
+#### 1.3.3 Developer Responsibility for Trial Independence
 
 While the framework provides the statistical machinery, **developers share responsibility** for ensuring that the independence assumption holds in practice. Many LLM service providers offer features that can introduce correlation between trials:
 
@@ -1826,6 +1851,10 @@ The two dimensions are evaluated independently and combined with logical conjunc
 15. Bayarri, M. J., & Berger, J. O. (2004). The interplay of Bayesian and frequentist analysis. *Statistical Science*, 19(1), 58-80. [Framework for reconciling predictive-Bayesian and frequentist inference, cited in §4.5]
 
 16. Geisser, S. (1993). *Predictive Inference: An Introduction*. Chapman and Hall. [Predictive treatment of binomial future performance]
+
+17. Anthropic (2026). *Models* and *Model deprecations*. Claude documentation, accessed 2026-05-11. https://platform.claude.com/docs/en/docs/about-claude/models/overview ; https://platform.claude.com/docs/en/docs/about-claude/model-deprecations [Provider commitment that every Claude model ID is a pinned snapshot for the lifetime of its deprecation window; cited in §1.3.1 for the snapshot-vs-floating-alias distinction.]
+
+18. Chen, L., Zaharia, M., & Zou, J. (2023). How is ChatGPT's behavior changing over time? *arXiv preprint arXiv:2307.09009*. [Empirical demonstration of behaviour drift in floating-alias model identifiers across snapshots over a multi-month period; cited in §1.3.1 as motivation for the pinned-snapshot prescription.]
 
 ---
 

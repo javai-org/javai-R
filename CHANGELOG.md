@@ -5,6 +5,32 @@ Versions follow the fixture-versioning rules declared in `CLAUDE.md`:
 **minor** bumps on 0.x mark breaking changes to fixture content or shape;
 **patch** bumps mark additive changes.
 
+## [Unreleased] — Documentation
+
+**Documentation-only — no fixture content or schema change, and therefore
+no version bump.** Recorded here so downstream maintainers can see the
+methodology clarification when it lands in the next tagged release.
+
+### Changed
+
+- `docs/STATISTICAL-COMPANION.md` — §1.3 restructured to add a new
+  §1.3.1 *Why the Working Approximation is Defensible*, articulating
+  the conditions under which the Bernoulli i.i.d. assumption is
+  reasonable for LLM testing: a pinned-snapshot model identifier
+  (versus a floating alias), fixed system prompt and sampling
+  configuration, no conversation state carried between calls, a stable
+  input-sampling process, and a single experimental run of bounded
+  wall-clock duration. The new sub-section quotes Anthropic's
+  documented commitment that every Claude model ID is a pinned snapshot
+  and cites Chen, Zaharia & Zou (2023) as the empirical counterweight
+  showing that floating aliases do drift across snapshots over months.
+  Existing §1.3 material moves unchanged into §1.3.2 (formal
+  assumptions and operational threats) and §1.3.3 (developer
+  responsibility for trial independence — previously an unnumbered
+  sub-section, now numbered to match the §8.3.x convention used
+  elsewhere in the document). Bibliography gains entries 17 (Anthropic,
+  2026) and 18 (Chen, Zaharia & Zou, 2023).
+
 ## [0.6.0] — 2026-05-08
 
 **Breaking — threshold-derivation fixture content and signature change.**
