@@ -24,7 +24,8 @@ suites <- list(
   feasibility = generate_feasibility_cases(),
   verdict = generate_verdict_cases(),
   latency_percentile = generate_latency_percentile_cases(),
-  latency_threshold = generate_latency_threshold_cases()
+  latency_threshold = generate_latency_threshold_cases(),
+  latency_threshold_bootstrap = generate_latency_threshold_bootstrap_cases()
 )
 
 for (name in names(suites)) {

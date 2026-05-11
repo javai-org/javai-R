@@ -253,3 +253,118 @@ generate_latency_threshold_cases <- function() {
     cases = cases
   )
 }
+
+#' Bootstrap upper confidence bound on the baseline percentile
+#'
+#' Computes a one-sided upper bound on Q(p) by 10,000-replicate
+#' percentile bootstrap (type-1 quantile). Informational only — used to
+#' compare against the exact binomial order-statistic construction.
+#' This is NOT the production threshold method.
+#'
+#' @param baseline Numeric vector. Successful-response latencies.
+#' @param p Numeric. Percentile level.
+#' @param confidence Numeric. One-sided confidence level.
+#' @param B Integer. Number of bootstrap replicates (default 10000).
+#' @param seed Integer. Bootstrap RNG seed (default 1). Determinism is
+#'   load-bearing: the published bootstrap_upper values in the
+#'   conformance fixture depend on this seed.
+#' @return Numeric. The bootstrap upper bound at the requested
+#'   confidence level.
+#' @export
+bootstrap_upper <- function(baseline, p, confidence, B = 10000L, seed = 1L) {
+  set.seed(seed)
+  n <- length(baseline)
+  reps <- replicate(B, {
+    nearest_rank_percentile(sample(baseline, n, replace = TRUE), p)
+  })
+  unname(quantile(reps, probs = confidence, type = 1))
+}
+
+#' Generate latency-threshold bootstrap-comparison reference cases
+#'
+#' This suite serves two coupled roles:
+#'
+#' (1) **Conformance contract** for the exact binomial order-statistic
+#'     upper bound. Every consuming framework (punit, feotest, ...) must
+#'     reproduce the rank, threshold, baseline_percentile, and n fields
+#'     exactly from the published baseline_latencies. Because every
+#'     conformance value is an integer or an element of the integer
+#'     baseline_latencies array, conformance is exact equality and the
+#'     suite carries tolerance: 0.
+#'
+#' (2) **Bootstrap-vs-binomial comparison** documented in §12.4.4 of the
+#'     Statistical Companion. The informational fields bootstrap_upper,
+#'     point_estimate, and diff preserve the published comparison so a
+#'     reader can see how the conservative binomial bound relates to the
+#'     bootstrap upper bound on each lognormal baseline.
+#'
+#' Determinism is load-bearing: the baselines are seeded so that
+#' consumers can verify the rank/threshold against the same array, and
+#' the bootstrap seed is fixed so the informational fields are stable
+#' across regenerations.
+#'
+#' @return A list suitable for JSON serialisation.
+#' @export
+generate_latency_threshold_bootstrap_cases <- function() {
+  # Reuses the same DGP and seeds as the n=200 percentile-suite sample
+  # and the n=935 threshold-suite sample — by construction these
+  # baselines are byte-identical across suites.
+  set.seed(42)
+  baseline_200 <- sort(round(rlnorm(200, meanlog = log(200), sdlog = 0.4)))
+
+  set.seed(42)
+  baseline_935 <- sort(round(rlnorm(935, meanlog = log(500), sdlog = 0.3)))
+
+  build_case <- function(label, baseline, p, confidence = 0.95) {
+    derived <- latency_threshold_derive(baseline, p, confidence)
+    point_est <- nearest_rank_percentile(baseline, p)
+    boot <- bootstrap_upper(baseline, p, confidence)
+    list(
+      name = sprintf("%s_p%g", label, p * 100),
+      inputs = list(
+        baseline_latencies = baseline,
+        p = p,
+        confidence = confidence
+      ),
+      expected = list(
+        # Conformance fields — exact equality required.
+        rank = derived$rank,
+        threshold = derived$threshold,
+        baseline_percentile = derived$baseline_percentile,
+        n = derived$n,
+        # Informational comparison fields — not conformance targets.
+        bootstrap_upper = boot,
+        point_estimate = point_est,
+        diff = derived$threshold - boot
+      )
+    )
+  }
+
+  cases <- list(
+    build_case("lognormal_n200", baseline_200, 0.95),
+    build_case("lognormal_n200", baseline_200, 0.99),
+    build_case("lognormal_n935", baseline_935, 0.95),
+    build_case("lognormal_n935", baseline_935, 0.99)
+  )
+
+  list(
+    suite = "latency_threshold_bootstrap",
+    description = paste0(
+      "Conformance suite for the exact binomial order-statistic upper bound on the baseline percentile. ",
+      "Each case publishes the (ascending-sorted) baseline sample, the derivation parameters, ",
+      "and the expected conformance fields (rank, threshold, baseline_percentile, n). ",
+      "Conformance is exact equality per field: every conformance value is an integer or a specific ",
+      "element of baseline_latencies, so floating-point tolerance does not apply (suite tolerance: 0). ",
+      "The fields bootstrap_upper, point_estimate, and diff are preserved as informational comparison ",
+      "content (10,000-replicate percentile bootstrap upper bound, raw sample quantile, and the ",
+      "difference from the binomial threshold) and are not conformance targets."
+    ),
+    method = paste0(
+      "Exact binomial order-statistic upper bound (k = qbinom(1 - alpha, n_s, p) + 1, clamped to ",
+      "[ceil(p*n), n]); bootstrap upper bound at type-1 quantile preserved alongside as informational ",
+      "comparison."
+    ),
+    tolerance = 0,
+    cases = cases
+  )
+}
