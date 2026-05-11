@@ -5,13 +5,85 @@ Versions follow the fixture-versioning rules declared in `CLAUDE.md`:
 **minor** bumps on 0.x mark breaking changes to fixture content or shape;
 **patch** bumps mark additive changes.
 
-## [Unreleased] — Documentation
+## [0.7.0] — Unreleased
 
-**Documentation-only — no fixture content or schema change, and therefore
-no version bump.** Recorded here so downstream maintainers can see the
-methodology clarification when it lands in the next tagged release.
+**Breaking — `latency_threshold_bootstrap` fixture role change and
+shape change.**
+
+`inst/cases/latency_threshold_bootstrap.json` is upgraded from an
+*informational* comparison report (R-internal) to a *conformance*
+contract for the exact binomial order-statistic upper bound. Both
+`punit` and `feotest` will now consume this suite to verify their
+implementations agree exactly with `javai-R`'s on the same lognormal
+baselines. The bootstrap-vs-binomial comparison content is preserved
+alongside as informational fields.
 
 ### Changed
+
+- **`inst/cases/latency_threshold_bootstrap.json` shape.** Each case
+  now publishes the (ascending-sorted) baseline sample in
+  `inputs.baseline_latencies`, alongside `p` and `confidence`. The
+  `expected` section gains four conformance fields:
+    - `rank` (was `binomial_rank`),
+    - `threshold` (was `binomial_bound`),
+    - `baseline_percentile` (the raw sample quantile `Q(p)`),
+    - `n` (the baseline sample count).
+  The fields `bootstrap_upper`, `point_estimate`, and `diff` are
+  preserved as informational comparison content and are no longer
+  conformance targets. The suite-level `description` documents the
+  new role; `method` is rewritten to lead with the binomial
+  construction.
+
+- **`scripts/bootstrap_compare.R`.** The generator logic moved into
+  `generate_latency_threshold_bootstrap_cases()` in `R/latency.R`.
+  The script is now a thin wrapper that produces the markdown
+  comparison table for §12.4.4 of the Statistical Companion; JSON
+  emission is driven by `scripts/generate_all.R`.
+
+- **`R/latency.R`.** Added the bootstrap-comparison generator plus a
+  reusable `bootstrap_upper()` helper. The bootstrap RNG seed is
+  fixed (default `seed = 1`) so the informational fields stay stable
+  across regenerations.
+
+### Conformance properties
+
+The new conformance fields are integer-valued or are specific
+elements of the integer-valued `baseline_latencies` array, so the
+suite carries `tolerance: 0` (exact equality), matching the sister
+suite `latency_threshold.json`. Per-field precision contract:
+
+| Field                 | Conformance check    |
+|-----------------------|----------------------|
+| `rank`                | exact integer match  |
+| `threshold`           | exact match (equals `baseline_latencies[rank - 1]`) |
+| `baseline_percentile` | exact match (`t_{([p·n])}`) |
+| `n`                   | exact integer match  |
+| `bootstrap_upper`     | informational only   |
+| `point_estimate`      | informational only   |
+| `diff`                | informational only   |
+
+### Downstream impact
+
+The four existing cases (`lognormal_n200_p95`, `lognormal_n200_p99`,
+`lognormal_n935_p95`, `lognormal_n935_p99`) keep their names and
+keep the same underlying lognormal draws (the `set.seed(42)` calls
+are unchanged), so consumers picking up the upgraded fixture see
+the same numerical `binomial_bound` / `binomial_rank` values they
+would have read out of the prior shape — only the field names and
+the addition of `baseline_latencies` differ.
+
+Downstream maintainers should:
+
+- Pull the upgraded `latency_threshold_bootstrap.json` into their
+  test resources (or rely on the conformance-data download
+  mechanism).
+- Extend their conformance test (`LatencyConformanceTest` in
+  `punit`; equivalent in `feotest`) to consume the new shape.
+
+See `REQ-R-bootstrap-fixture-upgrade.md` in each downstream
+project's `plan/` folder for per-framework guidance.
+
+### Documentation (shipped alongside the fixture upgrade)
 
 - `docs/STATISTICAL-COMPANION.md` — §1.3 restructured to add a new
   §1.3.1 *Why the Working Approximation is Defensible*, articulating
