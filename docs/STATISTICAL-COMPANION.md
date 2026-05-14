@@ -1,7 +1,7 @@
 # Statistical Companion Document
 
-**Version**: 1.2
-**Last updated**: 2026-04-15
+**Version**: 1.3
+**Last updated**: 2026-05-13
 
 Copyright © 2026, Michael Franz Mannion BSc (Hons) MBA
 
@@ -13,13 +13,14 @@ All attribution licensing is ARL.
 
 ## Document History
 
-| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|---|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                         |
-| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                 |
-| 4 | **2026-05** | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged. |
-| 5 | **2026-05** | **Justification of the i.i.d. working assumption.** §1.3 gains a new §1.3.1 setting out the conditions under which the Bernoulli i.i.d. premise is defensible for LLM testing, with citations to Anthropic (2026) for provider model-versioning policy and Chen, Zaharia & Zou (2023) for the empirical counterweight. Existing §1.3 material moves unchanged into §1.3.2 (formal assumptions and operational threats) and §1.3.3 (developer responsibility for trial independence — previously unnumbered). No statistical content changes. |
+| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+|---|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 4 | **2026-05** | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged.                                                                                                                                                                                                                                                                        |
+| 5 | **2026-05** | **Justification of the i.i.d. working assumption.** §1.3 gains a new §1.3.1 setting out the conditions under which the Bernoulli i.i.d. premise is defensible for LLM testing, with citations to Anthropic (2026) for provider model-versioning policy and Chen, Zaharia & Zou (2023) for the empirical counterweight. Existing §1.3 material moves unchanged into §1.3.2 (formal assumptions and operational threats) and §1.3.3 (developer responsibility for trial independence — previously unnumbered). No statistical content changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 6 | **2026-05** | **Criterion decomposition of the functional dimension.** The functional dimension is partitioned per **criterion** rather than aggregated over a contract's postconditions, with each criterion running its own Bernoulli stream (new §1.4). The chapter introduces three model primitives (postcondition, criterion, validation set), the inferential / observational mode distinction with three-valued per-criterion verdicts (PASS, FAIL, INCONCLUSIVE), the structural composite verdict, and its disclosed Type-I envelope $\sum_c \alpha_c$. New §1.5 formalises the **baseline** as an indexed family of per-criterion estimators conditioned on factor record, covariate profile, expiration window, and structural reference. Appendix A enumerates the elements of the statistical model. The single-trial $K=1$ instance of the per-criterion model recovers the methodology of milestones 1–5 unchanged; no existing formula is superseded. |
 
 Each milestone strictly extends the previous one in the scope of what the methodology claims; none supersedes the Bernoulli/Wilson foundation laid in Milestone 1.
 
@@ -46,6 +47,8 @@ Uncertain-system behaviour manifests along two independent dimensions:
 2. **Temporal stochasticity** — how long the system takes to respond, even among successful invocations. Latency is not a fixed property; it is a distribution.
 
 The dimensions are independent. A fast response can be incorrect; a slow response can be correct. Both require repeated observation and distributional reasoning. The javai methodology treats them with different statistical machinery — a binomial model for functional outcomes (§§1–5), non-parametric empirical percentiles for latency (§12) — and requires both to pass for the overall test to pass.
+
+Within the functional dimension, a contract typically declares multiple **criteria** (§1.4) — each its own Bernoulli stream, with its own threshold, confidence level, and validation set. The per-criterion partition refines the evidence within the functional dimension; it does not introduce new dimensions of stochasticity, since every criterion shares the same methodological regime (Wilson on per-criterion pass-rates).
 
 Memory consumption, token usage, and cost per call also vary and could be modelled the same way, but the methodology concentrates on correctness and latency because these two dimensions have the most direct impact on end users; resource consumption is usually managed through infrastructure tooling rather than test assertions.
 
@@ -89,16 +92,16 @@ This document provides a rigorous statistical treatment of the methods employed 
 
 The methodology supports two distinct testing paradigms. They share the same hypothesis-test skeleton but differ in where the threshold comes from and how results are interpreted.
 
-| Paradigm | Threshold source | Statistical question | Example |
-|----------|------------------|----------------------|---------|
-| **Compliance** | Contract / SLA / SLO / policy — given, not estimated | "Does the system meet its mandated requirement?" | Payment API with contractual $p_{\text{SLA}} = 0.995$ uptime |
-| **Regression** | Empirical estimate from a MEASURE experiment | "Has the system degraded from its measured baseline?" | LLM customer-service system with $\hat{p}_{\text{exp}} = 0.951$ from $n = 1000$ samples |
+| Paradigm       | Threshold source                                     | Statistical question                                  | Example                                                                                 |
+|----------------|------------------------------------------------------|-------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| **Compliance** | Contract / SLA / SLO / policy — given, not estimated | "Does the system meet its mandated requirement?"      | Payment API with contractual $p_{\text{SLA}} = 0.995$ uptime                            |
+| **Regression** | Empirical estimate from a MEASURE experiment         | "Has the system degraded from its measured baseline?" | LLM customer-service system with $\hat{p}_{\text{baseline}} = 0.951$ from $n = 1000$ samples |
 
 Both paradigms test the same one-sided hypothesis:
 
-$$H_0: p \geq p_{\text{threshold}} \quad\text{(acceptable)} \qquad H_1: p < p_{\text{threshold}} \quad\text{(unacceptable)}$$
+$$H_0: p \geq p^* \quad\text{(acceptable)} \qquad H_1: p < p^* \quad\text{(unacceptable)}$$
 
-The three differences are the **source** of $p_{\text{threshold}}$ (given vs. derived), the **interpretation** of failure (SLA violation vs. regression), and the **prerequisite step** (none vs. MEASURE). Everything else — the binomial model, the Wilson machinery, the feasibility gate, the VERIFICATION/SMOKE distinction — applies identically.
+The three differences are the **source** of $p^*$ (given vs. derived), the **interpretation** of failure (SLA violation vs. regression), and the **prerequisite step** (none vs. MEASURE). Everything else — the binomial model, the Wilson machinery, the feasibility gate, the VERIFICATION/SMOKE distinction — applies identically.
 
 For an evidential claim under either paradigm (VERIFICATION intent), the sample size must be sufficient to support the threshold; otherwise the developer must declare the test as SMOKE. Section 5.7 defines this split.
 
@@ -108,7 +111,7 @@ For an evidential claim under either paradigm (VERIFICATION intent), the sample 
 
 ### 1.1 Bernoulli Trial Framework
 
-Each invocation of the use case is treated as a Bernoulli trial under a **working approximation** of independence and stationarity:
+Each invocation of the service contract is treated as a Bernoulli trial under a **working approximation** of independence and stationarity:
 
 $$X_i \sim \text{Bernoulli}(p)$$
 
@@ -201,6 +204,890 @@ No framework can detect or correct for these effects—they require domain knowl
 
 ---
 
+### 1.4 Criterion Decomposition of the Functional Dimension
+
+#### 1.4.1 Failure modes of differing consequence
+
+Criterion decomposition operates *within* the functional dimension
+introduced earlier in the document. The partition this chapter
+develops refines the evidence inside that one dimension into multiple
+statistical streams; it does not multiply the number of dimensions of
+stochasticity.
+
+The chapter uses a deliberately stark pairing as its running example: a
+trivial structural failure (a service response that does not parse as
+JSON) and a life-endangering content failure (a clinical-advice system
+that suggests self-harm to a vulnerable user). The pairing is chosen
+because the two failure modes lie at opposite ends of every axis that
+the methodology has to handle — consequence, frequency, and input
+requirement — and so it makes the structural argument for separate
+statistical treatment in the sharpest available terms. References to
+self-harm in what follows are technical illustrations of a
+catastrophic-consequence criterion; they are not commentary on
+clinical practice or on the regulation of clinical AI systems.
+
+A service contract's postconditions defend against different failure
+modes. The failure modes vary along at least three independent axes,
+each of which on its own is sufficient to require separate statistical
+treatment.
+
+**Consequence.** A response that fails to parse and a response that
+advises a patient toward harm both violate the contract, but the cost
+of each violation to the consumer of the verdict is not the same. The
+methodology operationalises this difference as the per-criterion
+threshold $p^*_c$ — equivalently, the demanded pass-rate — against
+which the criterion's Wilson lower bound is tested. A
+high-consequence criterion demands a tighter $p^*_c$. At the limit,
+where the project's stance is zero tolerance, the criterion runs
+observationally (§1.4.5): no threshold parameter applies and the
+verdict reports whether any failure was observed.
+
+**Frequency.** A baseline parse-failure rate of 5% and a catastrophic
+self-harm advice rate of $10^{-5}$ are statistically incommensurate.
+The sample budget that gives strong evidential power to the first
+criterion gives the second next to none; per-criterion feasibility
+gates surface this asymmetry honestly, where an aggregated stream
+absorbs it.
+
+**Input requirement.** Parseability is exercised by every input the
+service receives. The self-harm path is exercised only by inputs
+designed to probe it; a representative production sample will reach
+that path only by accident. The two criteria are therefore evaluated
+over different input pools — a representative pool for parseability, a
+curated probe pool for self-harm — and the evidence each criterion
+produces is a claim about the distribution its pool represents, not
+about a shared underlying distribution.
+
+The methodology treats failure modes that differ along any of these
+axes as **separately contractual** — each is its own hypothesis test,
+with its own threshold, its own confidence level, its own feasibility
+gate, and its own validation set.
+
+A representative example, threaded through the chapter, is a
+clinical-advice service whose contract carries:
+
+- $P_1$: *response parses as JSON* — correctness, ordinary regression sensitivity
+- $P_2$: *required fields are present* — correctness
+- $P_3$: *advice does not suggest self-harm* — safety, catastrophic-consequence
+- $P_4$: *response is layperson-readable* — safety, less acute consequence
+
+The four postconditions are not consequentially interchangeable. A
+$P_3$ failure rate of $10^{-3}$ is clinically significant in a way a
+$P_1$ failure rate of $10^{-3}$ is not. The methodology evaluates each
+in its own statistical stream, against its own threshold, at its own
+confidence level. The four primitives of §1.4.2 give this discipline
+its formal structure; the hiding result of §1.4.4 establishes that an
+aggregated stream over postconditions that differ along any of the
+three axes potentially obscures movement in a low-frequency,
+high-consequence, or designed-input criterion. Where postconditions
+defend against failure modes that are interchangeable along all three
+axes — equivalent consequences, comparable frequencies, the same input
+distribution — a single aggregated stream remains an adequate
+representation; the $K = 1$ instance of the per-criterion model
+recovers this case unchanged.
+
+---
+
+#### 1.4.2 Three primitives
+
+The decomposition rests on three primitives, each playing a distinct
+role in the statistical model.
+
+**Postcondition.** A named predicate over the produced output of a
+single trial. A postcondition has one job: decide pass or fail for a
+single observable property of the output. It carries no threshold, no
+statistical configuration, and no governance metadata. In the
+clinical-advice example, $P_1$ through $P_4$ above are postconditions.
+
+**Criterion.** The unit of statistical evaluation. A criterion declares
+which postcondition (or postconditions) it evaluates, the *shape* of
+the test it conducts (inferential or observational, §1.4.5), the
+threshold and threshold origin where applicable, the confidence level
+$\alpha$, and the validation set the criterion is exercised against
+(§1.4.7). Each criterion is its own Bernoulli stream and produces its
+own verdict. The criterion is the partition unit of the functional
+dimension. Two postconditions whose failures carry materially
+different consequences are addressed by two distinct criteria, never
+by sharing a stream.
+
+**Validation set.** The curated, governed input pool over which a
+criterion is evaluated. A validation set carries per-example
+provenance, a versioned mapping to a failure-mode taxonomy, an
+attestation of independence from any guardrail's training data where
+applicable, and a documented refresh policy. Different criteria within
+a single contract may be exercised against different validation sets;
+each criterion declares its own. The role of the validation set is
+elaborated in §1.4.7.
+
+The relationship between the primitives is:
+
+| Primitive      | Role                       |
+| -------------- | -------------------------- |
+| Postcondition  | Per-trial predicate        |
+| Criterion      | Statistical partition unit |
+| Validation set | Input pool for a criterion |
+
+Each of the three primitives has exactly one job: postconditions
+decide per-trial outcomes; criteria partition the functional
+dimension into statistical streams and parameterise each stream's
+inferential test; validation sets specify the population each
+criterion's inference targets.
+
+---
+
+#### 1.4.3 The per-criterion Bernoulli model
+
+The model of §1.1 treats each invocation as a single Bernoulli trial
+$X_i \sim \text{Bernoulli}(p)$ and §1.2 aggregates to $K = \sum X_i
+\sim \text{Binomial}(n, p)$ with $\hat{p} = K/n$. Criterion
+decomposition replaces the single trial $X_i$ with a family of
+per-criterion trials, one per criterion, and applies the same model to
+each.
+
+Let a contract declare $K$ criteria $\{C_1, \ldots, C_K\}$. For each
+criterion $c$, let $\mathcal{P}_c$ denote the set of postconditions
+the criterion references, and let $n_c$ denote the number of
+**conclusive** trials for criterion $c$ in the run — those trials on
+which $c$'s postconditions could be evaluated and a PASS-or-FAIL
+indicator $X_{i,c}$ produced. Trials on which $c$ could not be
+evaluated are not counted in $n_c$ and do not contribute to the
+estimator; whether a trial is conclusive is a property of the
+observation, not of the statistical model. Define the per-criterion
+trial outcome:
+
+$$
+X_{i,c} \;=\; \begin{cases}
+1 & \text{if every } P \in \mathcal{P}_c \text{ holds on trial } i \\
+0 & \text{otherwise.}
+\end{cases}
+$$
+
+Each per-criterion trial is modelled exactly as the single-criterion
+trial of §§1.1–1.2:
+
+$$
+X_{i,c} \,\sim\, \text{Bernoulli}(p_c), \qquad K_c \,=\, \sum_{i=1}^{n_c} X_{i,c} \,\sim\, \text{Binomial}(n_c, p_c), \qquad \hat{p}_c \,=\, K_c / n_c.
+$$
+
+The independence and stationarity working approximations of §1.3 apply
+per criterion. Within a criterion, trials drawn from its validation
+set are i.i.d. under that set's distribution. Across criteria, the
+methodology does not assume independence: the per-criterion trials
+$X_{i,1}, \ldots, X_{i,K}$ on a single invocation are typically
+correlated, since an invocation that produces a malformed response may
+also fail criteria that evaluate the response's content.
+Cross-criterion dependence does not affect per-criterion verdict
+correctness; its consequence for the composite verdict is the
+disclosed Type-I envelope of §1.4.6.
+
+Each per-criterion trial is a complete statistical object in its own
+right. From here forward in the companion, the single-trial $X_i$,
+$\hat{p}$, $\alpha$, $p^*$ of §§1.1–1.2 may be read as the
+per-criterion $X_{i,c}$, $\hat{p}_c$, $\alpha_c$, $p^*_c$ for any
+criterion $c$ declared on a contract: the Wilson construction, the
+threshold-derivation pipeline, the sample-size derivations, the
+feasibility gate, and the verdict-evaluation rule apply unchanged.
+
+---
+
+#### 1.4.4 The hiding result
+
+The structural claim that the criterion is the appropriate partition
+unit rests on a one-line mathematical result about binomial aggregation
+of heterogeneous failure events.
+
+Let $\{C_1, \ldots, C_K\}$ be the contract's criteria, with per-trial
+indicators $X_{i,c}$ as in §1.4.3. Define the conjunction indicator
+
+$$
+X_i \;=\; \prod_{c=1}^{K} X_{i,c}, \qquad p \;=\; \mathbb{P}(X_i = 1)
+$$
+
+— the rate at which every criterion's indicator simultaneously equals
+one on a trial. By the union bound applied to the complementary events,
+
+$$
+1 - p \;=\; \mathbb{P}\bigl(\exists\, c : X_{i,c} = 0 \bigr) \;\leq\; \sum_{c=1}^{K} \bigl(1 - p_c\bigr)
+$$
+
+with equality if and only if the per-criterion failure events are
+disjoint. The aggregate failure rate $1 - p$ is therefore bounded above
+by the sum of per-criterion failure rates, and in typical cases is
+dominated by the largest of them.
+
+**Corollary.** If criterion $c^*$ has a per-criterion failure rate that
+is small relative to the largest per-criterion failure rate — say
+$1 - p_{c^*} \ll \max_{c \neq c^*} (1 - p_c)$ — then $1 - p$ is
+dominated by the larger terms and is essentially insensitive to
+$1 - p_{c^*}$. A change in $1 - p_{c^*}$ of any magnitude substantially
+smaller than $\max_{c \neq c^*} (1 - p_c)$ produces a change in $1 - p$
+within the sampling noise of an aggregate estimator. A conjunction
+indicator therefore cannot detect movement in $1 - p_{c^*}$ unless that
+movement is comparable to the noise of the dominant criterion. The
+catastrophic-consequence criterion of an asymmetric contract is, by
+construction, the criterion most often dominated.
+
+**Inverse statement.** Given an observed conjunction rate $\hat{p}$,
+the per-criterion rates $\{\hat{p}_c\}$ are not identified: any
+allocation of $1 - \hat{p}$ among the per-criterion failure events that
+respects the union bound is consistent with the observation. Recovering
+the per-criterion rates requires per-criterion attribution at trial
+record time — the wide trial record that §1.4.3's indicators
+demand. A trial archive that has not preserved per-postcondition
+outcomes per trial cannot be decomposed retrospectively.
+
+These two facts together make per-criterion partitioning the only
+faithful representation of a contract whose postconditions defend
+against failure modes of differing consequence.
+
+---
+
+#### 1.4.5 Inferential and observational criteria
+
+A criterion operates in one of two distinct modes. The distinction is
+not a matter of statistical convenience; it reflects two different
+kinds of question. In either mode the criterion delivers one of three
+results: **PASS**, **FAIL**, or **INCONCLUSIVE**.
+
+**Inferential criterion.** Estimates a population parameter $p_c$ from
+the observed sample and tests against a threshold. The Wilson lower
+bound $\hat{p}_{c,L}(\alpha_c)$ is the test statistic; the threshold
+$p^*_c$ is either contractual (origin SLA, SLO, POLICY) or empirically
+derived (origin EMPIRICAL). Subject to the feasibility gate of §8.4,
+the verdict is PASS if the Wilson lower bound clears the threshold and
+FAIL if it does not. Where the gate does not admit a verdict — the
+sample is too small to support an inferential claim at the stated
+threshold and $\alpha_c$, or $n_c = 0$ — the verdict is INCONCLUSIVE.
+The inferential mode is the appropriate shape for criteria whose
+contractual question is *"what is the true rate of behaviour $c$, with
+what confidence, and does it clear the demanded threshold?"*.
+
+**Observational criterion.** Reports whether any failure of the
+criterion was observed in the run. No population estimation; no
+confidence interval; no threshold parameter. The test is on the
+observation itself:
+
+$$
+\text{verdict}(c) \;=\; \begin{cases}
+\text{PASS} & \text{if } K_c \,=\, n_c \text{ and } n_c \,>\, 0 \\
+\text{FAIL} & \text{if } K_c \,<\, n_c \\
+\text{INCONCLUSIVE} & \text{if } n_c \,=\, 0.
+\end{cases}
+$$
+
+A PASS verdict says exactly: zero failures of $c$ were observed in the
+$n_c$ trials of $c$'s validation set. INCONCLUSIVE indicates that no
+observation of the criterion was available in the run.
+
+**Exact.** The observational verdict is deterministic given the run's
+observations. It makes no claim about $p_c$. A passing observational
+verdict at $n_c = 1000$ means exactly: *no failure of criterion $c$ was
+observed in 1000 trials of $c$'s validation set.* It does not entail
+any bound on the true population rate of such failures. A contract that
+also requires a population-level claim attaches an additional
+inferential criterion against the same postconditions; the two
+criteria coexist on the contract, ask different questions, and produce
+different verdicts.
+
+**Engineering guardrail.** A criterion declared as observational is not
+silently transformed into an inferential criterion at threshold
+$p^*_c = 1$, and the framework does not accept the literal threshold
+$1.0$ as an inferential parameter. The Wilson lower bound at
+$\hat{p}_c = 1$ is strictly less than $1$ for every finite $n_c$ and
+every $\alpha_c < 1$; an inferential test against $p^*_c = 1$ cannot
+pass at any finite sample size. The observational mode is the honest
+expression of zero-tolerance contracts: the verdict reports the
+observation, and the population claim is deferred to sentinel-scale
+accumulation or to the guardrail-validation pattern (the subjects of
+follow-on chapters).
+
+The two modes coexist within a single contract. The clinical-advice
+example holds an observational criterion against $P_3$ alongside an
+inferential criterion against $P_4$ at $p^*_{P_4} = 0.98$,
+$\alpha = 0.001$, and a further inferential criterion conjoining $P_1$
+and $P_2$ against an empirically derived threshold. The composite
+verdict (§1.4.6) is structured over the three criterion verdicts; the
+engineering response to a fired observational verdict is investigation,
+not threshold debate.
+
+The methodology's "Wilson everywhere" guideline applies to every
+inferential claim about a population parameter. Observational criteria
+make no inferential claim and lie outside the Wilson regime by
+construction.
+
+---
+
+#### 1.4.6 The composite verdict and its Type-I envelope
+
+A contract's verdict is a structured tuple over its per-criterion
+verdicts. The tuple is not collapsed to a single PASS/FAIL at the
+reporting layer; a flat boolean verdict surface would obscure
+per-criterion outcomes that the contract requires the consumer to see.
+
+**Structural composite.** Let $V_c \in \{\text{PASS}, \text{FAIL}, \text{INCONCLUSIVE}\}$
+denote the verdict of criterion $c$ (§1.4.5). The contract's
+structural composite verdict is
+
+$$
+V_{\text{contract}} \;=\; \begin{cases}
+\text{PASS}         & \text{if } \forall\, c : V_c = \text{PASS} \\
+\text{FAIL}         & \text{if } \exists\, c : V_c = \text{FAIL} \\
+\text{INCONCLUSIVE} & \text{otherwise.}
+\end{cases}
+$$
+
+with the per-criterion verdicts retained in full on the composite
+artefact. A consumer reads the contract verdict and the supporting
+per-criterion verdicts in one place.
+
+The structural composite is the methodology's representation of "the
+contract is satisfied." A baseline may carry an aggregate $\hat{p}$
+over the conjunction of all postconditions as a descriptive statistic
+— useful for dashboards and trend reporting — but the aggregate is
+not threshold-bearing: thresholds are not derived from it and
+verdicts are not framed against it. The hiding result of §1.4.4
+demonstrates why a conjunction-based threshold is structurally unable
+to detect the per-criterion movement the methodology exists to
+surface.
+
+**Type-I envelope.** The Type-I error of the structural composite
+verdict — declaring $V_{\text{contract}} = \text{FAIL}$ when every
+criterion's claim is in fact satisfied — is bounded above by the sum
+of per-criterion $\alpha$ over inferential criteria:
+
+$$
+\alpha_{\text{composite}} \;\leq\; \sum_{c \,\in\, \text{inferential}} \alpha_c
+$$
+
+**Exact.** The bound holds under arbitrary dependence among
+per-criterion test statistics; it is the union bound applied to
+per-criterion Type-I events. Observational criteria do not contribute
+to the envelope because their verdicts are deterministic on
+observation; they carry no $\alpha$.
+
+**Engineering guardrail.** Per-criterion $\alpha_c$ is set by the
+consequence of false acceptance for criterion $c$. A safety-class
+criterion at $\alpha = 0.001$ holds at that level because the
+consequence of falsely accepting a safety regression demands it. The
+envelope $\sum_c \alpha_c$ is reported on the composite verdict as a
+disclosed property; it is not a control target, and per-criterion
+$\alpha_c$ is not adjusted to control it. A uniform reduction
+$\alpha_c \mapsto \alpha_c / K$ would lower the per-criterion power
+proportionally — most consequentially in the safety case, where power
+to detect a true regression is the property the criterion most needs
+to preserve.
+
+Projects whose governance demands a uniform composite $\alpha$ may
+apply a Bonferroni reduction at the operator level. The methodology
+does not impose it.
+
+The companion's §7.3 addresses **cross-test** family-wise inflation
+when multiple independent contracts are evaluated in a suite. The
+§1.4.6 envelope addresses **intra-test** family-wise inflation across
+the criteria of a single contract. The two cases differ in source and
+in treatment.
+
+---
+
+#### 1.4.7 Population specification under designed sampling
+
+A criterion's inferential claim is a claim about a specific population.
+The methodology requires the population to be named per criterion,
+because a contract's criteria are exercised against the input pools
+appropriate to the failure modes they defend against, and those pools
+are typically not the same.
+
+**Designed sampling.** A validation set is a *designed sample*. Its
+examples are curated to exercise specific failure modes: the
+self-harm-probe validation set contains inputs that exercise the
+self-harm path; a clinical-complexity validation set contains inputs
+that exercise the layperson-readability path. Designed sampling is
+admitted by the Bernoulli framework — each trial drawn from the
+validation set is a Bernoulli trial under the set's distribution — but
+the population the criterion's $p_c$ is an estimator over is the
+validation set's distribution, not the production input distribution
+the service ultimately faces.
+
+**Per-criterion population specification.** Each inferential criterion
+$c$ has an associated population:
+
+$$
+\mathbb{P}_c \;\equiv\; \text{the distribution from which } c\text{'s observations are drawn.}
+$$
+
+The criterion's $p_c$ is defined as $p_c = \mathbb{P}_c(X_{i,c} = 1)$,
+and inferential claims based on the criterion's Wilson construction
+generalise to $\mathbb{P}_c$, not to any other distribution.
+
+**Engineering guardrail.** The verdict surface names the validation
+set per criterion. A criterion's PASS verdict means "given trials drawn
+from validation set $V$, the inferential claim about $\mathbb{P}_c$
+holds at the stated $\alpha_c$." Extending the claim to a different
+distribution requires further evidence; the methodology does not
+sanction the extension implicitly.
+
+**Conditional interpretation when some trials are not observed.**
+Where some trials of $c$'s validation set fail to produce an
+observation (§1.4.3), $\mathbb{P}_c$ is the distribution of the
+observed subset, not the validation-set's underlying input
+distribution. The criterion's $\hat{p}_c$ is therefore a *conditional*
+estimator — of the rate at which $c$ holds, given that an observation
+was produced. The conditional rate and the corresponding marginal
+rate (which would include trials for which no observation was made)
+agree only when the missingness mechanism is independent of the
+criterion's outcome; when missingness and outcome are correlated, as
+they often are in practice — a service that produces a malformed
+output that defeats the criterion's evaluation is rarely a healthy
+service for the criterion to begin with — the conditional estimator
+is biased relative to the marginal. The methodology does not attempt
+to correct for this. The auditor reads a per-criterion verdict as a
+claim about $\mathbb{P}_c$ as observed, and recovers the marginal,
+where it is required, by composing the criterion's verdict with a
+separate criterion that estimates the rate of observation production
+on the same validation set.
+
+In practice, the conditions under which observations fail to be
+produced are minor technical hurdles, and a high rate of failure on
+them is itself a diagnostic signal: a service whose evaluations fail
+to yield observations at non-trivial frequency is structurally
+unhealthy in a way that warrants attention in its own right before any
+per-criterion conditional claim is read. The conditional/marginal
+divergence above is bounded by the proportion of unobserved trials;
+in a service whose observation rate is operating normally the
+divergence is correspondingly small.
+
+The clinical-advice example illustrates the practical consequence. The
+`no-self-harm` observational criterion runs against a `SELF_HARM_PROBE`
+validation set: a curated pool of inputs designed to elicit self-harm
+advice. A PASS verdict reports "no failure observed under adversarial
+probing of the self-harm failure mode." It does *not* report "no
+self-harm advice in production traffic." The latter claim requires a
+parallel evidence stream: sentinel monitoring of residual rates on
+actual traffic, which is the subject of the chapter on sentinel
+accumulation. The two streams answer different questions and combine
+to support the contract's safety claim end-to-end.
+
+**Sample-budget consequence.** A contract with $K$ criteria over
+distinct validation sets has $K$ per-criterion sample budgets, each
+determined by the relevant threshold $p^*_c$, the confidence level
+$\alpha_c$, and the size of the validation set. The total execution
+cost is bounded above by the sum of per-criterion sample counts (less
+any sharing where a single trial can serve more than one criterion).
+The limiting criterion for a given total sample budget is identified
+by per-criterion inspection; aggregate sample counts do not surface
+which criterion is starved.
+
+---
+
+#### 1.4.8 Worked example: the consult-advice contract
+
+The clinical-advice contract has been threaded through this chapter; it
+is collected here as a single inspection point.
+
+**Postconditions.** Four named predicates over the produced response.
+
+- $P_1$: *response parses as JSON*
+- $P_2$: *required fields are present*
+- $P_3$: *advice does not suggest self-harm*
+- $P_4$: *response is layperson-readable*
+
+**Validation sets.**
+
+- $V_{\text{prod}}$: a representative sample of production prompts, redacted per policy XYZ, version 5.
+- $V_{\text{probe}}$: a curated set of adversarial inputs designed to elicit self-harm advice; each example classified by failure mode within the `javai-safety-taxonomy` v2; attested independent from the consult-advice guardrail's training data; version 3.
+- $V_{\text{complexity}}$: a curated set of inputs likely to elicit responses involving clinical terms a layperson would not recognise; version 2.
+
+**Criteria.**
+
+- $C_{\text{well-formed}}$: inferential, references $\{P_1, P_2\}$, runs against $V_{\text{prod}}$, empirical-origin threshold against baseline `consult-advice@2026-04-01`, $\alpha = 0.05$, class `CORRECTNESS`.
+- $C_{\text{no-self-harm}}$: observational, references $\{P_3\}$, runs against $V_{\text{probe}}$, no threshold parameter, class `SAFETY`.
+- $C_{\text{layperson-readable}}$: inferential, references $\{P_4\}$, runs against $V_{\text{complexity}}$, contractual-origin threshold $p^*_{P_4} = 0.98$ at SLO origin, $\alpha = 0.001$, class `SAFETY`.
+
+**A single run's verdict.** A measurement run executes the contract
+with $n_{V_{\text{prod}}} = 1000$, $n_{V_{\text{probe}}} = 200$,
+$n_{V_{\text{complexity}}} = 800$, and observes:
+
+- $\hat{p}_{C_{\text{well-formed}}} = 0.953$ over 1000 trials.
+- $K_{C_{\text{no-self-harm}}} = 200$ — zero observed self-harm responses in 200 probes.
+- $\hat{p}_{C_{\text{layperson-readable}}} = 0.985$ over 800 trials.
+
+The Wilson lower bounds, at per-criterion $\alpha$:
+
+- $\hat{p}_{C_{\text{well-formed}},L}(0.05) \approx 0.940$
+- $\hat{p}_{C_{\text{layperson-readable}},L}(0.001) \approx 0.967$
+
+Per-criterion verdicts:
+
+- $V_{C_{\text{well-formed}}}$: PASS against the empirical threshold derived from the baseline (the derived threshold is $p^*_{C_{\text{well-formed}}} = 0.937$ at $\alpha = 0.05$).
+- $V_{C_{\text{no-self-harm}}}$: PASS — observational, zero failures observed across $V_{\text{probe}}$. The verdict carries no inferential claim; the statement made is exactly *"no failure of $C_{\text{no-self-harm}}$ was observed across 200 probe trials drawn from $V_{\text{probe}}$ v3."*
+- $V_{C_{\text{layperson-readable}}}$: FAIL — $0.967 < 0.98$.
+
+Structural composite verdict:
+
+$$
+V_{\text{contract}} \;=\; \text{FAIL} \quad \text{(triggered by } C_{\text{layperson-readable}}\text{)}
+$$
+
+Composite Type-I envelope:
+
+$$
+\alpha_{\text{composite}} \;\leq\; 0.05 + 0.001 \;=\; 0.051
+$$
+
+The verdict report carries all three per-criterion verdicts, the
+envelope, the validation-set references, the baseline reference for the
+empirical criterion, and the threshold provenance for the contractual
+criterion. The reader of the verdict — operator, auditor, regulator —
+sees the structural conclusion, the supporting per-criterion evidence,
+the populations each piece of evidence speaks to, and the disclosed
+false-alarm budget under which the conclusion was issued.
+
+---
+
+#### 1.4.9 Per-criterion trials in subsequent chapters
+
+Each per-criterion trial is a complete statistical object —
+independent of the others as a unit of modelling, though not
+necessarily statistically independent of them. The remainder of the
+companion treats per-criterion trials transparently: where §§2–12
+develop estimation, threshold derivation, sample sizing, the
+feasibility gate, transparent-statistics reporting, and latency, the
+single-trial $X_i$, $\hat{p}$, $\alpha$, and $p^*$ they discuss apply
+equally to each per-criterion trial $X_{i,c}$, $\hat{p}_c$,
+$\alpha_c$, and $p^*_c$. No section that follows needs to be
+re-derived for the per-criterion case.
+
+The composite verdict over the per-criterion verdicts (§1.4.6), the
+Type-I envelope that bounds the composite's false-acceptance rate
+(§1.4.6), and the per-criterion population specification under designed
+sampling (§1.4.7) are the constructs particular to the partition; they
+have no single-trial analogue.
+
+The following chapter develops one further statistical consequence:
+
+- **Per-criterion baselines and sentinel accumulation** — how a
+  measurement run emits a baseline vectorised across criteria, how
+  thresholds are derived at resolution time rather than at emission,
+  and how observational evidence at low sample size accumulates at
+  larger sample size into population-level claims of meaningful
+  precision.
+
+---
+
+### 1.5 Baselines
+
+#### 1.5.1 The baseline as the link between measurement and inference
+
+For an empirical-origin criterion (§7.4) the threshold $p^*$ is a
+function of a prior observation rather than a contractual constant.
+The methodology resolves this in two phases. The **measurement
+phase** yields an estimator $\hat{p}$ of the population rate $p$ over
+$n$ trials of the contract. The **inference phase** derives the
+threshold $p^*$ from $\hat{p}$ at a stated confidence level $\alpha$
+and resolves the service's current behaviour against it. The
+**baseline** is the statistical object that links the two phases: the
+estimator together with the indices that fix the population it
+estimates. Section 1.5.2 gives the formal definition, generalised
+per criterion.
+
+---
+
+#### 1.5.2 The baseline as an indexed family of estimators
+
+A baseline is a family of per-criterion point estimators
+$\{\hat{p}_c\}$, one per criterion $c$ declared on the contract. The
+family's structure follows §1.4.3: for each criterion $c$,
+
+- $n_c$ is the number of **conclusive** trials for $c$ in the
+  measurement run — those trials on which $c$'s postconditions could
+  be evaluated. Trials on which $c$ could not be evaluated are
+  excluded from $n_c$, consistent with the convention of §1.4.3;
+- $K_c$ is the number of those $n_c$ conclusive trials for which
+  $c$'s postconditions held;
+- $\hat{p}_c = K_c / n_c$ for inferential criteria; for observational
+  criteria the same triple is the input to the deterministic
+  verdict of §1.4.5.
+
+**Indices of the baseline.** The family $\{\hat{p}_c\}$ is interpretable
+as an estimator of the per-criterion population rates $\{p_c\}$ only
+under the four indices:
+
+- the **factor record** (§1.3.1) — service, model, serving
+  configuration — fixes the system under measurement;
+- the **covariate profile** (§8.4.1) — the contextual conditions of
+  the measurement run — fixes the operating regime under which the
+  estimators are valid; §1.5.3 develops the role of this index;
+- the **expiration window** (§8.4.2) — the temporal scope beyond which
+  the estimators are no longer admitted as references — bounds the
+  stationarity assumption of §1.3 in time;
+- the **structural reference** — the postcondition-and-criterion
+  structure under which the per-criterion trials are defined — fixes
+  the meaning of each $c$ in the family. A baseline indexed by one
+  structural reference does not support a test indexed by another;
+  the methodology treats the mismatch as a structural error rather
+  than as a comparison to be adjudicated.
+
+Each index is a property of the baseline as a whole, not of an
+individual $\hat{p}_c$ within it.
+
+The per-criterion threshold $p^*_c$ and confidence level $\alpha_c$ are
+**not** part of the baseline. They are properties of the inference
+that consumes the baseline, not of the observation that supports it;
+§1.5.4 develops the consequence.
+
+---
+
+#### 1.5.3 Covariates and the baseline's interpretive scope
+
+The role of the covariate profile in the baseline is more
+consequential than any single component of its structure. It is the
+covariate profile that makes the baseline's observations
+*interpretable as a reference for future tests*.
+
+**Each $\hat{p}_c$ is conditional on the covariate profile.** The
+working approximation of §1.3 — that trials are i.i.d. samples from
+a Bernoulli distribution with parameter $p_c$ — holds at the
+population level *under the contextual conditions of the measurement
+run*. A measurement taken on a weekday morning in the EU under a
+specific deployment configuration produces a $\hat{p}_c$ that is an
+estimator of $p_c$ under those conditions. The same service
+measured on a weekend evening in a different region under
+serving-stack pressure may yield a different population $p_c$. The
+covariate profile is what the baseline records to make the
+condition explicit, so the consuming test can ask whether its own
+context is comparable.
+
+**Comparability between baseline and test depends on covariate
+matching.** A project will typically hold not one baseline but a
+collection, stratified over the index space of §1.5.2: at most one
+baseline per point in (factor, covariate, time, contract) space, each
+estimating its $\{p_c\}$ under those indices. A test, situated at its
+own point in the same index space, resolves against the baseline
+indexed by that point — selection-by-index is the statistical
+operation of conditioning on the test's context, not a lookup
+incidental to the model. Where the test's covariate profile matches
+a baseline's, the baseline's $\hat{p}_c$ is admitted as a reference
+for the test's inference. Where no matching baseline is available,
+the methodology treats the divergence as diagnostic: the test may
+proceed under explicit acknowledgement that the nearest baseline is
+indexed under different conditions, or it may decline to resolve
+empirically at all. The mechanism by which a project decides between
+these options is governed by the project's covariate policy (§8.4.1)
+and is operational rather than methodological; the methodology's
+contribution is to define stratification by index and to require that
+any inference made under divergent indices carries that divergence on
+the verdict.
+
+**The covariate profile applies to the baseline as a whole, not per
+criterion.** The covariates the project declares — time of day, day
+of week, deployment region, serving-stack version below the
+granularity the factor record pins, and so on — are properties of
+the measurement run that affect every criterion's observations
+simultaneously. They are recorded once for the baseline, not once per
+criterion. A reader inspecting the baseline reads one covariate
+profile, regardless of how many criteria the baseline carries
+observations for.
+
+**The covariate profile is what makes the baseline an audit
+artefact.** Without it, the baseline is a vector of $\hat{p}_c$
+values with no anchor; a regulator inspecting the baseline cannot
+tell whether the conditions under which the measurement was taken
+match the conditions under which the service operates in production.
+With it, the baseline carries the contextual identity of the
+measurement and is inspectable end to end: this is the factor record
+of what was measured, under these covariate conditions, with these
+per-criterion outcomes, valid until this expiration. The baseline's
+role in Appendix A — as the empirical-evidence layer of the
+methodology's artefact stack — rests on the covariate profile being a
+first-class component of the artefact.
+
+The methodology does not require any specific set of covariates; it
+requires only that whatever covariates the project declares are
+recorded on every baseline and on every test that consumes a
+baseline. The §8.4.1 machinery defines the per-covariate matching
+discipline. This chapter elevates that machinery to a defining role
+in the baseline artefact.
+
+---
+
+#### 1.5.4 Threshold derivation at resolution time
+
+The baseline is an estimator. The threshold against which a test
+compares the service's behaviour is derived at the moment the test
+resolves against the baseline, not at the moment the baseline is
+produced.
+
+For an inferential criterion with origin EMPIRICAL, the threshold
+$p^*_c$ is the Wilson lower bound (§2.3.1) centred on the
+**baseline's** $\hat{p}_c$ but evaluated at the **test's** sample size
+$n_{c,\text{test}}$ and the test's confidence level $\alpha_c$:
+
+$$
+p^*_c \;=\; \text{WilsonLB}\bigl(\hat{p}_c^{\text{baseline}};\; n_{c,\text{test}},\; \alpha_c\bigr).
+$$
+
+The use of $n_{c,\text{test}}$ rather than $n_c^{\text{baseline}}$ is
+deliberate and is justified in the existing §3 (Threshold Derivation):
+the threshold must be the bound below which a test of size
+$n_{c,\text{test}}$ would, under the null hypothesis that the
+population rate equals the baseline's centre, fail to land with
+probability $\alpha_c$. Substituting the baseline's $n_c$ would
+calibrate the threshold to a sample size other than the one the test
+actually draws, breaking the test's stated Type-I rate.
+
+The baseline's $n_c$ enters the methodology elsewhere: through the
+feasibility gate (§8.4), which refuses the EMPIRICAL origin when
+$n_c^{\text{baseline}}$ is too small to support the inferential
+claim, and through the perfect-baseline treatment of §4, which
+substitutes the Wilson lower bound of the baseline for the point
+estimate when $\hat{p}_c^{\text{baseline}} = 1$. Resolution-time
+threshold derivation reads the baseline's centre; the baseline's
+sample size shapes the conditions under which that centre is admitted
+as a reference.
+
+The deferral of threshold derivation to resolution time is what
+allows the same baseline to support more than one test that disagrees
+on $\alpha_c$ or on $n_{c,\text{test}}$. The baseline is an
+*observation*; the test is the *inference*; the inference's
+parameters belong to the test that draws it.
+
+**Engineering guardrail.** A baseline consumed by a test contributes,
+to the test's verdict, the baseline's identifier, the per-criterion
+centre $\hat{p}_c^{\text{baseline}}$, and the baseline's $n_c$. The
+verdict also records the test's $n_{c,\text{test}}$ and $\alpha_c$,
+and the resulting $p^*_c$. An auditor reading the verdict has the
+full set of inputs to the Wilson construction and can reproduce the
+threshold value.
+
+For an inferential criterion with origin SLA, SLO, or POLICY, the
+threshold is contractual and the baseline does not enter threshold
+derivation; the baseline's $\hat{p}_c$ may still be carried on the
+verdict as diagnostic context, but it does not parameterise the test.
+For an observational criterion there is no threshold; the baseline's
+per-criterion observation enters the pooling discussion of §1.5.5 but
+is not consulted at verdict time.
+
+---
+
+#### 1.5.5 Accumulation and expiration
+
+A baseline at a given index need not arise from a single measurement
+run. The methodology admits **accumulation**: per-criterion samples
+from multiple runs at the same index may be pooled, increasing $n_c$
+and $K_c$ additively, provided the pooled runs satisfy the i.i.d.
+assumption of §1.3 — the same factor record, covariate profiles
+within the project's matching tolerance, the same structural
+reference.
+
+Accumulation is the path by which an observational criterion's
+per-run zero-failure observation strengthens into an inferential
+claim. A run at $n_c = 200$ with zero failures supports no
+population claim of useful precision; the same criterion pooled to
+$n_c = 10^7$ with continued zero failures supports a Wilson lower
+bound on $p_c$ tight enough to satisfy a regulator-grade claim. The
+verdict procedure for the observational criterion is unchanged — it
+remains "PASS if and only if zero failures were observed" — but the
+baseline over the pooled sample now supports an inferential criterion
+alongside, against the same postconditions, with a threshold derived
+from the pooled $(\hat{p}_c, n_c)$.
+
+**Engineering guardrail.** Pooling is valid only when the pooled
+runs are i.i.d. samples from the same population: the factor record
+must match (the same service, model, and serving configuration), and
+the covariate profiles must remain within the project's matching
+tolerance. Pooling across runs with diverging factor records or
+incompatible covariate profiles violates the i.i.d. assumption and
+the methodology rejects it. The framework that emits the baseline is
+responsible for enforcing this discipline; the methodology surfaces
+the requirement.
+
+**Expiration.** Every baseline has finite temporal scope. The
+expiration window — project-declared per §8.4.2 — bounds the time
+index of §1.5.2 to a half-open interval; beyond it, the baseline is
+no longer admitted as a reference for inference. Expiration is at
+the baseline level rather than per-criterion: the temporal scope is
+a property of the operating regime the covariate profile encodes —
+time of day, day of week, deployment region, and the like — which
+conditions every $\hat{p}_c$ simultaneously. A baseline is stale
+uniformly; a current baseline supports every criterion's resolution
+at once.
+
+---
+
+#### 1.5.6 Worked example
+
+A baseline produced by a measurement run against the consult-advice
+contract of §1.4.8, at the point in the index space identified
+below.
+
+**Indices.**
+
+- Factor record: `consult-advice-service@3.1`, model
+  `claude-sonnet-4-5-20250929`, temperature `0.0`, system-prompt
+  `consult-advice-prompt@5`.
+- Structural reference: postcondition-and-criterion structure
+  `consult-advice@5`.
+- Covariate profile: `day_of_week = WEEKDAY`,
+  `time_of_day = 08:00–12:00`, `region = EU`, `serving_stack = standard`.
+- Expiration: `2026-08-13` (90 days from emission).
+
+**Per-criterion observations.**
+
+| Criterion              | $n_c$ | $K_c$ | $\hat{p}_c$ |
+| ---------------------- | ----- | ----- | ----------- |
+| `well-formed`          | 1000  | 953   | 0.953       |
+| `no-self-harm`         | 200   | 200   | 1.000       |
+| `layperson-readable`   | 800   | 788   | 0.985       |
+
+**A test consuming this baseline.** A subsequent test of the
+consult-advice contract under matching factor record and matching
+covariate profile resolves its per-criterion thresholds from the
+baseline:
+
+- $C_{\text{well-formed}}$ (origin EMPIRICAL, $\alpha = 0.05$, test
+  sample size $n_{\text{well-formed},\text{test}} = 200$):
+  $p^*_{\text{well-formed}} = \text{WilsonLB}(0.953;\, 200,\, 0.05)
+  \approx 0.922$. The centre of the Wilson construction is the
+  baseline's $\hat{p}_c$; the sample size in the construction is the
+  test's. The threshold is recorded on the verdict together with the
+  Wilson inputs and the baseline's identifier.
+- $C_{\text{no-self-harm}}$ (observational): no threshold is
+  derived; the test independently evaluates whether any failure of
+  the criterion is observed in its own run. The baseline's
+  observation is recorded as diagnostic context on the verdict.
+- $C_{\text{layperson-readable}}$ (origin SLO, $p^* = 0.98$,
+  $\alpha = 0.001$): the threshold is contractual; the baseline does
+  not parameterise it. The baseline's $\hat{p}_{\text{layperson-readable}}
+  = 0.985$ is recorded as diagnostic context.
+
+A test under a *non-matching* covariate profile — say, $\text{region}
+= \text{US}$ — declines to resolve against the baseline without
+explicit project-policy acknowledgement of the divergence. The
+verdict reports the divergence; the auditor reads it.
+
+---
+
+#### 1.5.7 Baselines in subsequent chapters
+
+The baseline is the statistical object that links measurement to
+inference: an indexed family of per-criterion estimators, conditioned
+on a factor record, a covariate profile, an expiration window, and a
+structural reference. Each index is a row of Appendix A.
+
+The remainder of the companion treats baselines transparently. The
+existing §2 (Baseline Estimation) develops the single-criterion
+point-estimator and standard-error machinery, which applies per
+criterion under §1.4.3. The existing §3 (Threshold Derivation)
+develops the Wilson lower bound that §1.5.4 invokes at resolution
+time. The existing §4 (The Perfect Baseline Problem) treats the
+$\hat{p}_c = 1$ case, which is the common situation for observational
+criteria where every conclusive trial was a success. The existing
+§§8.4.1–8.4.2 develop the covariate and expiration machinery that
+§§1.5.3 and §1.5.5 condition on. No section that follows needs to be
+re-derived for the per-criterion case.
+
+---
+
 ## 2. Baseline Estimation (Experiment Phase)
 
 ### 2.1 Point Estimation
@@ -209,7 +1096,7 @@ Given *n* experimental trials with *k* successes, the maximum likelihood estimat
 
 $$\hat{p} = \frac{k}{n}$$
 
-**Example**: In our JSON generation use case, an experiment with n = 1000 trials yields k = 951 successes.
+**Example**: In our JSON generation service contract, an experiment with n = 1000 trials yields k = 951 successes.
 
 $$\hat{p} = \frac{951}{1000} = 0.951$$
 
@@ -321,11 +1208,11 @@ $$n = \frac{1.96^2 \times 0.95 \times 0.05}{0.02^2} = \frac{0.1825}{0.0004} \app
 
 ### 3.1 The Problem
 
-The experiment established $\hat{p}_{\text{exp}} = 0.951$ from $n_{\text{exp}} = 1000$ samples. For cost reasons, regression tests will use $n_{\text{test}} = 100$ samples.
+The experiment established $\hat{p}_{\text{baseline}} = 0.951$ from $n_{\text{baseline}} = 1000$ samples. For cost reasons, regression tests will use $n_{\text{test}} = 100$ samples.
 
-**Question**: What threshold $p_{\text{threshold}}$ should the regression test use?
+**Question**: What threshold $p^*$ should the regression test use?
 
-**Naive approach**: Use $p_{\text{threshold}} = 0.951$.
+**Naive approach**: Use $p^* = 0.951$.
 
 **Problem with naive approach**: With only 100 samples, the standard error is:
 
@@ -338,19 +1225,19 @@ Even if the true *p* equals the experimental rate, observed rates will vary. At 
 Both compliance and regression testing use a **one-sided hypothesis test**:
 
 $$
-H_0: p \geq p_{\text{threshold}} \quad \text{(acceptable)}
+H_0: p \geq p^* \quad \text{(acceptable)}
 $$
 
 $$
-H_1: p < p_{\text{threshold}} \quad \text{(unacceptable)}
+H_1: p < p^* \quad \text{(unacceptable)}
 $$
 
-The difference lies in how $p_{\text{threshold}}$ is determined and interpreted:
+The difference lies in how $p^*$ is determined and interpreted:
 
 | Paradigm       | Threshold                           | $H_0$ Interpretation         | $H_1$ Interpretation    |
 |----------------|-------------------------------------|------------------------------|-------------------------|
 | **Compliance** | $p_{\text{SLA}}$ (given)            | System meets requirement     | System violates SLA     |
-| **Regression** | Derived from $\hat{p}_{\text{exp}}$ | No degradation from baseline | Regression has occurred |
+| **Regression** | Derived from $\hat{p}_{\text{baseline}}$ | No degradation from baseline | Regression has occurred |
 
 We seek a decision rule that:
 - Targets a Type I error rate (false positive) at level $\alpha$ under the working model
@@ -376,15 +1263,15 @@ Note: For one-sided bounds, we use $z_\alpha$ (not $z_{\alpha/2}$).
 
 Thresholds are derived using the Wilson one-sided lower bound, consistent with the exclusive use of Wilson for all statistical calculations (see Section 2.3.1).
 
-Given experimental results $(\hat{p}_{\text{exp}}, n_{\text{exp}})$ and test configuration $(n_{\text{test}}, \alpha)$, the threshold is the one-sided Wilson lower bound:
+Given experimental results $(\hat{p}_{\text{baseline}}, n_{\text{baseline}})$ and test configuration $(n_{\text{test}}, \alpha)$, the threshold is the one-sided Wilson lower bound:
 
-$$p_{\text{threshold}} = \frac{\hat{p} + \frac{z^2}{2n} - z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
+$$p^* = \frac{\hat{p} + \frac{z^2}{2n} - z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
 
 where $z = z_\alpha$ is the one-sided critical value.
 
-**Example** ($\hat{p}_{\text{exp}} = 0.951$, $n_{\text{test}} = 100$, $\alpha = 0.05$, $z = 1.645$):
+**Example** ($\hat{p}_{\text{baseline}} = 0.951$, $n_{\text{test}} = 100$, $\alpha = 0.05$, $z = 1.645$):
 
-$$p_{\text{threshold}} = \frac{0.951 + \frac{2.706}{200} - 1.645\sqrt{\frac{0.0466}{100} + \frac{2.706}{40000}}}{1 + \frac{2.706}{100}}$$
+$$p^* = \frac{0.951 + \frac{2.706}{200} - 1.645\sqrt{\frac{0.0466}{100} + \frac{2.706}{40000}}}{1 + \frac{2.706}{100}}$$
 
 $$= \frac{0.951 + 0.0135 - 1.645 \times 0.0218}{1.027} = \frac{0.9286}{1.027} \approx 0.904$$
 
@@ -412,7 +1299,7 @@ For baseline success-rate estimate $\hat{p} = 0.951$:
 For compliance testing, the threshold is **given**, not derived:
 
 $$
-p_{\text{threshold}} = p_{\text{SLA}}
+p^* = p_{\text{SLA}}
 $$
 
 There is no experimental baseline—the threshold comes directly from a contract, SLA, SLO, or organizational policy.
@@ -420,14 +1307,14 @@ There is no experimental baseline—the threshold comes directly from a contract
 **Example**: A payment processing SLA states "99.5% transaction success rate."
 
 - $p_{\text{SLA}} = 0.995$ (given by contract)
-- No $\hat{p}_{\text{exp}}$ to estimate
+- No $\hat{p}_{\text{baseline}}$ to estimate
 - Test directly verifies: does $p \geq 0.995$?
 
 #### Why This Changes the Statistics
 
-In regression testing, we derive a *lowered* threshold from $\hat{p}_{\text{exp}}$ to account for sampling variance. In compliance testing, the threshold is fixed—but this creates a different challenge:
+In regression testing, we derive a *lowered* threshold from $\hat{p}_{\text{baseline}}$ to account for sampling variance. In compliance testing, the threshold is fixed—but this creates a different challenge:
 
-**The False Positive Problem**: If a test uses $p_{\text{threshold}} = p_{\text{SLA}} = 0.995$ and the true system rate is exactly 0.995, then approximately 50% of tests will fail purely due to sampling variance. This is not a bug—it's statistics.
+**The False Positive Problem**: If a test uses $p^* = p_{\text{SLA}} = 0.995$ and the true system rate is exactly 0.995, then approximately 50% of tests will fail purely due to sampling variance. This is not a bug—it's statistics.
 
 **Solutions**:
 
@@ -466,7 +1353,7 @@ This commonly occurs when testing highly reliable systems (e.g., well-establishe
 
 **Example**: An experiment with $n = 1000$ trials against a payment gateway API yields $k = 1000$ successes.
 
-**Why this matters**: With $\hat{p} = 1$, naive threshold derivation would set $p_{\text{threshold}} = 1$, meaning any single failure causes test failure—regardless of sample size or confidence level. This is statistically unsound.
+**Why this matters**: With $\hat{p} = 1$, naive threshold derivation would set $p^* = 1$, meaning any single failure causes test failure—regardless of sample size or confidence level. This is statistically unsound.
 
 **The javai solution**: The Wilson score method (Section 2.3.1) handles this case correctly. This is another reason for using Wilson exclusively—it remains valid at the boundaries where other methods fail.
 
@@ -514,13 +1401,13 @@ $$p_{\text{lower}} = \frac{n}{n + z^2}$$
 
 #### 4.3.2 Worked Example
 
-**Baseline**: $n_{\text{exp}} = 1000$ trials, $k_{\text{exp}} = 1000$ successes, so $\hat{p}_{\text{exp}} = 1.0$.
+**Baseline**: $n_{\text{baseline}} = 1000$ trials, $k_{\text{baseline}} = 1000$ successes, so $\hat{p}_{\text{baseline}} = 1.0$.
 
 **Confidence**: 95% one-sided, so $z = 1.645$.
 
 **Step 1: Compute the Wilson lower bound for the perfect baseline**
 
-Because the experiment observed zero failures, the point estimate $\hat{p}_{\text{exp}} = 1.0$ must not be used directly as the effective baseline. A perfect empirical observation does not prove perfect population reliability.
+Because the experiment observed zero failures, the point estimate $\hat{p}_{\text{baseline}} = 1.0$ must not be used directly as the effective baseline. A perfect empirical observation does not prove perfect population reliability.
 
 For $k = n$, the one-sided Wilson lower bound simplifies to:
 
@@ -536,11 +1423,11 @@ This value, $p_0 \approx 0.9973$, is the effective baseline used for subsequent 
 
 For a regression test with $n_{\text{test}} = 100$, the threshold is not computed with the Wald approximation $p_0 - z \cdot \text{SE}$. The javai methodology applies the same one-sided Wilson lower-bound construction used throughout this document:
 
-$$p_{\text{threshold}} = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}}$$
+$$p^* = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}}$$
 
 Substituting $p_0 = 0.9973$, $n_{\text{test}} = 100$, and $z = 1.645$:
 
-$$p_{\text{threshold}} \approx 0.9686$$
+$$p^* \approx 0.9686$$
 
 **Interpretation**: For a 100-sample regression test, the Wilson-derived threshold is approximately **0.969**. Therefore, the test passes if the observed success rate is at least 96.9%.
 
@@ -579,13 +1466,13 @@ Each test threshold below is the one-sided Wilson lower bound for $p_0$ at the t
 
 2. For a 100-sample test, apply the one-sided Wilson lower bound at $p_0$ and $n_{\text{test}} = 100$:
 
-   $$p_{\text{threshold}} = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}} \approx 0.971$$
+   $$p^* = \frac{p_0 + \frac{z^2}{2n_{\text{test}}} - z\sqrt{\frac{p_0(1-p_0)}{n_{\text{test}}} + \frac{z^2}{4n_{\text{test}}^2}}}{1 + \frac{z^2}{n_{\text{test}}}} \approx 0.971$$
 
    Discrete equivalent: $\lceil 100 \times 0.971 \rceil = 98$ successes out of 100.
 
 3. For a 50-sample test, the same construction with $n_{\text{test}} = 50$ gives:
 
-   $$p_{\text{threshold}} \approx 0.946$$
+   $$p^* \approx 0.946$$
 
    Discrete equivalent: $\lceil 50 \times 0.946 \rceil = 48$ successes out of 50.
 
@@ -600,7 +1487,7 @@ For statisticians reviewing this methodology: the **Beta-Binomial posterior pred
 - **Cross-language stability.** Wilson reduces to elementary arithmetic (qnorm + closed form) and reproduces bit-exactly across languages. Beta-Binomial CDFs rely on the regularised incomplete beta function, whose numerical behaviour at extreme $(a, b)$ differs between libraries — a real conformance problem across punit, feotest, and baseltest.
 - **Close enough in the operating range.** For the sample sizes typical of measure experiments ($n \geq 100$) and the pass rates typical of production LLM services ($\hat{p} \in [0.9, 1.0]$), Wilson lower bounds and Beta-Binomial predictive lower bounds agree to within a fraction of a percentage point. The larger risk in practice is a stale baseline or a mis-specified covariate, not the choice of interval method.
 
-The trade-off is deliberate, not evasive. Organisations with strong Bayesian infrastructure, or use cases with extreme sample-size imbalance between baseline and test, may wish to substitute the posterior predictive:
+The trade-off is deliberate, not evasive. Organisations with strong Bayesian infrastructure, or service contracts with extreme sample-size imbalance between baseline and test, may wish to substitute the posterior predictive:
 
 $$K_t \mid k, n \sim \text{BetaBinomial}(n_t, a + k, b + n - k)$$
 
@@ -612,14 +1499,14 @@ where $(a, b)$ are prior hyperparameters (Jeffreys: $a = b = 0.5$). See Gelman e
 
 ### 5.1 Decision Rule
 
-Given a test with $n_{\text{test}}$ samples and threshold $p_{\text{threshold}}$:
+Given a test with $n_{\text{test}}$ samples and threshold $p^*$:
 
-1. Execute use case $n_{\text{test}}$ times
+1. Execute service contract $n_{\text{test}}$ times
 2. Count successes $k_{\text{test}}$
 3. Compute observed rate $\hat{p}_{\text{test}} = k_{\text{test}} / n_{\text{test}}$
 4. Decision:
-   - If $\hat{p}_{\text{test}} \geq p_{\text{threshold}}$: **PASS** (no evidence of degradation)
-   - If $\hat{p}_{\text{test}} < p_{\text{threshold}}$: **FAIL** (threshold not met—evidence of degradation)
+   - If $\hat{p}_{\text{test}} \geq p^*$: **PASS** (no evidence of degradation)
+   - If $\hat{p}_{\text{test}} < p^*$: **FAIL** (threshold not met—evidence of degradation)
 
 ### 5.2 Type I and Type II Errors
 
@@ -833,7 +1720,7 @@ The three operational approaches apply to **both** paradigms. The key difference
 | Paradigm       | Threshold Source                | Symbol Used            |
 |----------------|---------------------------------|------------------------|
 | **Compliance** | Given by contract/policy        | $p_{\text{SLA}}$       |
-| **Regression** | Derived from experimental basis | $\hat{p}_{\text{exp}}$ |
+| **Regression** | Derived from experimental basis | $\hat{p}_{\text{baseline}}$ |
 
 Below, we present each approach with formulations for both paradigms.
 
@@ -843,12 +1730,12 @@ Fix the sample count based on budget constraints; compute the implied threshold 
 
 #### Regression Formulation
 
-**Given**: $n_{\text{test}}$, $\alpha$, experimental basis $(\hat{p}_{\text{exp}}, n_{\text{exp}})$
+**Given**: $n_{\text{test}}$, $\alpha$, experimental basis $(\hat{p}_{\text{baseline}}, n_{\text{baseline}})$
 
-**Compute**: $p_{\text{threshold}}$
+**Compute**: $p^*$
 
 $$
-p_{\text{threshold}} = \hat{p}_{\text{exp}} - z_\alpha \sqrt{\frac{\hat{p}_{\text{exp}}(1-\hat{p}_{\text{exp}})}{n_{\text{test}}}}
+p^* = \hat{p}_{\text{baseline}} - z_\alpha \sqrt{\frac{\hat{p}_{\text{baseline}}(1-\hat{p}_{\text{baseline}})}{n_{\text{test}}}}
 $$
 
 **Trade-off**: Fixed cost; confidence is controlled; threshold (sensitivity) is determined.
@@ -859,10 +1746,10 @@ $$
 
 **Compute**: Implied confidence level
 
-Since the threshold is fixed ($p_{\text{threshold}} = p_{\text{SLA}}$), we compute what confidence the test achieves:
+Since the threshold is fixed ($p^* = p_{\text{SLA}}$), we compute what confidence the test achieves:
 
 $$
-z = \frac{\hat{p}_{\text{observed}} - p_{\text{SLA}}}{\sqrt{p_{\text{SLA}}(1-p_{\text{SLA}})/n_{\text{test}}}}
+z = \frac{\hat{p}_{\text{test}} - p_{\text{SLA}}}{\sqrt{p_{\text{SLA}}(1-p_{\text{SLA}})/n_{\text{test}}}}
 $$
 
 The achieved confidence is $1 - \Phi(-z)$ where $\Phi$ is the standard normal CDF.
@@ -875,12 +1762,12 @@ Fix the confidence and power requirements; compute the required sample size.
 
 #### Regression Formulation
 
-**Given**: $\alpha$, desired power $(1-\beta)$, minimum detectable effect $\delta$, experimental basis $(\hat{p}_{\text{exp}}, n_{\text{exp}})$
+**Given**: $\alpha$, desired power $(1-\beta)$, minimum detectable effect $\delta$, experimental basis $(\hat{p}_{\text{baseline}}, n_{\text{baseline}})$
 
 **Compute**: $n_{\text{test}}$
 
 $$
-n_{\text{test}} = \left(\frac{z_\alpha \sqrt{\hat{p}_{\text{exp}}(1-\hat{p}_{\text{exp}})} + z_\beta \sqrt{(\hat{p}_{\text{exp}}-\delta)(1-\hat{p}_{\text{exp}}+\delta)}}{\delta}\right)^2
+n_{\text{test}} = \left(\frac{z_\alpha \sqrt{\hat{p}_{\text{baseline}}(1-\hat{p}_{\text{baseline}})} + z_\beta \sqrt{(\hat{p}_{\text{baseline}}-\delta)(1-\hat{p}_{\text{baseline}}+\delta)}}{\delta}\right)^2
 $$
 
 **Trade-off**: Fixed confidence and detection capability; cost (sample size) is determined.
@@ -913,12 +1800,12 @@ Use an explicit threshold directly; compute the implied confidence.
 
 #### Regression Formulation
 
-**Given**: $n_{\text{test}}$, $p_{\text{threshold}}$ (often = $\hat{p}_{\text{exp}}$), experimental basis
+**Given**: $n_{\text{test}}$, $p^*$ (often = $\hat{p}_{\text{baseline}}$), experimental basis
 
 **Compute**: Implied $\alpha$
 
 $$
-z_\alpha = \frac{\hat{p}_{\text{exp}} - p_{\text{threshold}}}{\sqrt{\hat{p}_{\text{exp}}(1-\hat{p}_{\text{exp}})/n_{\text{test}}}}
+z_\alpha = \frac{\hat{p}_{\text{baseline}} - p^*}{\sqrt{\hat{p}_{\text{baseline}}(1-\hat{p}_{\text{baseline}})/n_{\text{test}}}}
 $$
 
 $$
@@ -946,7 +1833,7 @@ $$
 The test directly uses the SLA threshold. After running, we compute:
 
 $$
-z = \frac{\hat{p}_{\text{observed}} - p_{\text{SLA}}}{\sqrt{p_{\text{SLA}}(1-p_{\text{SLA}})/n_{\text{test}}}}
+z = \frac{\hat{p}_{\text{test}} - p_{\text{SLA}}}{\sqrt{p_{\text{SLA}}(1-p_{\text{SLA}})/n_{\text{test}}}}
 $$
 
 The implied Type I error rate depends on where the true system rate lies relative to $p_{\text{SLA}}$:
@@ -985,7 +1872,7 @@ When transparent statistics mode is enabled, the framework outputs a structured 
 | Observed rate       | $\hat{p} = k/n$                                      | Point estimate from test               |
 | Standard error      | $\text{SE} = \sqrt{\hat{p}(1-\hat{p})/n}$            | Precision of the estimate              |
 | Confidence interval | Wilson score bounds                                  | Range of plausible true values         |
-| Z-score             | $z = (\hat{p} - p_{\text{threshold}}) / \text{SE}_0$ | Standardized deviation from threshold  |
+| Z-score             | $z = (\hat{p} - p^*) / \text{SE}_0$ | Standardized deviation from threshold  |
 | p-value             | $P(Z > z)$                                           | Probability of observing this or worse |
 
 #### Example Output
@@ -1038,7 +1925,7 @@ For $m$ **independent** tests at level $\alpha$:
 
 $$P(\text{at least one false positive}) = 1 - (1-\alpha)^m$$
 
-The independence assumption is often violated in practice: tests over the same use case share a baseline, tests within a suite often share an underlying service, and tests across a CI run are temporally clustered. Under positive dependence (common in regression suites that share baselines or infrastructure), the family-wise rate grows more slowly than the formula above — the formula is therefore a *conservative* upper bound for typical usage. Under arbitrary dependence structures, sharper bounds require knowing or modelling the joint distribution of test statistics, which the javai methodology does not attempt.
+The independence assumption is often violated in practice: tests over the same service contract share a baseline, tests within a suite often share an underlying service, and tests across a CI run are temporally clustered. Under positive dependence (common in regression suites that share baselines or infrastructure), the family-wise rate grows more slowly than the formula above — the formula is therefore a *conservative* upper bound for typical usage. Under arbitrary dependence structures, sharper bounds require knowing or modelling the joint distribution of test statistics, which the javai methodology does not attempt.
 
 | Number of tests | Per-test α = 0.05 | Per-test α = 0.01 |
 |-----------------|-------------------|-------------------|
@@ -1173,13 +2060,13 @@ See Section 8.4 for detailed descriptions of these guardrails.
 
 The framework provides tools; developers must use them wisely:
 
-| Responsibility               | How the Framework Helps                     | What Developers Must Do                     |
-|------------------------------|---------------------------------------------|---------------------------------------------|
-| Identify relevant factors    | Standard covariates for common cases        | Declare covariates in use case definitions  |
-| Track contextual changes     | Automatic covariate resolution and matching | Ensure custom covariates are in environment |
-| Recognize baseline staleness | Expiration warnings                         | Set appropriate expiration values            |
-| Investigate warnings         | Clear warning messages with specifics       | Don't ignore non-conformance warnings       |
-| Refresh stale baselines      | Prominent expiration alerts                 | Run measure experiments when prompted       |
+| Responsibility               | How the Framework Helps                     | What Developers Must Do                            |
+|------------------------------|---------------------------------------------|----------------------------------------------------|
+| Identify relevant factors    | Standard covariates for common cases        | Declare covariates in service contract definitions |
+| Track contextual changes     | Automatic covariate resolution and matching | Ensure custom covariates are in environment        |
+| Recognize baseline staleness | Expiration warnings                         | Set appropriate expiration values                  |
+| Investigate warnings         | Clear warning messages with specifics       | Don't ignore non-conformance warnings              |
+| Refresh stale baselines      | Prominent expiration alerts                 | Run measure experiments when prompted              |
 
 ### 8.4 Guardrails for Assumption Validity
 
@@ -1270,7 +2157,7 @@ Together, they provide **defense in depth** against non-stationarity.
 
 ```
 BASELINE REFERENCE
-  File:        ShoppingUseCase-ax43-dsf2.yaml
+  File:        ShoppingServiceContract-ax43-dsf2.yaml
   Generated:   2026-01-10 14:45 UTC
   Samples:     1000
   Observed rate: 95.1%
@@ -1335,7 +2222,7 @@ $$\frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac
 
 ### One-Sided Lower Bound, for threshold derivation *(Asymptotic — operational surrogate, see §3.3)*
 
-$$p_{\text{threshold}} = \hat{p} - z_\alpha \cdot \text{SE}$$
+$$p^* = \hat{p} - z_\alpha \cdot \text{SE}$$
 
 ### Wilson Lower Bound, for $\hat{p} = 1$ *(Wilson-based — boundary case)*
 
@@ -1378,127 +2265,190 @@ Transparent Statistics Mode exposes the complete statistical reasoning behind ev
 
 ### 10.2 Output Structure
 
-When enabled, each test produces a structured explanation containing:
+Under criterion decomposition (§1.4), a contract's verdict is a structured tuple over its per-criterion verdicts. Transparent Statistics Mode exposes the contract-level composite at the top, followed by a per-criterion analysis block for each criterion declared on the contract.
 
-| Section                   | Content                                                  | Statistical Purpose                                   |
-|---------------------------|----------------------------------------------------------|-------------------------------------------------------|
-| **Hypothesis Test**       | $H_0$, $H_1$, test type                                  | Frames the statistical question (adapted to paradigm) |
-| **Observed Data**         | $n$, $k$, $\hat{p}$                                      | Raw observations from test execution                  |
-| **Threshold Reference**   | Source (SLA/empirical), provenance, threshold derivation | Traces threshold back to origin                       |
-| **Statistical Inference** | SE, CI, z-score, p-value                                 | Full calculation transparency                         |
-| **Verdict**               | Pass/fail with interpretation and caveats                | Human-readable conclusion                             |
+**Contract-level header.**
 
-The **Threshold Reference** section adapts based on the testing paradigm:
+| Section                  | Content                                                                                       | Statistical Purpose                                   |
+|--------------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| **Composite Verdict**    | PASS / FAIL / INCONCLUSIVE per §1.4.6, with the triggering criterion(a) named                 | At-a-glance answer to "did the contract pass?"        |
+| **Per-Criterion Summary** | One line per criterion: verdict (PASS/FAIL/INCONCLUSIVE) and mode (inferential/observational) | Surface every per-criterion outcome on the front page |
+| **Type-I Envelope**      | Disclosed sum $\sum_c \alpha_c$ over inferential criteria                                     | The composite verdict's family-wise bound (§1.4.6)    |
 
-| Paradigm       | Content Displayed                                                          |
-|----------------|----------------------------------------------------------------------------|
-| **Compliance** | Threshold origin (SLA/SLO/POLICY), contract reference, normative threshold |
-| **Regression** | Spec file, empirical basis (samples, rate), threshold derivation method    |
+**Per-criterion analysis block** — repeated for each criterion declared on the contract.
 
-### 10.3 Example Output: Regression Paradigm
+| Section                   | Content (inferential criterion)                          | Content (observational criterion)                   |
+|---------------------------|----------------------------------------------------------|-----------------------------------------------------|
+| **Hypothesis Test**       | $H_0$, $H_1$, test type, $\alpha_c$                      | Mode declaration ("observational"); no $H_0$/$H_1$  |
+| **Observed Data**         | $n_c$, $K_c$, $\hat{p}_c$                                | $n_c$, $K_c$                                        |
+| **Threshold Reference**   | Threshold origin and derivation (see below)              | *(omitted — no threshold)*                          |
+| **Statistical Inference** | SE, CI, Wilson lower bound, z, p-value                   | *(omitted — verdict is deterministic on the observation)* |
+| **Verdict**               | Three strands: statistical / observed-rate / operational | Zero-failure assertion with explicit "no population claim" caveat |
+
+The **Threshold Reference** section, when shown, adapts to the criterion's origin:
+
+| Origin                  | Content displayed                                                                                       |
+|-------------------------|---------------------------------------------------------------------------------------------------------|
+| **SLA / SLO / POLICY**  | Threshold origin, contract reference, normative threshold $p^*_c$, $\alpha_c$                            |
+| **EMPIRICAL**           | Baseline identifier, baseline $(\hat{p}_c^{\text{baseline}}, n_c^{\text{baseline}})$, covariate-match status, test sample size $n_{c,\text{test}}$, derived $p^*_c$ (§1.5.4) |
+
+The **inferential verdict's three strands** (per §10.3's example, applied per inferential criterion):
+
+- **Statistical verdict** — the hypothesis-test conclusion: whether the Wilson lower bound clears $p^*_c$ at $\alpha_c$.
+- **Observed-rate status** — whether the point estimate $\hat{p}_c$ sits on the right side of $p^*_c$. Can disagree with the statistical verdict, especially near the boundary; the disagreement is the point of disclosing both.
+- **Operational caution** — what an operator should do next: sample-size adequacy, power against plausible regressions, follow-up recommendations.
+
+Observational criteria do not carry the three strands; their verdict is deterministic on the observation and a single assertion line suffices.
+
+### 10.3 Example output: a multi-criteria contract
+
+The consult-advice contract of §1.4.8 declares three criteria of differing origins — one EMPIRICAL inferential, one observational, one SLO inferential — and exercises them against three distinct validation sets. The transparent-statistics output shows the contract-level composite first, then one analysis block per criterion. Inferential blocks carry the three-strand verdict; the observational block reports a single deterministic assertion.
 
 ```
 ══════════════════════════════════════════════════════════════════════════════
-STATISTICAL ANALYSIS: shouldReturnValidJson
+STATISTICAL ANALYSIS: ConsultAdviceContract
 ══════════════════════════════════════════════════════════════════════════════
+
+COMPOSITE VERDICT
+  Contract verdict:    FAIL  (triggered by C_layperson-readable)
+  Per-criterion:       C_well-formed         PASS  (inferential, EMPIRICAL)
+                       C_no-self-harm        PASS  (observational)
+                       C_layperson-readable  FAIL  (inferential, SLO)
+  Type-I envelope:     ∑ α_c  ≤  0.05 + 0.001  =  0.051   (over inferential)
+
+──────────────────────────────────────────────────────────────────────────────
+CRITERION 1 of 3: C_well-formed                       (inferential, EMPIRICAL)
+──────────────────────────────────────────────────────────────────────────────
 
 HYPOTHESIS TEST
-  H₀ (null):        True success rate π ≥ 0.85 (no degradation from baseline)
-  H₁ (alternative): True success rate π < 0.85 (degradation has occurred)
-  Test type:        One-sided binomial proportion test
+  H₀ (null):        True success rate p_c ≥ p*_c (no degradation from baseline)
+  H₁ (alternative): True success rate p_c < p*_c (degradation has occurred)
+  Test type:        One-sided Wilson lower bound at α_c = 0.05
+  Validation set:   V_prod  v5  (redacted production prompts, policy XYZ)
 
 OBSERVED DATA
-  Sample size (n):     100
-  Successes (k):       87
-  Observed rate (p̂):   0.870
+  Sample size (n_c):           1000  (conclusive trials)
+  Successes (K_c):              953
+  Observed rate (p̂_c):           0.953
 
 THRESHOLD REFERENCE
-  Source:              ShoppingUseCase.yaml (generated 2026-01-10)
-  Empirical basis:     1000 samples, 872 successes (87.2%)
-  Threshold derivation: Lower bound of 95% CI = 85.1%, rounded to 85%
+  Threshold origin:    EMPIRICAL
+  Baseline ID:         consult-advice@2026-04-01
+  Baseline observation: p̂_c (baseline) = 0.951  over  n_c (baseline) = 2000
+  Covariate match:     OK   (test indexed at same point in covariate space)
+  Test sample size:    n_{c,test} = 1000
+  Derived threshold:   p*_c  =  WilsonLB(0.951; 1000, 0.05)  ≈  0.937   (§1.5.4)
 
 STATISTICAL INFERENCE
-  Standard error:      SE = √(p̂(1-p̂)/n) = √(0.87 × 0.13 / 100) = 0.0336
-  95% Confidence interval: [0.804, 0.936]
-
-  Test statistic:      z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                       z = (0.87 - 0.85) / √(0.85 × 0.15 / 100)
-                       z = 0.56
-
-  p-value:             P(Z > 0.56) = 0.288
+  Standard error:      SE_c = √(p̂_c(1-p̂_c)/n_c) = √(0.953 × 0.047 / 1000) ≈ 0.00673
+  95% Wilson CI:       [0.938, 0.965]
+  Wilson lower bound:  p̂_{c,L}(0.05) ≈ 0.940
+  Test statistic:      z = (p̂_c - p*_c) / √(p*_c(1-p*_c)/n_c) ≈ 2.13
+  p-value:             P(Z < -2.13) ≈ 0.017
 
 VERDICT
-  Result:              PASS
-  Interpretation:      The observed success rate of 87% is consistent with
-                       the baseline expectation of 87.2%. The 95% confidence
-                       interval [80.4%, 93.6%] contains the threshold of 85%.
+  Statistical verdict:  PASS
+                        Wilson lower bound 0.940 clears the derived
+                        threshold 0.937 at α = 0.05.
 
-  Caveat:              With n=100 samples, we can detect a drop from 87% to
-                       below 85% with approximately 50% power. For higher
-                       sensitivity, consider increasing sample size.
+  Observed-rate status: ABOVE THRESHOLD
+                        Observed 0.953 > 0.937. The point estimate and the
+                        statistical verdict agree.
 
-══════════════════════════════════════════════════════════════════════════════
-```
+  Operational caution:  ADEQUATE POWER
+                        At n_c = 1000, the test detects a drop to 0.925
+                        with power ≈ 0.80. Margin above threshold is
+                        modest; watch for downward drift over the
+                        baseline's validity window.
 
-### 10.4 Example Output: Compliance Paradigm
-
-```
-══════════════════════════════════════════════════════════════════════════════
-STATISTICAL ANALYSIS: verifyPaymentGatewaySla
-══════════════════════════════════════════════════════════════════════════════
+──────────────────────────────────────────────────────────────────────────────
+CRITERION 2 of 3: C_no-self-harm                              (observational)
+──────────────────────────────────────────────────────────────────────────────
 
 HYPOTHESIS TEST
-  H₀ (null):        True success rate π ≥ 0.995 (system meets SLA requirement)
-  H₁ (alternative): True success rate π < 0.995 (system violates SLA)
-  Test type:        One-sided binomial proportion test
+  Mode:                Observational  (no threshold, no α, no inferential claim)
+  Question:            Was any failure of C_no-self-harm observed in the run?
+  Validation set:      V_probe  v3  (adversarial self-harm probes,
+                       independent of guardrail's training data,
+                       per javai-safety-taxonomy v2)
 
 OBSERVED DATA
-  Sample size (n):     500
-  Successes (k):       496
-  Observed rate (p̂):   0.992
-
-THRESHOLD REFERENCE
-  Threshold origin:    SLA
-  Contract ref:        Payment Gateway SLA v3.2 §5.1.2
-  Threshold origin:    Normative claim from external contract
-  Threshold value:     0.995 (99.5%)
-
-STATISTICAL INFERENCE
-  Standard error:      SE = √(p̂(1-p̂)/n) = √(0.992 × 0.008 / 500) = 0.0040
-  95% Confidence interval: [0.980, 0.997]
-
-  Test statistic:      z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                       z = (0.992 - 0.995) / √(0.995 × 0.005 / 500)
-                       z = -0.95
-
-  p-value:             P(Z < -0.95) = 0.171
+  Sample size (n_c):           200  (conclusive trials)
+  Successes (K_c):             200
+  Failures observed:             0
 
 VERDICT
-  Statistical verdict:   NO EVIDENCE OF VIOLATION
-                         The one-sided test does not reject H₀ at α=0.05
-                         (p = 0.171). The 95% CI [98.4%, 100%] includes the
-                         SLA threshold.
+  Result:              PASS  (observational)
+  Statement:           No failure of C_no-self-harm was observed across
+                       200 probe trials drawn from V_probe v3.
 
-  Observed-rate status:  BELOW NOMINAL TARGET
-                         Observed 99.2% < SLA 99.5%. The sample provides
-                         insufficient evidence to conclude violation, but
-                         the point estimate is on the wrong side of the
-                         threshold.
+  No population claim: This verdict makes no inferential claim about the
+                       population rate of self-harm responses. Population-
+                       scale evidence requires sentinel accumulation against
+                       production traffic; see §1.5.5.
 
-  Operational caution:   MONITOR / GATHER MORE DATA
-                         Increase sample size if a more conclusive verdict
-                         is required. The current test would fail to detect
-                         a true rate as low as 98.0% with meaningful power.
+──────────────────────────────────────────────────────────────────────────────
+CRITERION 3 of 3: C_layperson-readable                     (inferential, SLO)
+──────────────────────────────────────────────────────────────────────────────
+
+HYPOTHESIS TEST
+  H₀ (null):        True success rate p_c ≥ 0.98 (system meets SLO)
+  H₁ (alternative): True success rate p_c < 0.98 (system violates SLO)
+  Test type:        One-sided Wilson lower bound at α_c = 0.001
+  Validation set:   V_complexity  v2  (inputs eliciting clinical terminology)
+
+OBSERVED DATA
+  Sample size (n_c):           800  (conclusive trials)
+  Successes (K_c):             788
+  Observed rate (p̂_c):           0.985
+
+THRESHOLD REFERENCE
+  Threshold origin:    SLO
+  Contract ref:        Consult-Advice SLO v2 §3.4 (layperson readability)
+  Normative threshold: p*_c = 0.98
+  Confidence level:    α_c  = 0.001
+
+STATISTICAL INFERENCE
+  Standard error:      SE_c = √(p̂_c(1-p̂_c)/n_c) = √(0.985 × 0.015 / 800) ≈ 0.00430
+  99.9% Wilson CI:     [0.971, 0.993]
+  Wilson lower bound:  p̂_{c,L}(0.001) ≈ 0.967
+  Test statistic:      z = (p̂_c - p*_c) / √(p*_c(1-p*_c)/n_c) ≈ 1.01
+  p-value:             P(Z < -1.01) ≈ 0.156
+
+VERDICT
+  Statistical verdict:  FAIL
+                        Wilson lower bound 0.967 does not clear the SLO
+                        threshold 0.98 at α = 0.001. Insufficient evidence
+                        to conclude SLO compliance at the stated confidence
+                        level.
+
+  Observed-rate status: ABOVE THRESHOLD
+                        Observed 0.985 > 0.98. The point estimate sits
+                        above the SLO, but the lower bound does not. The
+                        statistical verdict and observed-rate status
+                        disagree; the disclosed strands surface the
+                        tension that a single PASS/FAIL would hide.
+
+  Operational caution:  INCREASE SAMPLE OR REVISIT α
+                        At α_c = 0.001 the threshold is unusually tight;
+                        n_c = 800 is insufficient to clear it at the
+                        observed point estimate. Either increase n_c to
+                        ≈ 2200 to support the SLO at α = 0.001, or
+                        re-examine the contract's choice of α against the
+                        consequence the SLO defends against (§1.4.6).
 
 ══════════════════════════════════════════════════════════════════════════════
 ```
 
-**Key differences in compliance output**:
-- Hypothesis framing uses "meets SLA requirement" / "violates SLA"
-- Threshold Reference shows provenance (`thresholdOrigin`, `contractRef`) instead of empirical basis
-- The verdict is deliberately split into three strands rather than overloaded onto a single PASS/FAIL label: the **statistical verdict** reports the hypothesis-test conclusion, the **observed-rate status** reports whether the point estimate sits on the right side of the threshold, and the **operational caution** describes what an operator should do next. These can disagree — a test can be statistically non-rejecting while the observed rate sits below target, and reporting them separately prevents the overloaded "PASS (but borderline)" label from masking a genuine operational concern.
+**Reading the example.**
 
-### 10.5 Mathematical Notation
+- The composite verdict is FAIL, triggered by C_layperson-readable. The two passing criteria are reported in full alongside; the methodology does not collapse the contract to a single FAIL label without disclosing per-criterion evidence.
+- The Type-I envelope $\sum_c \alpha_c \leq 0.051$ is a disclosed property of the composite, not a control target (§1.4.6). The observational criterion contributes nothing to the envelope because it makes no inferential claim.
+- C_well-formed and C_layperson-readable demonstrate the two **Threshold Reference** shapes: EMPIRICAL (baseline-derived, with covariate-match disclosure and a back-reference to §1.5.4) versus SLO (contract-referenced, normative). The blocks share otherwise-identical structure; only the threshold's provenance differs.
+- C_layperson-readable's verdict shows the three strands disagreeing — statistical FAIL, observed-rate above threshold. The disclosure is the point of the three-strand format: an overloaded "FAIL (close to threshold)" label would lose the information that the point estimate sits above the SLO but the inference at α = 0.001 does not support the claim.
+- C_no-self-harm omits Threshold Reference and Statistical Inference entirely; its verdict is the zero-failure assertion of §1.4.5, with the explicit non-claim about population rates that the methodology requires of observational verdicts.
+
+### 10.4 Mathematical Notation
 
 The output uses proper mathematical symbols where terminal capabilities allow:
 
@@ -1514,7 +2464,7 @@ The output uses proper mathematical symbols where terminal capabilities allow:
 | Approximately          | $\approx$      | ~=             |
 | Alpha (significance)   | $\alpha$       | alpha          |
 
-### 10.6 Validation by Statisticians
+### 10.5 Validation by Statisticians
 
 The transparent output enables statisticians to verify:
 
@@ -1661,7 +2611,7 @@ This mirrors the compliance vs. regression dichotomy for pass-rate thresholds (S
 
 #### 12.4.1 The Problem
 
-When a measure experiment records the latency distribution, the observed percentiles are point estimates subject to sampling variability. Using the raw baseline percentile as the threshold would cause frequent false positives — the same problem as using $\hat{p}_{\text{exp}}$ directly as the pass-rate threshold (Section 3.1).
+When a measure experiment records the latency distribution, the observed percentiles are point estimates subject to sampling variability. Using the raw baseline percentile as the threshold would cause frequent false positives — the same problem as using $\hat{p}_{\text{baseline}}$ directly as the pass-rate threshold (Section 3.1).
 
 **Example**: A baseline observes $Q_{0.95} = 480\text{ms}$ from $n_s = 935$ samples. A subsequent test with $n_s = 192$ samples observes $Q_{0.95} = 495\text{ms}$. Is this a degradation, or normal variance?
 
@@ -1815,6 +2765,40 @@ The table below summarises how the two quality dimensions parallel each other in
 | **Enforcement** | Always enforced | Advisory by default; opt-in enforcement |
 
 The two dimensions are evaluated independently and combined with logical conjunction. This independence means that latency analysis can never compensate for a pass-rate failure, and vice versa — each dimension must meet its own threshold.
+
+---
+
+## Appendix A. Elements of the statistical model
+
+The statistical model described in this companion is built from a set
+of named primitives, parameterised by named statistical quantities,
+and produces a set of named statistical results. This appendix gathers
+them in one place, with references to the sections in which each is
+defined.
+
+The list is restricted to elements that are intrinsic to the model.
+Operationalization artefacts that frameworks and projects assemble
+around the model — the service contract as a programming artefact,
+contract families, binding policies, runtime-resolution mechanisms,
+governance taxonomies, validation-set registries — are documented
+elsewhere.
+
+| Element                       | Information content                                                                                                                                                                                                                                                            | Defined in                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| **Postcondition**             | A predicate over the service's output; defines per-trial pass or fail for a single observable property.                                                                                                                                                                        | §1.4.2                                    |
+| **Criterion**                 | The partition unit of the functional dimension. References one or more postconditions, has a mode (inferential or observational), and where inferential carries a threshold $p^*_c$ and confidence level $\alpha_c$.                                                            | §1.4.2, §1.4.3, §1.4.5                    |
+| **Validation set**            | The input pool over which a criterion's per-trial indicators are observed. Operationally a sample from a designed distribution.                                                                                                                                                | §1.4.2, §1.4.7                            |
+| **Factor record**             | The identification of the service, model, and serving configuration whose $p_c$ is being estimated. Two evaluations that differ in factors evaluate two different objects.                                                                                                     | §1.3.1                                    |
+| **Covariate profile**         | The recorded values of declared contextual variables at the time of an evaluation; affects baseline comparability.                                                                                                                                                             | §8.4.1                                    |
+| **Population specification**  | The distribution from which a criterion's validation set is a sample; the population over which the criterion's inferential claim holds.                                                                                                                                       | §1.4.7                                    |
+| **Per-criterion Bernoulli stream** | The sequence of per-criterion indicators $\{X_{i,c}\}$ treated as i.i.d. Bernoulli with parameter $p_c$ under the model's working approximation.                                                                                                                          | §1.4.3                                    |
+| **Confidence statement**      | A Wilson lower bound $\hat{p}_{c,L}(\alpha_c)$, qualifying an inferential per-criterion claim about $p_c$.                                                                                                                                                                     | §2.3.1, §1.4.3                            |
+| **Threshold origin**          | The provenance category of an inferential threshold $p^*_c$ (SLA, SLO, POLICY, EMPIRICAL, UNSPECIFIED), recorded with the threshold value.                                                                                                                                     | §7.4                                      |
+| **Sample-size requirement**   | The per-criterion sample count required to support an inferential test at its threshold and $\alpha_c$, with the feasibility gate that admits or refuses a smaller sample.                                                                                                     | §§5.4–5.5, §8.4                           |
+| **Per-criterion verdict**     | PASS, FAIL, or INCONCLUSIVE on a criterion: for inferential criteria the Wilson lower bound's relation to $p^*_c$; for observational criteria the zero-failure observation. Carries the supporting statistics, the threshold and origin, $\alpha_c$, and the population specification. | §1.4.3, §1.4.5, §1.4.6                    |
+| **Composite verdict**         | A structured tuple over per-criterion verdicts.                                                                                                                                                                                                                                | §1.4.6                                    |
+| **Composite Type-I envelope** | The disclosed sum $\sum_c \alpha_c$ over inferential criteria, bounding the family-wise false-acceptance rate of the composite verdict.                                                                                                                                        | §1.4.6                                    |
+| **Baseline**                  | An indexed family of per-criterion point estimators $\{\hat{p}_c\}$ with supporting $\{n_c\}$ and $\{K_c\}$, conditioned on a factor record, a covariate profile, an expiration window, and a structural reference. Consumed by inferential criteria of origin EMPIRICAL to derive $p^*_c$ at resolution time. | §1.5                                      |
 
 ---
 
