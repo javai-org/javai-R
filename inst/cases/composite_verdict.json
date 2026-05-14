@@ -1,0 +1,329 @@
+{
+  "suite": "composite_verdict",
+  "description": "Composite-verdict aggregation per companion §1.4.6 (composite rule) and SC-RU-05 (envelopes split by procedure direction). The composite rule is: PASS if every per-criterion verdict is PASS; FAIL if any is FAIL; INCONCLUSIVE otherwise. The two envelopes are sums of alpha_c over their own family of inferential criteria: the false-compliance envelope over COMPLIANCE criteria, the false-degradation-signal envelope over REGRESSION criteria. Observational criteria carry no alpha and contribute to neither.",
+  "method": "Three-way aggregation (PASS/FAIL/INCONCLUSIVE) plus per-family alpha summation. An envelope is omitted (encoded as null) when no inferential criterion of that procedure direction is present.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "name": "all_pass_regression_only",
+      "description": "Three REGRESSION criteria all pass; only the degradation envelope is emitted.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_well_formed",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_latency_within",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_schema_valid",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.01,
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "PASS",
+        "triggering_criteria": [],
+        "false_compliance_envelope": null,
+        "false_degradation_signal_envelope": 0.11
+      }
+    },
+    {
+      "name": "all_pass_compliance_only",
+      "description": "Three COMPLIANCE criteria all pass; only the false-compliance envelope is emitted.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_sla_uptime",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_sla_correctness",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_policy_pii",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.01,
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "PASS",
+        "triggering_criteria": [],
+        "false_compliance_envelope": 0.012,
+        "false_degradation_signal_envelope": null
+      }
+    },
+    {
+      "name": "consult_advice_fail_single_trigger",
+      "description": "The §10.3 consult-advice contract: one REGRESSION, one observational, one COMPLIANCE. The COMPLIANCE criterion fails. Both envelopes are emitted with their distinct sums; the observational criterion contributes to neither.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_well_formed",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_no_self_harm",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_layperson_readable",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "FAIL"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "FAIL",
+        "triggering_criteria": [
+          "c_layperson_readable"
+        ],
+        "false_compliance_envelope": 0.001,
+        "false_degradation_signal_envelope": 0.05
+      }
+    },
+    {
+      "name": "fail_multi_trigger_mixed_procedures",
+      "description": "Two failing criteria across both procedure directions. Each envelope sums only over its own family.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_regression_a",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "FAIL"
+          },
+          {
+            "criterion_id": "c_regression_b",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_compliance_a",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "FAIL"
+          },
+          {
+            "criterion_id": "c_compliance_b",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.01,
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "FAIL",
+        "triggering_criteria": [
+          "c_regression_a",
+          "c_compliance_a"
+        ],
+        "false_compliance_envelope": 0.011,
+        "false_degradation_signal_envelope": 0.1
+      }
+    },
+    {
+      "name": "inconclusive_some_pass_some_inconclusive",
+      "description": "No FAIL verdicts but at least one INCONCLUSIVE: composite is INCONCLUSIVE.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_regression_pass",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_compliance_inconclusive",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "INCONCLUSIVE"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "INCONCLUSIVE",
+        "triggering_criteria": [
+          "c_compliance_inconclusive"
+        ],
+        "false_compliance_envelope": 0.001,
+        "false_degradation_signal_envelope": 0.05
+      }
+    },
+    {
+      "name": "inconclusive_all_inconclusive",
+      "description": "Pathological case: every criterion INCONCLUSIVE (e.g. the run produced no evaluable trials anywhere). Composite is INCONCLUSIVE.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_a",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "INCONCLUSIVE"
+          },
+          {
+            "criterion_id": "c_b",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "INCONCLUSIVE"
+          },
+          {
+            "criterion_id": "c_c",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "INCONCLUSIVE"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "INCONCLUSIVE",
+        "triggering_criteria": [
+          "c_a",
+          "c_b",
+          "c_c"
+        ],
+        "false_compliance_envelope": 0.001,
+        "false_degradation_signal_envelope": 0.05
+      }
+    },
+    {
+      "name": "mixed_observational_excluded_from_envelopes",
+      "description": "Mixed inferential + observational criteria. Both envelopes exclude the observational alpha (it has none). Composite is PASS.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_regression",
+            "mode": "inferential",
+            "procedure": "REGRESSION",
+            "alpha": 0.05,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_compliance",
+            "mode": "inferential",
+            "procedure": "COMPLIANCE",
+            "alpha": 0.001,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_observation_a",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_observation_b",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "PASS",
+        "triggering_criteria": [],
+        "false_compliance_envelope": 0.001,
+        "false_degradation_signal_envelope": 0.05
+      }
+    },
+    {
+      "name": "observational_only_pass",
+      "description": "Contract with only observational criteria. Composite is PASS; neither envelope is emitted (no inferential criterion of either direction).",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_guardrail_a",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_guardrail_b",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "PASS",
+        "triggering_criteria": [],
+        "false_compliance_envelope": null,
+        "false_degradation_signal_envelope": null
+      }
+    },
+    {
+      "name": "observational_only_fail",
+      "description": "Contract with only observational criteria, one fails. Composite is FAIL; neither envelope is emitted.",
+      "inputs": {
+        "criteria": [
+          {
+            "criterion_id": "c_guardrail_a",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "PASS"
+          },
+          {
+            "criterion_id": "c_guardrail_b",
+            "mode": "observational",
+            "procedure": null,
+            "alpha": null,
+            "verdict": "FAIL"
+          }
+        ]
+      },
+      "expected": {
+        "composite_verdict": "FAIL",
+        "triggering_criteria": [
+          "c_guardrail_b"
+        ],
+        "false_compliance_envelope": null,
+        "false_degradation_signal_envelope": null
+      }
+    }
+  ]
+}

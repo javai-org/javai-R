@@ -93,6 +93,37 @@ threshold_first_implied_confidence <- function(baseline_successes,
   )
 }
 
+#' Sample-size-first threshold + integer cutoff + achieved size (SC-RU-02)
+#'
+#' Companion v1.3 / SC-RU-02 distinguishes three artefacts of the
+#' threshold-derivation construction:
+#'   - `wilson_lower_real` — the real-valued Wilson lower bound.
+#'     Synonym for the historical `threshold` field; preserved under
+#'     both names for backward compatibility.
+#'   - `cutoff_integer`    — the binding decision artefact
+#'     c = ceiling(test_samples * wilson_lower_real). The test
+#'     decides PASS / FAIL on K >= c, not on rounded rates.
+#'   - `achieved_size`     — the lower-tail false-degradation
+#'     probability at the integer cutoff under the effective baseline
+#'     rate p_0: P_{p_0}(K < c). Typically less than nominal alpha
+#'     because the cutoff is discretised upward.
+#'
+#' @keywords internal
+ssf_expected_block <- function(baseline_successes, baseline_trials,
+                               test_samples, confidence) {
+  wlr <- threshold_sample_size_first(baseline_successes, baseline_trials,
+                                     test_samples, confidence)
+  c_int <- ceiling(test_samples * wlr)
+  p_0 <- effective_baseline_rate(baseline_successes, baseline_trials, confidence)
+  achieved <- pbinom(c_int - 1, size = test_samples, prob = p_0)
+  list(
+    threshold          = wlr,   # backward-compatible synonym
+    wilson_lower_real  = wlr,
+    cutoff_integer     = as.integer(c_int),
+    achieved_size      = achieved
+  )
+}
+
 #' Generate threshold derivation reference cases
 #'
 #' @return A list suitable for JSON serialisation.
@@ -107,9 +138,7 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 95L, baseline_trials = 100L,
         test_samples = 50L, confidence = 0.95
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(95, 100, 50, 0.95)
-      )
+      expected = ssf_expected_block(95, 100, 50, 0.95)
     ),
     list(
       name = "ssf_950_of_1000_test100_95pct",
@@ -118,9 +147,7 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 950L, baseline_trials = 1000L,
         test_samples = 100L, confidence = 0.95
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(950, 1000, 100, 0.95)
-      )
+      expected = ssf_expected_block(950, 1000, 100, 0.95)
     ),
     # Sample-size-first case — perfect-baseline two-step (companion §4.3.2)
     list(
@@ -130,9 +157,7 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 100L, baseline_trials = 100L,
         test_samples = 50L, confidence = 0.95
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(100, 100, 50, 0.95)
-      )
+      expected = ssf_expected_block(100, 100, 50, 0.95)
     ),
     list(
       name = "ssf_perfect_baseline_n1000_test100_95pct",
@@ -141,10 +166,8 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 1000L, baseline_trials = 1000L,
         test_samples = 100L, confidence = 0.95
       ),
-      expected = list(
-        # Companion §4.3.2 worked example: ≈ 0.9686
-        threshold = threshold_sample_size_first(1000, 1000, 100, 0.95)
-      )
+      # Companion §4.3.2 worked example: real-valued ≈ 0.9686, cutoff ≈ 97
+      expected = ssf_expected_block(1000, 1000, 100, 0.95)
     ),
     # Sample-size-first sensitivity to test sample size — companion §3.5
     list(
@@ -154,9 +177,7 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 950L, baseline_trials = 1000L,
         test_samples = 50L, confidence = 0.95
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(950, 1000, 50, 0.95)
-      )
+      expected = ssf_expected_block(950, 1000, 50, 0.95)
     ),
     list(
       name = "ssf_950_of_1000_test200_95pct",
@@ -165,9 +186,7 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 950L, baseline_trials = 1000L,
         test_samples = 200L, confidence = 0.95
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(950, 1000, 200, 0.95)
-      )
+      expected = ssf_expected_block(950, 1000, 200, 0.95)
     ),
     # Sample-size-first at higher confidence
     list(
@@ -177,9 +196,19 @@ generate_threshold_derivation_cases <- function() {
         baseline_successes = 95L, baseline_trials = 100L,
         test_samples = 50L, confidence = 0.99
       ),
-      expected = list(
-        threshold = threshold_sample_size_first(95, 100, 50, 0.99)
-      )
+      expected = ssf_expected_block(95, 100, 50, 0.99)
+    ),
+    # SC-RU-02 worked example: baseline 0.951, test n = 100, alpha = 0.05
+    # Companion §3.4 reports wilson_lower_real ≈ 0.902124,
+    # cutoff = 91, achieved_size ≈ 0.024986.
+    list(
+      name = "ssf_sc_ru_02_worked_example",
+      approach = "sample_size_first",
+      inputs = list(
+        baseline_successes = 951L, baseline_trials = 1000L,
+        test_samples = 100L, confidence = 0.95
+      ),
+      expected = ssf_expected_block(951, 1000, 100, 0.95)
     ),
     # Threshold-first cases (now require test_samples per companion §6.3)
     list(
