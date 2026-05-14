@@ -5,6 +5,87 @@ Versions follow the fixture-versioning rules declared in `CLAUDE.md`:
 **minor** bumps on 0.x mark breaking changes to fixture content or shape;
 **patch** bumps mark additive changes.
 
+## [0.8.0] — Unreleased
+
+**Multi-criteria model fixtures. Lands five new formula-value suites
+and an in-place extension of `threshold_derivation.json` per the
+criterion-decomposition model of Statistical Companion v1.3
+(§§1.4–1.5, §10).**
+
+This release is the formula-value half of the conformance contract
+named in §10.6: arithmetic agreement between downstream framework
+computations and the javai-R oracle. The calibration-fixture half
+(achieved Type-I rates, achieved power, achieved family-wise rates
+under stated dependence regimes) is named in §10.6 as future work and
+will land in a subsequent release.
+
+Per `DIR-MULTI-CRITERIA-FIXTURES-javai-R.md` in the orchestrator.
+
+### Added
+
+- **`inst/cases/criterion_verdict_observational.json`** — per-criterion
+  verdict cases for observational criteria (§1.4.5), with the §1.4.5a
+  two-policy denominator enum. The effective denominator `n_c` is the
+  policy-derived field; cases include a policy-difference pair where
+  the same raw counts yield PASS under `CONDITIONAL_ON_EVALUABLE` and
+  FAIL under `MARGINAL_COUNT_UNEVALUABLE_AS_FAIL`.
+- **`inst/cases/criterion_verdict_inferential.json`** — per-criterion
+  verdict cases for inferential criteria, partitioned by procedure
+  (REGRESSION decides on the integer cutoff `K_c >= c` per SC-RU-02;
+  COMPLIANCE decides on the Wilson lower bound exceeding `p_req`).
+  Three-strand verdict (`statistical`, `observed_rate_status`,
+  `operational_caution_category`) plus p-value method/tail metadata.
+- **`inst/cases/composite_verdict.json`** — composite-verdict
+  aggregation per §1.4.6 and SC-RU-05: composite PASS / FAIL /
+  INCONCLUSIVE plus the procedure-split envelopes
+  (`false_compliance_envelope` over compliance criteria,
+  `false_degradation_signal_envelope` over regression criteria).
+  Observational criteria contribute to neither envelope.
+- **`inst/cases/baseline_object.json`** — canonical baseline objects
+  at named points in the index space (factor record, covariate
+  profile, expiration window, structural reference) under the locked
+  §1.4.5a two-policy enum, with `availability_criterion_ref` for the
+  structural-composition pattern. Schema-only fixtures: each case
+  carries an empty `expected` block.
+- **`inst/cases/multi_criteria_scenario_consult_advice.json`** — the
+  end-to-end fixture mirroring §10.3. Four cases: the locked §10.3
+  composite-FAIL contract, the passing counterfactual, the paired-
+  evaluability / content structural-composition pattern with non-1.0
+  `r_obs`, and the cross-policy structural-mismatch refusal. Every
+  case carries the §10.6 `conformance_status` metadata block with
+  `formula_value_fixtures: passed`, `calibration_fixtures:
+  not-published`, `calibration_claim_permitted: false`.
+
+### Changed
+
+- **`inst/cases/threshold_derivation.json`** — every
+  `sample_size_first` case gains three new `expected` fields per
+  **SC-RU-02**: `wilson_lower_real` (the real-valued Wilson lower
+  bound), `cutoff_integer` (the binding decision artefact
+  `ceiling(n_test × wilson_lower_real)`), and `achieved_size` (the
+  lower-tail false-degradation probability `P_{p_0}(K < c)` under the
+  effective baseline rate). The historical `threshold` field is
+  preserved as a synonym for `wilson_lower_real`. A new
+  `ssf_sc_ru_02_worked_example` case anchors the §3.4 worked-example
+  numerics (`p̂ = 0.951`, `n_test = 100`, `α = 0.05` → real-valued
+  ≈ 0.902124, cutoff = 91, achieved size ≈ 0.024986).
+- **`schema/cases.schema.json`** — relaxed top-level `inputs` /
+  `expected` value constraints to accept arbitrary JSON (numbers,
+  booleans, strings, nulls, arrays, objects) so the per-criterion and
+  scenario fixtures' nested shapes validate. Existing flat-shape
+  fixtures continue to validate unchanged. New top-level case fields
+  added: `description` (optional), `procedure` (optional, enum).
+  `$defs` introduces the two-value denominator policy enum for
+  generators that need to validate the enum explicitly.
+
+### Downstream
+
+- `punit` and `feotest` need extending to consume the new suites; see
+  `DIR-MULTI-CRITERIA-FIXTURES-punit.md` and
+  `DIR-MULTI-CRITERIA-FIXTURES-feotest.md` (forthcoming).
+
+---
+
 ## [0.7.0] — Unreleased
 
 **Breaking — `latency_threshold_bootstrap` fixture role change and

@@ -25,13 +25,22 @@ suites <- list(
   verdict = generate_verdict_cases(),
   latency_percentile = generate_latency_percentile_cases(),
   latency_threshold = generate_latency_threshold_cases(),
-  latency_threshold_bootstrap = generate_latency_threshold_bootstrap_cases()
+  latency_threshold_bootstrap = generate_latency_threshold_bootstrap_cases(),
+  # Multi-criteria model fixtures (per DIR-MULTI-CRITERIA-FIXTURES-javai-R):
+  criterion_verdict_observational =
+    generate_criterion_verdict_observational_cases(),
+  criterion_verdict_inferential =
+    generate_criterion_verdict_inferential_cases(),
+  composite_verdict = generate_composite_verdict_cases(),
+  baseline_object = generate_baseline_object_cases(),
+  multi_criteria_scenario_consult_advice =
+    generate_multi_criteria_scenario_cases()
 )
 
 for (name in names(suites)) {
   path <- file.path(output_dir, paste0(name, ".json"))
   jsonlite::write_json(suites[[name]], path, pretty = TRUE, auto_unbox = TRUE,
-                       digits = NA)
+                       digits = NA, na = "null")
   message("Wrote: ", path)
 }
 
