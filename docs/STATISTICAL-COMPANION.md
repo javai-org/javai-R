@@ -1,6 +1,6 @@
 # Statistical Companion Document
 
-**Version**: 1.3
+**Version**: 1.3-draft
 **Last updated**: 2026-05-14
 
 Copyright © 2026, Michael Franz Mannion BSc (Hons) MBA
