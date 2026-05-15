@@ -102,21 +102,21 @@ Both paradigms share a one-sided binomial decision skeleton, but they implement 
 
 **Compliance / assurance procedure** — affirmative procedure used to show that a system meets an externally required threshold $p_{\mathrm{req}}$:
 
-$$H_0: p \le p_{\mathrm{req}} \quad\text{(not shown acceptable)} \qquad H_1: p \gt p_{\mathrm{req}} \quad\text{(shown acceptable)}$$
+$$H_0: p \le p_{\mathrm{req}} \quad\text{(not shown acceptable)} \qquad H_1: p > p_{\mathrm{req}} \quad\text{(shown acceptable)}$$
 
 PASS only if the one-sided lower confidence bound on $p$ exceeds $p_{\mathrm{req}}$. The procedure controls the long-run probability of falsely declaring compliance when the true success probability is at or below the requirement, subject to model assumptions and approximation limits.
 
 **Regression / monitoring procedure** — reference-control procedure used to detect degradation from a measured reference behaviour. Choose an integer lower-tail cutoff $c$ so that, under the stated reference model,
 
-$$P_{\mathrm{ref}}(K \lt c) \le \alpha.$$
+$$P_{\mathrm{ref}}(K < c) \le \alpha.$$
 
-PASS if observed $K \ge c$; FAIL if $K \lt c$. The procedure controls false degradation alarms under the reference model. **A regression PASS means "no degradation signal at this cutoff," not "equivalence to the baseline has been proved"**, and a compliance PASS means "evidence supports compliance at the configured level," not "no degradation."
+PASS if observed $K \ge c$; FAIL if $K < c$. The procedure controls false degradation alarms under the reference model. **A regression PASS means "no degradation signal at this cutoff," not "equivalence to the baseline has been proved"**, and a compliance PASS means "evidence supports compliance at the configured level," not "no degradation."
 
 The two rules share implementation components — the binomial model, the Wilson machinery on the threshold side, the feasibility gate, the VERIFICATION/SMOKE distinction — but their PASS/FAIL labels are **not interchangeable**. The transparent-statistics output (§7, §10) records which procedure was applied, and reports use intent-specific verdict wording so that auditors and operators do not read a regression PASS as an affirmative compliance certification (or vice versa).
 
 For backward compatibility and for the regression-side prose throughout §§3–5, this document continues to write the regression hypothesis in the equivalent rate form
 
-$$H_0: p \ge p^* \quad\text{(acceptable)} \qquad H_1: p \lt p^* \quad\text{(unacceptable)}$$
+$$H_0: p \ge p^* \quad\text{(acceptable)} \qquad H_1: p < p^* \quad\text{(unacceptable)}$$
 
 where $p^* = c/n$ is the displayed rate corresponding to the integer cutoff $c$. The discreteness of the binomial decision means $p^*$ is informational; the binding decision artefact is $c$ (§3.4, §5.1).
 
@@ -1342,7 +1342,7 @@ Compliance and regression testing both use a one-sided binomial decision skeleto
 
 **Compliance / assurance procedure** — affirmative test that the system meets a normative threshold $p_{\mathrm{req}}$:
 
-$$H_0: p \le p_{\mathrm{req}} \qquad H_1: p \gt p_{\mathrm{req}}$$
+$$H_0: p \le p_{\mathrm{req}} \qquad H_1: p > p_{\mathrm{req}}$$
 
 Decision: PASS only if the one-sided lower confidence bound on $p$ exceeds $p_{\mathrm{req}}$. The procedure controls the **false-compliance** rate — the long-run probability of declaring compliance when the true success probability is at or below the requirement, subject to discreteness and approximation.
 
@@ -1350,9 +1350,9 @@ Decision: PASS only if the one-sided lower confidence bound on $p$ exceeds $p_{\
 
 Choose an integer lower-tail cutoff $c$ such that, under the stated reference model,
 
-$$P_{\mathrm{ref}}(K \lt c) \le \alpha.$$
+$$P_{\mathrm{ref}}(K < c) \le \alpha.$$
 
-Decision: PASS if observed $K \ge c$; FAIL if $K \lt c$. The procedure controls the **false-degradation-alarm** rate under the reference model. A regression PASS means "no degradation signal at this cutoff"; it does not establish equivalence to the baseline.
+Decision: PASS if observed $K \ge c$; FAIL if $K < c$. The procedure controls the **false-degradation-alarm** rate under the reference model. A regression PASS means "no degradation signal at this cutoff"; it does not establish equivalence to the baseline.
 
 For continuity with §§3.3–5 prose, the regression rule is also written in the equivalent rate form
 
@@ -1370,8 +1370,8 @@ The differences across the two paradigms are summarised below. Note that the con
 
 | Paradigm       | Threshold                                | Hypotheses                                                                                         | Error controlled                             | PASS means                                           |
 |----------------|------------------------------------------|----------------------------------------------------------------------------------------------------|----------------------------------------------|------------------------------------------------------|
-| **Compliance** | $p_{\text{SLA}}$ (given)                 | $H_0: p \le p_{\mathrm{req}}$ vs $H_1: p \gt p_{\mathrm{req}}$                                     | False-compliance probability                 | Evidence supports compliance at the configured level |
-| **Regression** | Derived from $\hat{p}_{\text{baseline}}$ | $H_0: p \ge p^*$ vs $H_1: p \lt p^*$, integer cutoff $c$ from $P_{\mathrm{ref}}(K \lt c)\le\alpha$ | False-degradation-alarm rate under reference | No degradation signal at the configured cutoff       |
+| **Compliance** | $p_{\text{SLA}}$ (given)                 | $H_0: p \le p_{\mathrm{req}}$ vs $H_1: p > p_{\mathrm{req}}$                                     | False-compliance probability                 | Evidence supports compliance at the configured level |
+| **Regression** | Derived from $\hat{p}_{\text{baseline}}$ | $H_0: p \ge p^*$ vs $H_1: p < p^*$, integer cutoff $c$ from $P_{\mathrm{ref}}(K < c)\le\alpha$ | False-degradation-alarm rate under reference | No degradation signal at the configured cutoff       |
 
 **Regression-rule status note.** The Wilson-derived empirical regression rule developed in §3.4 is a **one-sample reference-control approximation**. It uses the baseline point estimate $\hat p_{\text{baseline}}$ together with the test sample size $n_{\text{test}}$ and the configured $\alpha$ to set the cutoff; it does not fully propagate the baseline's own measurement uncertainty, especially when $n_{\text{baseline}} \ne n_{\text{test}}$. Two alternatives are available for projects that need fuller uncertainty propagation: the **beta-binomial posterior predictive** rule (§4.5), and frequentist **two-sample non-inferiority methods** such as Miettinen–Nurminen and Farrington–Manning. The Wilson rule is retained as the default for the operational reasons in §4.5; this note labels its status rather than replacing it.
 
@@ -1423,7 +1423,7 @@ The displayed integer-rate companion is $c/n = 0.910000$. Three distinct artefac
 
 The Wilson construction targets nominal $\alpha = 0.05$ before discretisation. For the integer cutoff $c = 91$, the achieved lower-tail false-degradation probability under $p_0 = 0.951$ is
 
-$$P_{0.951}(K \lt 91) \approx 0.024986,$$
+$$P_{0.951}(K < 91) \approx 0.024986,$$
 
 not 0.05. The gap between nominal $\alpha$ and achieved size is intrinsic to discrete decisions and not a defect; it is reported alongside $c$ so that two thresholds whose real-valued bounds differ in the third decimal place can still be recognised as implementing the same decision when they share an integer cutoff.
 
@@ -1489,13 +1489,13 @@ There is no experimental baseline—the threshold comes directly from a contract
 
 Compliance testing is an **affirmative-assurance** procedure. The required rate $p_{\text{req}}$ is normative — supplied by an SLA, SLO, policy, or regulatory requirement — and the hypothesis pair is
 
-$$H_0: p \le p_{\text{req}}, \qquad H_1: p \gt p_{\text{req}}.$$
+$$H_0: p \le p_{\text{req}}, \qquad H_1: p > p_{\text{req}}.$$
 
 A PASS is issued only when the one-sided lower confidence bound on $p$ exceeds $p_{\text{req}}$. The controlled error event is **false compliance**: declaring that the system meets the requirement when the true rate is at or below it.
 
 Three regimes need to be kept distinct, because each behaves differently at the boundary $p = p_{\text{req}}$:
 
-1. **Naive observed-rate thresholding.** Compare $\hat{p}$ directly with $p_{\text{req}}$. At $p = p_{\text{req}}$ this produces approximately symmetric pass/fail behaviour from sampling variance; about half of repeated tests yield $\hat{p} \lt p_{\text{req}}$. This is the rule whose failure at the boundary is properly described as a false positive. **It is not the methodology's compliance rule** and is presented here only for contrast.
+1. **Naive observed-rate thresholding.** Compare $\hat{p}$ directly with $p_{\text{req}}$. At $p = p_{\text{req}}$ this produces approximately symmetric pass/fail behaviour from sampling variance; about half of repeated tests yield $\hat{p} < p_{\text{req}}$. This is the rule whose failure at the boundary is properly described as a false positive. **It is not the methodology's compliance rule** and is presented here only for contrast.
 
 2. **Confidence-bound compliance** (the methodology's rule). PASS only when the lower confidence bound on $p$ clears $p_{\text{req}}$. The controlled error is false compliance, and it is controlled at the configured level. At $p = p_{\text{req}}$ the rule is conservative by construction: the lower bound rarely clears the requirement, so the procedure rarely declares compliance.
 
@@ -1684,7 +1684,7 @@ Given a test with $n_{\text{test}}$ samples and threshold $p^*$ (with correspond
 2. Count successes $k_{\text{test}}$
 3. Decision (binding, integer-valued form):
    - If $k_{\text{test}} \ge c$: **PASS** (no degradation signal at this cutoff)
-   - If $k_{\text{test}} \lt c$: **FAIL** (threshold not met — degradation signal at $\alpha$ under the reference)
+   - If $k_{\text{test}} < c$: **FAIL** (threshold not met — degradation signal at $\alpha$ under the reference)
 
 The displayed observed rate $\hat{p}_{\text{test}} = k_{\text{test}} / n_{\text{test}}$ is reported alongside the integer count for human readability, but the binding decision is on $k_{\text{test}}$ vs. $c$, not on $\hat p_{\text{test}}$ vs. $p^*$. The two are equivalent for the regression rule (the integer cutoff is derived from $p^*$); reporting both prevents auditors and developers from being misled when the displayed-rate boundary lies between two adjacent integer outcomes.
 
@@ -2055,7 +2055,7 @@ When transparent statistics mode is enabled, the framework outputs a structured 
 | Observed rate       | $\hat{p} = K/n$                                        | Point estimate from test                                        |
 | Integer pass cutoff | $c = \lceil n \cdot p^* \rceil$                        | Binding decision artefact (§3.4, §5.1)                          |
 | Displayed cutoff    | $c/n$                                                  | Cutoff expressed as a rate                                      |
-| Achieved size       | $P_{\mathrm{ref}}(K \lt c)$ under the stated reference | Actual error rate of the discrete decision (≠ nominal $\alpha$) |
+| Achieved size       | $P_{\mathrm{ref}}(K < c)$ under the stated reference | Actual error rate of the discrete decision (≠ nominal $\alpha$) |
 | Standard error      | $\text{SE} = \sqrt{\hat{p}(1-\hat{p})/n}$              | Precision of the estimate                                       |
 | Confidence interval | Wilson score bounds                                    | Range of plausible true values                                  |
 | Z-score             | $z = (\hat{p} - p^*) / \text{SE}_0$                    | Standardised deviation from threshold (diagnostic)              |
@@ -2272,7 +2272,7 @@ where $j$ indexes prompts (or prompt strata) and $G$ is the prompt-level rate di
 
 The estimator must match the declared `targetEstimand`. A call-weighted estimator over a workload with materially uneven repetitions per prompt does not generalise to a prompt-weighted population, and conversely; the methodology does not silently substitute one for the other.
 
-**Treatment by intent.** When the invocation count $n$ materially exceeds the count of independent input items (e.g., $n \gt 2 J$ for a workload of $J$ distinct prompts), the design materially violates the i.i.d. Bernoulli interpretation, and the verdict's calibration under a plain $\mathrm{Binomial}(n, p)$ aggregation is no longer warranted. The methodology's response is intent-dependent.
+**Treatment by intent.** When the invocation count $n$ materially exceeds the count of independent input items (e.g., $n > 2 J$ for a workload of $J$ distinct prompts), the design materially violates the i.i.d. Bernoulli interpretation, and the verdict's calibration under a plain $\mathrm{Binomial}(n, p)$ aggregation is no longer warranted. The methodology's response is intent-dependent.
 
 In **SMOKE** mode, the warning of §8.4.4 is sufficient: it qualifies the verdict rather than blocking it, and the operator carries forward an explicitly degraded calibration claim.
 
@@ -3056,7 +3056,7 @@ class of **calibration fixtures**:
   $(p_0, n, \alpha)$ tuples — covering at minimum the worked
   examples of §§3 and 5 and the boundary cases of §4 — the fixture
   records the **achieved** false-alarm probability
-  $P_{p_0}(K \lt c)$ at the integer cutoff $c$ derived by the
+  $P_{p_0}(K < c)$ at the integer cutoff $c$ derived by the
   Wilson construction, and (where a minimum detectable effect
   $\delta$ is supplied) the **achieved** power against
   $p_0 - \delta$. Downstream frameworks check not only that their
@@ -3300,7 +3300,7 @@ $$k_{\text{raw}} = \texttt{qbinom}(1 - \alpha, \, n_s, \, p_j) + 1,$$
 and the saturation gate is applied before any clamp:
 
 - if $k_{\text{raw}} \le n_s$, the bound exists within the sample. The operative rank is $k_j = \max(k_{\text{raw}}, \lceil p_j n_s \rceil)$ and the upper confidence bound is $\tau_j = t_{(k_j)}$. (The floor at the baseline percentile rank prevents the bound from being looser-than-loose — see the property list below.)
-- if $k_{\text{raw}} \gt n_s$, no finite-sample distribution-free upper confidence bound on $Q(p_j)$ is available from this sample at the configured confidence. The rank has saturated beyond the maximum observed order statistic; the construction's existence condition (§12.5.2.1) is not met. Under VERIFICATION the result is INCONCLUSIVE, treated as a configuration error per §8.4.5. Under SMOKE or advisory reporting, the value $t_{(n_s)}$ may be reported with `saturated: true`, but does not constitute an exact bound and is not labelled as such.
+- if $k_{\text{raw}} > n_s$, no finite-sample distribution-free upper confidence bound on $Q(p_j)$ is available from this sample at the configured confidence. The rank has saturated beyond the maximum observed order statistic; the construction's existence condition (§12.5.2.1) is not met. Under VERIFICATION the result is INCONCLUSIVE, treated as a configuration error per §8.4.5. Under SMOKE or advisory reporting, the value $t_{(n_s)}$ may be reported with `saturated: true`, but does not constitute an exact bound and is not labelled as such.
 
 **Why this is the right construction.** The upper confidence bound on $Q(p_j)$ at level $1-\alpha$ is defined as the smallest value $\tau$ such that $P(\hat{Q}(p_j) > \tau \mid Q_{\text{true}}(p_j) \leq \tau) \leq \alpha$ under the null of no degradation. Because ranks are binomially distributed regardless of the underlying latency distribution, the construction is exact for any continuous $F_T$ — no density estimate, no normal approximation, no second moment. It is the non-parametric counterpart of the Wilson bound used on the pass-rate side, and restores the statistical symmetry the javai methodology requires between the two halves of the contract.
 
@@ -3406,7 +3406,7 @@ This is the standard Wilks (1941) tolerance-interval logic for distribution-free
 | p99        | 0.99  |                                             299 |
 | p99.9      | 0.999 |                                            2995 |
 
-If the rank required by §12.4.2 saturates beyond $n_s$ — i.e. $k_{\text{raw}} \gt n_s$ — **no finite-sample distribution-free upper confidence bound on $Q(p_j)$ is available at the configured confidence from this sample size**. The §12.4.2 construction therefore does not clamp $k_{\text{raw}}$ to $n_s$ and present the resulting $t_{(n_s)}$ as an exact bound: under VERIFICATION the verdict is INCONCLUSIVE (configuration-error treatment per §8.4.5); under SMOKE or advisory reporting, the value $t_{(n_s)}$ may be displayed with `saturated: true` as a clearly-labelled best-available statistic, distinct from an exact bound. The existence gate is the operative condition; the displayed advisory value does not weaken it.
+If the rank required by §12.4.2 saturates beyond $n_s$ — i.e. $k_{\text{raw}} > n_s$ — **no finite-sample distribution-free upper confidence bound on $Q(p_j)$ is available at the configured confidence from this sample size**. The §12.4.2 construction therefore does not clamp $k_{\text{raw}}$ to $n_s$ and present the resulting $t_{(n_s)}$ as an exact bound: under VERIFICATION the verdict is INCONCLUSIVE (configuration-error treatment per §8.4.5); under SMOKE or advisory reporting, the value $t_{(n_s)}$ may be displayed with `saturated: true` as a clearly-labelled best-available statistic, distinct from an exact bound. The existence gate is the operative condition; the displayed advisory value does not weaken it.
 
 The two latency gates therefore play different roles:
 
