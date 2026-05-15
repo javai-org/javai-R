@@ -49,7 +49,7 @@ Uncertain-system behaviour manifests along two **distinct** quality dimensions:
 
 The two dimensions are distinct (or orthogonal as quality concerns), not necessarily statistically independent. A fast response can be incorrect; a slow response can be correct; but correctness and latency may also covary in practice — challenging prompts may be slower *and* more likely to fail, overloaded infrastructure may inflate both error and tail-latency rates, and safety filters may change both refusal behaviour and latency. **The methodology does not require functional and temporal stochasticity to be statistically independent; the combined verdict is a logical conjunction rather than a probabilistic independence model.** Both dimensions require repeated observation and distributional reasoning. The javai methodology treats them with different statistical machinery — a binomial model for functional outcomes (§§1–5), non-parametric empirical percentiles for latency (§12) — and requires both to pass for the overall test to pass.
 
-Within the functional dimension, a contract typically declares multiple **criteria** (§1.4) — each its own Bernoulli stream, with its own threshold, confidence level, and validation set. The per-criterion partition refines the evidence within the functional dimension; it does not introduce new dimensions of stochasticity, since every criterion shares the same methodological regime (Wilson on per-criterion pass-rates).
+Within the functional dimension, a contract typically declares multiple **criteria** (§1.4) — each its own Bernoulli stream, with its own threshold, confidence level, and validation set. The per-criterion partition refines the evidence within the functional dimension; it does not introduce new dimensions of stochasticity, since every criterion shares the same methodological regime (Wilson on per-criterion pass-rates). A parallel diagnosis, with a different methodological response (Generalized Stochastic Dominance), appears in Garces Arias et al. (2025).
 
 Memory consumption, token usage, and cost per call also vary and could be modelled the same way, but the methodology concentrates on correctness and latency because these two dimensions have the most direct impact on end users; resource consumption is usually managed through infrastructure tooling rather than test assertions.
 
@@ -3600,6 +3600,8 @@ are documented elsewhere.
 21. Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. *Annals of Statistics*, 29(4), 1165–1188. [BY procedure; cited in §7.3 for FDR control under arbitrary dependence.]
 
 22. Anthropic. *Enterprise deployment overview.* Claude documentation, accessed 2026-05-14. [Provider documentation describing endpoint and routing configurations that vary across platforms; cited in §1.3.1 for the necessary-but-insufficient status of pinned model IDs.]
+
+23. Garces Arias, E., Blocher, H., Rodemann, J., Aßenmacher, M., & Jansen, C. (2025). Statistical multicriteria evaluation of LLM-generated text. In *Proceedings of the 18th International Natural Language Generation Conference (INLG)*, 338–351. Association for Computational Linguistics. [Independent diagnosis of the multi-criterion evaluation problem for stochastic language systems, addressed via a Generalized Stochastic Dominance front rather than the per-criterion decomposition adopted here; cited in the Introduction.]
 
 ---
 
