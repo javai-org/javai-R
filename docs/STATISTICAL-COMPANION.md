@@ -1,6 +1,6 @@
 # Statistical Companion Document
 
-**Version**: 1.3-draft
+**Version**: 1.3
 **Last updated**: 2026-05-14
 
 Copyright © 2026, Michael Franz Mannion BSc (Hons) MBA
@@ -13,17 +13,26 @@ All attribution licensing is ARL.
 
 ## Document History
 
-| # | Date           | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-|---|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **2025-12**    | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 2 | **2026-02**    | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 3 | **2026-04**    | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| 4 | **2026-05**    | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged.                                                                                                                                                                                                                                                                                                                             |
-| 5 | **2026-05**    | **Justification of the i.i.d. working assumption.** §1.3 gains a new §1.3.1 setting out the conditions under which the Bernoulli i.i.d. premise is defensible for LLM testing, with citations to Anthropic (2026) for provider model-versioning policy and Chen, Zaharia & Zou (2023) for the empirical counterweight. Existing §1.3 material moves unchanged into §1.3.2 (formal assumptions and operational threats) and §1.3.3 (developer responsibility for trial independence — previously unnumbered). No statistical content changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| 6 | **2026-05**    | **Criterion decomposition of the functional dimension.** The functional dimension is partitioned per **criterion** rather than aggregated over a contract's postconditions, with each criterion running its own Bernoulli stream (new §1.4). The chapter introduces three model primitives (postcondition, criterion, sampling), the inferential / observational mode distinction with three-valued per-criterion verdicts (PASS, FAIL, INCONCLUSIVE), the structural composite verdict, and its disclosed Type-I envelope $\sum_c \alpha_c$. New §1.5 formalises the **baseline** as an indexed family of per-criterion estimators conditioned on factor record, covariate profile, expiration window, and structural reference. Appendix A enumerates the elements of the statistical model. The single-criterion $m=1$ instance of the per-criterion model recovers the methodology of milestones 1–5 unchanged; no existing formula is superseded.                                                                                                                                                                                                   |
-| 7 | **2026-05-14** | **Per-criterion model extensions and statistical-language tightening.** Two strands of refinement extend milestone 6 without changing any formula or fixture. The per-criterion model gains a denominator-policy declaration (§1.4.5a), a policy-dependent effective denominator $n_c$, baselines that record both attempted and evaluable trial counts, the hierarchical model and target-estimand discipline for clustered designs (§8.2.1), and a composite-envelope split by procedure direction (§1.4.6). The statistical language is tightened throughout: compliance and regression are presented as distinct procedures with distinct error semantics; the integer pass cutoff $c$ is named as the binding decision artefact; Wilson is described as a score-test inversion rather than exact; confidence and p-value wording is frequentist and procedure-aligned; latency adds a confidence-bound existence gate (§12.5); population claims are codified as finite-corpus, superpopulation, or no-generalisation (§8.4.6); and the document's register is descriptive of what the methodology specifies rather than directive at implementers. |
+| # | Date        | Milestone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+|---|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **2025-12** | **First issue.** Uni-dimensional service contract covering only functional stochasticity: Bernoulli-trial model, binomial aggregation, and Wilson-score intervals as the basis for what later became the *distributional contract* idea formalised in [`DISTRIBUTIONAL-CONTRACTS.md`](DISTRIBUTIONAL-CONTRACTS.md).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 2 | **2026-02** | **Temporal dimension added.** The methodology expanded from a single service-contract dimension to two (functional and temporal). Latency was introduced as a non-parametric problem via empirical percentiles (nearest-rank), and a first-generation (naive) threshold derivation was provided using the standard error of the mean as a proxy for percentile uncertainty, $\hat{\tau}_j = Q(p_j) + z_\alpha \cdot s / \sqrt{n_s}$.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 3 | **2026-04** | **Stricter latency treatment.** The latency population was formally decomposed into a tripartite contract (correctness / availability / latency-given-success), with the perverse-incentive hazard of conditioning on success named explicitly. Additionally, the $s/\sqrt{n_s}$ approximation — which understated tail-percentile uncertainty for heavy-tailed distributions — was replaced by the exact binomial order-statistic upper confidence bound on the baseline quantile, restoring statistical symmetry with the Wilson-based construction on the pass-rate side.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 4 | **2026-05** | **Worked-example correction in §§4.3.2–4.4.** The 100%-baseline worked example, the §4.3.3 reference table, and the §4.4 extended example previously derived their test thresholds using a Wald approximation ($p_0 - z \cdot \text{SE}$), which was inconsistent with the one-sided Wilson lower-bound construction stated as the methodology's default elsewhere in the document. All three now apply the same Wilson construction. The §4.3.2 100-sample threshold becomes $\approx 0.969$ (97 / 100 successes) in place of $\approx 0.989$; the §4.3.3 table values shift accordingly; and the §4.4 thresholds (baseline $n = 2000$) become $\approx 0.971$ for $n_{\text{test}} = 100$ and $\approx 0.946$ for $n_{\text{test}} = 50$. This is a presentation correction only; the underlying methodology is unchanged.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 5 | **2026-05** | **Justification of the i.i.d. working assumption.** §1.3 gains a new §1.3.1 setting out the conditions under which the Bernoulli i.i.d. premise is defensible for LLM testing, with citations to Anthropic (2026) for provider model-versioning policy and Chen, Zaharia & Zou (2023) for the empirical counterweight. Existing §1.3 material moves unchanged into §1.3.2 (formal assumptions and operational threats) and §1.3.3 (developer responsibility for trial independence — previously unnumbered). No statistical content changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 6 | **2026-05** | **Multi-criterion service contracts.** The functional dimension is partitioned per **criterion**, with each criterion running its own Bernoulli stream (§1.4). Three model primitives — postcondition, criterion, sampling — are introduced (§1.4.2), together with inferential and observational modes (§1.4.5) yielding three-valued per-criterion verdicts (PASS, FAIL, INCONCLUSIVE), the structural composite verdict (§1.4.6), and Type-I envelopes split by procedure direction. A contract's clauses are typed as **empirical** (rate-bounded, evaluated by Wilson construction and integer-cutoff machinery) or **categorical** (obligation/prohibition, discharged architecturally). Compliance and regression are distinct procedures with distinct error semantics; the integer pass cutoff $c_c$ is the binding regression decision artefact, with Wilson identified as a score-test inversion. Population claims are codified as finite-corpus, superpopulation, or no-generalisation (§8.4.6). Latency carries a confidence-bound existence gate (§12.5). The **baseline** is an indexed family of per-criterion estimators (§1.5). The single-criterion ($m=1$) instance recovers the methodology of milestones 1–5 unchanged. |
 
 Each milestone strictly extends the previous one in the scope of what the methodology claims; none supersedes the Bernoulli/Wilson foundation laid in Milestone 1.
+
+---
+
+## Forward Scope: Revisions Targeted for 1.4
+
+Items identified for 1.4, deferred from 1.3 because each requires coordination with downstream frameworks and fixtures:
+
+- **1.4-S1**: Baseline indexing carries experiment/sampling identity.
+- **1.4-S2**: Threshold-notation cleanup separating the Wilson real-valued output, the integer cutoff, the displayed rate, and the compliance requirement.
+- **1.4-S3**: Predictive / two-sample treatment of latency regression.
 
 ---
 
@@ -59,7 +68,7 @@ The document mixes three kinds of content, and it is useful to name them upfront
 
 - **Exact statistical results** — e.g. the Bernoulli/binomial model, Wilson score intervals, and the binomial order-statistic upper bound on a quantile. These are theorems, cited and verifiable.
 - **Operational approximations** — e.g. normal-asymptotic sample-size planning formulas, and the Wilson lower bound used as a one-sided threshold. These are practical approximations chosen for their stability and familiarity; their limits are stated where they appear.
-- **Engineering guardrails** — e.g. feasibility gates, the VERIFICATION/SMOKE split, covariate tracking, baseline expiration, transparent-statistics output. These are framework-enforced disciplines that make disciplined inference *visible* and *auditable*; they do not replace the underlying statistics.
+- **Engineering guardrails** — e.g. feasibility gates, the distinction between full-strength verification runs and lightweight smoke-test runs, covariate tracking, baseline expiration, transparent-statistics output. These are framework-enforced disciplines that make disciplined inference *visible* and *auditable*; they do not replace the underlying statistics.
 
 Where a device below belongs to one of these categories, it is labelled. Readers should not expect design policies to have the calibration guarantees of theorems, or vice versa.
 
@@ -89,6 +98,22 @@ This document provides a rigorous statistical treatment of the methods employed 
 
 ---
 
+## The Model in Brief: Contracts, Tests, Experiments
+
+The rest of this document uses a small vocabulary — service contract, criterion, test, threshold, experiment, verdict — that it will lean on heavily. The terms are not exotic, but each carries a precise meaning in this methodology, and the chapters that follow are easier to navigate when they are introduced together.
+
+The foundation is the **service contract**. A service contract is the definition of what a *correct* response from the service under test looks like. It is not a single yes/no proposition; it is a conjunction of separately checkable expectations, and each expectation is called a **criterion**. A criterion asks one yes/no question of a single response: did *this* output meet *this* expectation, or did it not? A contract typically declares several criteria — schema validity, semantic correctness, absence of disallowed content — and the framework evaluates every one of them against every response it observes.
+
+A **test**, in this document, is what a developer or a CI system invokes to check that the service is behaving acceptably. Because the service is stochastic, a single response cannot settle the question; a test therefore invokes the service many times, applies the contract's criteria to each response, and aggregates the per-criterion outcomes into a **pass rate**. The test then compares that pass rate against a **threshold** and reports a per-criterion **verdict**: PASS, FAIL, or INCONCLUSIVE.
+
+A criterion's threshold comes from one of two places. A **normative** threshold is a fixed value the contract is *told* to meet — typically by an SLA, an SLO, a policy, or a regulation. An **empirical** threshold is derived from the service's own measured behaviour: the test does not ask whether the service meets some externally mandated rate, but whether it has *degraded* from a baseline it previously achieved. Empirical thresholds require a baseline, and a baseline is produced by an **experiment**: a separate invocation of the service whose purpose is to record the rate at which the service currently satisfies each criterion. Tests configured with normative thresholds do not need an experiment; tests configured with empirical thresholds consult the most recent experiment's baseline.
+
+The remaining vocabulary is structural. Whether the invocations belong to a test or to an experiment, the list of inputs the framework executes against the service is called a **sampling** — a list of $N \ge 1$ inputs whose responses are scored against every criterion in the contract.
+
+The bulk of this document is, in the end, an account of how those verdicts are computed under each threshold type, what they entitle a reader to claim, and what disciplines keep them honest. With that vocabulary in hand, the document can now look more closely at the *kinds* of expectation a contract can carry — which is the subject of the next section.
+
+---
+
 ## Clause Types: Empirical and Categorical
 
 A service contract is a conjunction of clauses, but the clauses are
@@ -106,9 +131,9 @@ confidence $\gamma$ over sampling $V$."* The threshold $p^*_c$
 may be normative in origin (an SLA-mandated 99.5%, evaluated by the
 compliance paradigm of §3) or empirically derived (a measured
 baseline, evaluated by the regression paradigm of §3). Either way,
-the *form* of the clause is rate-bounded: Wilson construction
-applies, MEASURE discharges it, and the companion's central machinery
-is the apparatus that evaluates it.
+the *form* of the clause is rate-bounded: a test invokes the
+service many times, and the companion's central machinery turns the
+resulting evidence into a per-criterion verdict.
 
 A **categorical clause** states an obligation or prohibition that
 admits no rate threshold at all: *"the service shall not violate
@@ -191,7 +216,7 @@ PASS if observed $K \ge c$; FAIL if $K < c$. The procedure controls false degrad
 
 The two rules share implementation components — the binomial model, the Wilson machinery on the threshold side, the feasibility gate, the VERIFICATION/SMOKE distinction — but their PASS/FAIL labels are **not interchangeable**. The transparent-statistics output (§7, §10) records which procedure was applied, and reports use intent-specific verdict wording so that auditors and operators do not read a regression PASS as an affirmative compliance certification (or vice versa).
 
-For backward compatibility and for the regression-side prose throughout §§3–5, this document continues to write the regression hypothesis in the equivalent rate form
+The regression hypothesis is equivalently expressible in rate form, and the regression-side prose of §§3–5 uses that form throughout:
 
 $$H_0: p \ge p^* \quad\text{(acceptable)} \qquad H_1: p < p^* \quad\text{(unacceptable)}$$
 
@@ -436,9 +461,14 @@ axes. A $P_4$ violation at any rate is clinically significant in a
 way a $P_1$ violation at $10^{-3}$ is not, *and* a $P_3$ violation at
 5% is significant in a way a $P_1$ violation at 5% is not. The
 methodology evaluates the empirical postconditions ($P_1$, $P_2$,
-$P_3$) each in its own statistical stream within MEASURE, against
-its own threshold, at its own confidence level; $P_4$ is routed out
-of MEASURE altogether. The three primitives of §1.4.2 give the
+$P_3$) each in its own statistical stream within the primary
+end-to-end MEASURE experiment, against its own threshold, at its
+own confidence level; $P_4$ is routed out of the primary end-to-end
+MEASURE experiment for contractual discharge. Its categorical
+obligation is discharged by the architectural commitment (§1.4.5);
+the guardrail's derived empirical criteria may themselves be
+evaluated in separate MEASURE experiments over adversarial samplings
+(§1.4.8). The three primitives of §1.4.2 give the
 empirical partition its formal structure; the hiding result of §1.4.4
 establishes that an aggregated stream over empirical postconditions
 that differ along any of the three axes potentially obscures
@@ -472,7 +502,7 @@ equal to the *conjunction* of its hosted postconditions' verdicts
 or postconditions it hosts, the *shape* of the test it conducts
 (inferential or observational, §1.4.5), the threshold and threshold
 origin where applicable, the confidence level $\alpha$, and the
-sampling the criterion is exercised against (§1.4.7). Each
+experiment/sampling in which the criterion is exercised (§1.4.7). Each
 criterion is its own Bernoulli stream and produces its own verdict. The criterion is the partition unit of the functional
 dimension. Two postconditions whose failures carry materially
 different consequences are addressed by two distinct criteria, never
@@ -893,8 +923,10 @@ in treatment.
 
 #### 1.4.7 Inferential reach of the sampling
 
-A criterion's inferential claim is, primarily, a claim about the
-sampling its experiment runs over. The Wilson lower bound
+A criterion's verdict or evidence is, primarily, a claim about the
+sampling its experiment runs over (including observational PASS
+verdicts, which are claims about the samples observed rather than
+about a population). The Wilson lower bound
 $\hat{p}_{c,L}(\alpha_c)$, the regression integer cutoff, the
 observational PASS verdict — all are statements about the $N$ samples
 in the experiment's sampling and the responses the service produced
@@ -1935,7 +1967,7 @@ $$\text{SE}_0 = \sqrt{0.95 \times 0.05 / 100} = 0.0218$$
 $$\text{SE}_1 = \sqrt{0.90 \times 0.10 / 100} = 0.0300$$
 $$\text{Power} = \Phi\left(\frac{0.95 - 0.90 - 1.645 \times 0.0218}{0.0300}\right) = \Phi\left(\frac{0.0141}{0.0300}\right) = \Phi(0.47) \approx 0.68$$
 
-With 100 samples, we have only 68% power to detect a 5-percentage-point degradation.
+With 100 samples, the test has only 68% power to detect a 5-percentage-point degradation.
 
 ##### Conformance Verification
 
@@ -2479,6 +2511,9 @@ where $j$ indexes prompts (or prompt strata) and $G$ is the prompt-level rate di
 | `region` / `timeBlock` | Provider region and time bucket when observable; supports detection of batch and temporal effects.                                                           |
 | `samplingMode`         | One of: with-replacement, without-replacement, exhaustive, adaptive, externally-supplied.                                                                    |
 | `targetEstimand`       | One of: prompt-weighted, call-weighted, production-weighted, severity-weighted, no-generalisation. Fixes which population the per-criterion $p_c$ estimates. |
+| `populationClaim`      | One of: `finite-corpus`, `superpopulation`, `no-generalisation` (§8.4.6). Fixes the claim regime of the verdict; a mismatch between baseline and test is a §8.4.5 hard invalidator.                                                                                |
+| `weights`              | Prompt, stratum, production, or severity weights, where the target estimand is weighted. Empty when the design is unweighted.                                                                                                                                       |
+| `strata`               | Declared strata and their intended population weights, where stratified sampling is used. Empty when the sampling is unstratified.                                                                                                                                  |
 
 The estimator must match the declared `targetEstimand`. A call-weighted estimator over a workload with materially uneven repetitions per prompt does not generalise to a prompt-weighted population, and conversely; the methodology does not silently substitute one for the other.
 
@@ -3098,12 +3133,20 @@ STATISTICAL INFERENCE
   Wilson lower bound:  p̂_{c,L}(0.05) ≈ 0.940
   Diagnostic z-score (Wald form, illustrative — not the operative test):
                        z = (p̂_c - p*_c) / √(p*_c(1-p*_c)/n_c) ≈ 2.13
-  Reference-tail probability at the observed count:
+  Achieved size at integer cutoff:
     method:            exact-binomial-lower-tail
-    tail:              P_{p = p*_c}(K_c ≤ 953)
-    value:             ≈ 0.98
-    interpretation:    observed count sits in the upper part of the
-                       reference distribution; no degradation signal.
+    reference:         p_ref = 0.951
+    cutoff:            c_c = 939
+    tail:              P_{p = 0.951}(K < 939)
+    value:             ≈ 0.0371
+    interpretation:    false-degradation-alarm probability under the
+                       empirical reference at the configured cutoff.
+
+  Diagnostic observed-count tail:
+    tail:              P_{p = 0.951}(K ≤ 953)
+    value:             ≈ 0.636
+    interpretation:    observed count is not in the lower tail of the
+                       reference distribution.
 
 VERDICT
   Statistical verdict:  PASS
@@ -3186,8 +3229,7 @@ THRESHOLD REFERENCE
 
 STATISTICAL INFERENCE
   Standard error:      SE_c = √(p̂_c(1-p̂_c)/n_c) = √(0.985 × 0.015 / 800) ≈ 0.00430
-  99.9% Wilson CI:     [0.971, 0.993]
-  Wilson lower bound:  p̂_{c,L}(0.001) ≈ 0.9649
+  One-sided Wilson lower bound at α_c = 0.001: p̂_{c,L} ≈ 0.9649
   Diagnostic z-score (Wald form, illustrative — not the operative test):
                        z = (p̂_c - p*_c) / √(p*_c(1-p*_c)/n_c) ≈ 1.01
   p-value:
@@ -3538,7 +3580,7 @@ A test with observed $\hat{Q}_{\text{test}}(p_j) \leq \tau_j$ means: the observe
 
 A breach ($\hat{Q}_{\text{test}}(p_j) > \tau_j$) means: the observed percentile exceeds the one-sided binomial upper bound on the baseline quantile, providing evidence of latency degradation at the stated confidence level.
 
-**Note on confidence vs. prediction**: The construction above is a confidence bound on the *true* baseline quantile $Q_{\text{true}}(p_j)$, not a prediction interval for the *next experiment's* $\hat{Q}_{\text{test}}(p_j)$. When baseline and test sample sizes are comparable, the test-side sampling variance roughly doubles the relevant uncertainty and false-positive rates will exceed the nominal $\alpha$. The methodology documents this as a known conservatism gap: for regression testing, breaches remain statistically meaningful (they exceed a legitimate upper bound on the baseline), but the false-positive rate of the binomial bound alone is between $\alpha$ and $2\alpha$ depending on the test-side $n_s$. Operators who require tight false-positive calibration should size test experiments substantially larger than baselines, at which point the confidence-bound interpretation is the binding constraint.
+**Note on confidence vs. prediction**: The construction above is a confidence bound on the *true* baseline quantile $Q_{\text{true}}(p_j)$, not a prediction interval for the *next experiment's* $\hat{Q}_{\text{test}}(p_j)$. When baseline and test sample sizes are comparable, test-side sampling variance can materially increase the no-degradation breach probability above the nominal $\alpha$. The increase is not controlled by the baseline confidence-bound construction alone; it depends on the test sample size, percentile level, and rank convention. Breaches remain statistically meaningful (they exceed a legitimate upper bound on the baseline), but the actual false-degradation-alarm rate is not bounded by a simple multiple of $\alpha$. Operators who require calibrated false-degradation-alarm rates should use a predictive or two-sample procedure, or rely on calibration fixtures, rather than reading the baseline confidence bound as a predictive test threshold; sizing test experiments substantially larger than baselines reduces but does not eliminate the gap (treatment forthcoming in 1.4 — see *Forward Scope*).
 
 #### 12.4.4 Supporting Comparison: Bootstrap
 
@@ -3549,7 +3591,7 @@ A breach ($\hat{Q}_{\text{test}}(p_j) > \tau_j$) means: the observed percentile 
 | Sample    | $n_s$ | $p$  | Point estimate $Q(p)$ | Bootstrap 95% upper | Binomial bound (rank) | $\Delta$ (ms) |
 |-----------|-------|------|-----------------------|---------------------|-----------------------|---------------|
 | lognormal | 200   | 0.95 | 356                   | 393                 | 419 (k=196)           | +26           |
-| lognormal | 200   | 0.99 | 448                   | 589                 | 589 (k=200)           | 0             |
+| lognormal | 200   | 0.99 | 448                   | 589                 | 589 (`k_raw > n_s`; advisory $t_{(n_s)}$, `saturated: true`; not an exact bound) | 0             |
 | lognormal | 935   | 0.95 | 787                   | 810                 | 812 (k=900)           | +2            |
 | lognormal | 935   | 0.99 | 980                   | 1098                | 1125 (k=931)          | +27           |
 
@@ -3560,7 +3602,7 @@ Two observations:
 
 Exact numerical outputs and the bootstrap seeds are preserved in `inst/cases/latency_threshold_bootstrap.json` so downstream consumers can verify the comparison without an R installation.
 
-The superseded $s/\sqrt{n_s}$ approximation used in v1.0 of this document is removed. It understated tail-percentile uncertainty for heavy-tailed distributions by a factor that grew with skewness; the binomial bound has no such defect.
+A standard-error scaling such as $s/\sqrt{n_s}$ would understate tail-percentile uncertainty on heavy-tailed distributions by a factor that grows with skewness; the binomial order-statistic construction has no such defect.
 
 #### 12.4.5 Worked Example
 
@@ -3579,8 +3621,6 @@ $$\tau_{0.95} = t_{(900)}$$
 That is, the latency threshold is the 900th-smallest observation in the baseline — an observed value in milliseconds, by construction.
 
 A subsequent test with $\hat{Q}_{0.95, \text{test}} \leq t_{(900)}$ passes; any observation above $t_{(900)}$ breaches the threshold and constitutes evidence of degradation at 95% confidence.
-
-Compare with the superseded v1.0 formula, which would have produced $\tau_{0.95} = 588\text{ms}$ from a sample standard deviation of $145\text{ms}$. Whether that corresponds to $t_{(900)}$ or to some lower rank depends entirely on the tail density of the specific service — a dependence the new construction eliminates.
 
 ### 12.5 Sample Size Requirements for Percentile Estimation
 
@@ -3628,24 +3668,28 @@ If the rank required by §12.4.2 saturates beyond $n_s$ — i.e. $k_{\text{raw}}
 
 The two latency gates therefore play different roles:
 
-| Gate                                   | Question answered                                                                                | Failure mode in VERIFICATION                      |
-|----------------------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------|
-| Non-degeneracy (§12.5.2)               | Is the empirical percentile distinct from the sample maximum / minimum?                          | Configuration error                               |
-| Confidence-bound existence (§12.5.2.1) | Does the configured confidence procedure admit a non-saturated upper bound on the true quantile? | Configuration error or explicit saturation report |
+| Gate                                   | Question answered                                                                                | Failure mode in VERIFICATION                                          |
+|----------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| Non-degeneracy (§12.5.2)               | Is the empirical percentile distinct from the sample maximum / minimum?                          | Configuration error                                                   |
+| Confidence-bound existence (§12.5.2.1) | Does the configured confidence procedure admit a non-saturated upper bound on the true quantile? | Configuration error / INCONCLUSIVE (saturation report applies under SMOKE or advisory only) |
 
 A percentile estimate can be non-degenerate yet still unable to support a distribution-free upper confidence bound at the configured confidence. For each asserted percentile, the framework first checks the non-degeneracy requirement and then checks whether the required order-statistic confidence-bound rank exists within the observed sample. If the required rank exceeds the sample size, the latency assertion is infeasible for VERIFICATION at the configured confidence.
 
-**Scope note on p99.9 and beyond**: The supported percentile levels are $\{0.50, 0.90, 0.95, 0.99\}$. Extreme-tail percentiles such as p99.9 are out of scope for the current methodology: a non-degenerate p99.9 estimate requires $n_s \geq 1{,}000$ successful samples, and a statistically useful binomial order-statistic upper bound at 95% confidence requires considerably more. Services with genuine p99.9 SLAs generally warrant dedicated tail-focused instrumentation (production telemetry, HdrHistogram-style log-linear bucketing, or extreme-value modelling) rather than per-test-run estimation. A future revision of the methodology may incorporate extreme-value-theory treatments for this regime.
+**Scope note on p99.9 and beyond**: The supported percentile levels are $\{0.50, 0.90, 0.95, 0.99\}$. Extreme-tail percentiles such as p99.9 are out of scope for the current methodology: a non-degenerate p99.9 estimate requires $n_s \geq 1{,}000$ successful samples, and a statistically useful binomial order-statistic upper bound at 95% confidence requires considerably more. Services with genuine p99.9 SLAs generally warrant dedicated tail-focused instrumentation (production telemetry, HdrHistogram-style log-linear bucketing, or extreme-value modelling) rather than per-test-run estimation.
 
 #### 12.5.3 The Feasibility Gate
 
-For **VERIFICATION** intent with latency enforcement enabled, the framework checks *before any samples execute* whether the expected number of successful samples meets the minimum requirement:
+For **VERIFICATION** intent with latency enforcement enabled, the framework checks *before any samples execute* whether the expected number of successful samples meets the **stricter** of the two minimums — non-degeneracy (§12.5.2) and confidence-bound existence (§12.5.2.1):
 
-$$n_{s,\text{expected}} = n_{\text{planned}} \times \hat{p}_{\text{baseline}}$$
+$$n_{s,\min}^{\mathrm{VERIFICATION}}(p_j,\, \alpha) \;=\; \max\!\left(\, n_{s,\min}^{\mathrm{non\text{-}degen}}(p_j),\; \left\lceil \frac{\log\alpha}{\log p_j} \right\rceil \,\right).$$
 
-If $n_{s,\text{expected}} < n_{s,\min}(p_j)$ for any asserted percentile $p_j$, the framework raises a configuration error — the same mechanism used for the pass-rate feasibility gate (Section 5.7.1).
+The expected successful-sample count is
 
-**Example**: A test with $n_{\text{planned}} = 50$ and baseline $\hat{p} = 0.80$ yields $n_{s,\text{expected}} = 40$. A p99 assertion requires $n_{s,\min} = 100$. The test is infeasible and fails immediately with a diagnostic message.
+$$n_{s,\text{expected}} = n_{\text{planned}} \times \hat{p}_{\text{baseline}}.$$
+
+If $n_{s,\text{expected}} < n_{s,\min}^{\mathrm{VERIFICATION}}(p_j,\, \alpha)$ for any asserted percentile $p_j$, the framework raises a configuration error — the same mechanism used for the pass-rate feasibility gate (Section 5.7.1).
+
+**Example**: A test with $n_{\text{planned}} = 200$ and baseline $\hat{p} = 0.80$ yields $n_{s,\text{expected}} = 160$. A p99 assertion at $\alpha = 0.05$ requires $n_{s,\min}^{\mathrm{VERIFICATION}} = \max(100,\, 299) = 299$. The test is infeasible (160 < 299) and fails immediately with a diagnostic message.
 
 #### 12.5.4 Indicative Results
 
@@ -3760,7 +3804,7 @@ are documented elsewhere.
 | **Sampling**                 | A list of $N \geq 1$ samples posted to the service under test in a single experiment. Shared by every criterion of the experiment; per-criterion verdicts are claims about the same $N$ samples.                                                                                                                                                                                                       | §1.4.2, §1.4.7                  |
 | **Factor record**                  | The identification of the service, model, and serving configuration whose $p_c$ is being estimated. Two evaluations that differ in factors evaluate two different objects.                                                                                                                                                                                                                              | §1.3.1                          |
 | **Covariate profile**              | The recorded values of declared contextual variables at the time of an evaluation; affects baseline comparability.                                                                                                                                                                                                                                                                                      | §8.4.1                          |
-| **Inferential reach of the sampling** | The $N$ samples the experiment posts to the service, over which every criterion in the experiment is exercised; the criterion's inferential claim is, primarily, a claim about those samples. Extending it to a different input distribution is a separate interpretive move (§8.1).                                                                                                            | §1.4.7                          |
+| **Inferential reach of the sampling** | The $N$ samples the experiment posts to the service, over which every criterion in the experiment is exercised; a criterion's verdict or evidence is, primarily, a claim about those samples. Extending it to a different input distribution is a separate interpretive move (§8.4.6).                                                                                                          | §1.4.7                          |
 | **Per-criterion Bernoulli stream** | The sequence of per-criterion indicators $\{X_{i,c}\}$ treated as i.i.d. Bernoulli with parameter $p_c$ under the model's working approximation.                                                                                                                                                                                                                                                        | §1.4.3                          |
 | **Denominator policy**             | The per-criterion declaration that determines whether unevaluable attempted trials are excluded from the criterion's success-rate denominator (`CONDITIONAL_ON_EVALUABLE`) or counted as failures (`MARGINAL_COUNT_UNEVALUABLE_AS_FAIL`). Structural non-applicability and availability gating are not denominator policies.                                                                            | §1.4.5a                         |
 | **Criterion scope**                | The criterion's `scopePredicate` (applicability predicate) narrows the experiment's $N$ samples to those on which the criterion is exercised. The report exposes $n_{c,\mathrm{applicable}}$ (samples in scope) and $n_{c,\mathrm{out\text{-}of\text{-}scope}}$ alongside the denominator-policy counts, so the narrowing from $N$ to $n_{c,\mathrm{attempted}}$ is visible.                              | §1.4.5a                         |
