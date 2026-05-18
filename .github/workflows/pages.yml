@@ -76,6 +76,23 @@ jobs:
             -V monofont="DejaVu Sans Mono" \
             -V title="Glossary"
 
+      - name: Render Statistical Model Overview to HTML fragment
+        env:
+          PANDOC_IMAGE: pandoc/latex:3.9-ubuntu
+        run: |
+          PANDOC="docker run --rm -v ${PWD}:/data -w /data ${PANDOC_IMAGE}"
+          $PANDOC docs/STATISTICAL-MODEL-OVERVIEW.md \
+            --from gfm \
+            --to html5 \
+            -o _overview-body.html
+          # The banner supplies the page title; strip the document's leading <h1>.
+          python3 - <<'PY'
+          import re
+          s = open('_overview-body.html').read()
+          s = re.sub(r'<h1[^>]*>.*?</h1>\s*', '', s, count=1, flags=re.DOTALL)
+          open('_overview-body.html', 'w').write(s)
+          PY
+
       - name: Create index page
         run: |
           cat > _site/index.html << 'HTMLEOF'
@@ -140,11 +157,32 @@ jobs:
               .content-body p { color: var(--color-text-secondary); font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; }
               .content-body strong { color: var(--color-text); }
 
+              /* Overview prose */
+              .overview { max-width: 760px; }
+              .overview p { color: var(--color-text-secondary); font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.2rem; }
+              .overview h1 { font-family: var(--font-heading); font-size: 1.9rem; font-weight: 700; color: var(--color-text); margin: 2.5rem 0 1rem; line-height: 1.2; letter-spacing: -0.01em; }
+              .overview h2 { font-family: var(--font-heading); font-size: 1.45rem; font-weight: 600; color: var(--color-text); margin: 2.25rem 0 0.75rem; line-height: 1.3; }
+              .overview h3 { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 600; color: var(--color-text); margin: 1.5rem 0 0.5rem; }
+              .overview ul, .overview ol { margin: 0 0 1.2rem 1.5rem; color: var(--color-text-secondary); font-size: 1.1rem; line-height: 1.8; }
+              .overview li { margin-bottom: 0.4rem; }
+              .overview li > strong:first-child { color: var(--color-text); }
+              .overview strong { color: var(--color-text); }
+              .overview blockquote { border-left: 4px solid var(--color-accent); padding: 0.75rem 1.25rem; margin: 1.75rem 0; font-style: italic; color: var(--color-text); background: var(--color-surface); }
+              .overview blockquote p { color: var(--color-text); margin-bottom: 0; }
+              .overview hr { border: none; border-top: 1px solid var(--color-border); margin: 2.5rem 0; }
+              .overview code { font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace; background: var(--color-surface); padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.9em; }
+              .overview a { border-bottom: 1px solid currentColor; }
+
+              /* Reference materials */
+              .references { margin-top: 5rem; }
+              .references > h2 { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+              .references > p { color: var(--color-text-secondary); font-size: 1.05rem; margin-bottom: 2rem; max-width: 760px; line-height: 1.7; }
+
               /* Document cards */
-              .doc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 3rem; }
-              .doc-card { background: var(--color-surface); border: 1px solid var(--color-border); border-left: 5px solid var(--color-accent); padding: 2rem; }
-              .doc-card h2 { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem; line-height: 1.3; }
-              .doc-card p { color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem; }
+              .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 0; }
+              .doc-card { background: var(--color-surface); border: 1px solid var(--color-border); border-left: 5px solid var(--color-accent); padding: 1.75rem; }
+              .doc-card h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem; line-height: 1.3; }
+              .doc-card p { color: var(--color-text-secondary); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.25rem; }
               .doc-card .btn { display: inline-block; font-family: var(--font-ui); padding: 0.7em 1.8em; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.03em; text-transform: uppercase; border: 2px solid var(--color-accent); background: var(--color-accent); color: var(--color-white); transition: all 0.2s ease; }
               .doc-card .btn:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); color: var(--color-white); }
 
@@ -161,7 +199,7 @@ jobs:
                 .site-nav { gap: 1rem; flex-wrap: wrap; justify-content: center; }
                 .section-banner { height: 180px; }
                 .section-banner h1 { font-size: 1.75rem; }
-                .doc-grid { grid-template-columns: 1fr; }
+                .doc-grid { grid-template-columns: 1fr; gap: 1rem; }
                 .site-footer .container { flex-direction: column; text-align: center; }
               }
             </style>
@@ -180,55 +218,49 @@ jobs:
             <section class="section-banner">
               <div class="container">
                 <h1>javai-R</h1>
-                <p class="section-banner-sub">Statistical foundations and reference data for probabilistic testing.</p>
+                <p class="section-banner-sub">A practical summary of the javai statistical model.</p>
               </div>
             </section>
 
             <section class="content">
               <div class="container">
-                <div class="content-body">
-                  <p>
-                    javai-R is the <strong>statistical oracle</strong> of the
-                    <a href="https://javai.org">javai</a> project family. It produces
-                    canonical reference datasets using R's vetted statistical library,
-                    against which all framework implementations verify conformance.
-                  </p>
-                  <p>
-                    The documents below describe the statistical methodology that underpins
-                    the javai approach to testing non-deterministic systems.
-                  </p>
-                </div>
+                <article class="overview">
+          __OVERVIEW_BODY__
+                </article>
 
-                <div class="doc-grid">
-                  <div class="doc-card">
-                    <h2>Statistical Companion</h2>
-                    <p>
-                      Primarily for statisticians, this document presents the statistical
-                      foundations of the javai methodology. Covers hypothesis testing,
-                      confidence intervals, power analysis, threshold derivation, and
-                      latency percentile analysis.
-                    </p>
-                    <a href="statistical-companion.pdf" class="btn">Download PDF</a>
+                <section class="references">
+                  <h2>Reference materials</h2>
+                  <p>The companion documents below provide the formal foundations underlying the summary above.</p>
+                  <div class="doc-grid">
+                    <div class="doc-card">
+                      <h3>Statistical Companion</h3>
+                      <p>
+                        Primarily for statisticians, the formal foundations of the javai
+                        methodology. Covers hypothesis testing, confidence intervals, power
+                        analysis, threshold derivation, and latency percentile analysis.
+                      </p>
+                      <a href="statistical-companion.pdf" class="btn">Download PDF</a>
+                    </div>
+                    <div class="doc-card">
+                      <h3>Distributional Contracts</h3>
+                      <p>
+                        For software language professionals. Extends Design by Contract to
+                        stochastic systems, lifting postconditions from Boolean predicates
+                        over individual executions to statistical assertions over repeated
+                        executions.
+                      </p>
+                      <a href="distributional-contracts.pdf" class="btn">Download PDF</a>
+                    </div>
+                    <div class="doc-card">
+                      <h3>Glossary</h3>
+                      <p>
+                        Terminology used across the javai project family, defined in the
+                        context of the distributional contract methodology.
+                      </p>
+                      <a href="glossary.pdf" class="btn">Download PDF</a>
+                    </div>
                   </div>
-                  <div class="doc-card">
-                    <h2>Distributional Contracts</h2>
-                    <p>
-                      For software language professionals, this document presents an
-                      extension of Design by Contract to stochastic systems. Lifts
-                      postconditions from Boolean predicates over individual executions
-                      to statistical assertions over repeated executions.
-                    </p>
-                    <a href="distributional-contracts.pdf" class="btn">Download PDF</a>
-                  </div>
-                  <div class="doc-card">
-                    <h2>Glossary</h2>
-                    <p>
-                      Terminology used across the javai project family. Terms are defined
-                      in the context of the distributional contract methodology.
-                    </p>
-                    <a href="glossary.pdf" class="btn">Download PDF</a>
-                  </div>
-                </div>
+                </section>
               </div>
             </section>
 
@@ -244,6 +276,13 @@ jobs:
           </body>
           </html>
           HTMLEOF
+
+          python3 - <<'PY'
+          body = open('_overview-body.html').read()
+          html = open('_site/index.html').read()
+          open('_site/index.html', 'w').write(html.replace('__OVERVIEW_BODY__', body))
+          PY
+          rm _overview-body.html
 
       - name: Add CNAME for custom domain
         run: echo "r.javai.org" > _site/CNAME
