@@ -2,7 +2,7 @@
 
 This document is the front door to the javai statistical model. It is intended for engineers, reviewers, product owners, and auditors who need to understand what the model is for, what kind of evidence it produces, and what it deliberately does not claim — without working through the full statistical companion.
 
-The statistical companion ([`STATISTICAL-COMPANION.md`](STATISTICAL-COMPANION.md); online: <https://r.javai.org/statistical-companion.pdf>) remains the canonical reference for formulae, derivations, and edge cases. This document summarises the conceptual frame around it.
+The [statistical companion](https://r.javai.org/statistical-companion.pdf) remains the canonical reference for formulae, derivations, and edge cases. This document summarises the conceptual frame around it.
 
 ## 1. Motivation: deterministic testing breaks at uncertainty's boundary
 
@@ -80,7 +80,7 @@ A reported confidence level is therefore not a claim that an individual verdict 
 
 ## Glossary
 
-Short definitions of the key statistical terms used above. The full glossary lives in [`GLOSSARY.md`](GLOSSARY.md) (online: <https://r.javai.org/glossary.pdf>); only the terms that appear in the body of this overview are repeated here.
+Short definitions of the key statistical terms used above. The full [glossary](https://r.javai.org/glossary.pdf) lives alongside this overview; only the terms that appear in the body are repeated here.
 
 - **Binomial** — the distribution of the count of passes in a fixed number of independent trials with the same success probability. The companion uses binomial reasoning to relate observed pass counts to the underlying success rate.
 - **Confidence level** — the long-run frequency with which the procedure's interval would cover the true parameter if the experiment were repeated under the same conditions. A 95% confidence level is a property of the procedure, not a probability attached to any single verdict.
@@ -95,4 +95,4 @@ Short definitions of the key statistical terms used above. The full glossary liv
 
 ---
 
-For the full derivations, formulae, and the rules each implementation must conform to, see [`STATISTICAL-COMPANION.md`](STATISTICAL-COMPANION.md) (online: <https://r.javai.org/statistical-companion.pdf>). For the language-agnostic conformance fixtures derived from the companion, see [`../inst/cases/`](../inst/cases/).
+For the full derivations, formulae, and the rules each implementation must conform to, see the [statistical companion](https://r.javai.org/statistical-companion.pdf). For the language-agnostic conformance fixtures derived from the companion, see [`../inst/cases/`](../inst/cases/).
