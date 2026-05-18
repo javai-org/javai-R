@@ -544,12 +544,14 @@ inferential test; postconditions decide per-trial outcomes.
 
 #### 1.4.3 The per-criterion Bernoulli model
 
-The model of §1.1 treats each invocation as a single Bernoulli trial
-$X_i \sim \text{Bernoulli}(p)$ and §1.2 aggregates to $K = \sum X_i
-\sim \text{Binomial}(n, p)$ with $\hat{p} = K/n$. Criterion
-decomposition replaces the single trial $X_i$ with a family of
-per-criterion trials, one per criterion, and applies the same model to
-each.
+Each criterion $c$ defines a Bernoulli stream of per-trial pass/fail
+indicators $\{X_{i,c}\}$, aggregated to a Binomial success count $K_c
+= \sum_i X_{i,c}$ for inference; the per-stream parameter is $p_c$
+and the per-stream estimate is $\hat p_c = K_c / n_c$. A contract
+with a single criterion ($m = 1$) is the special case of this
+formulation in which the per-criterion stream coincides with the
+single Bernoulli/Binomial model of §§1.1–1.2; the multi-criterion
+machinery below covers $m \geq 1$ uniformly.
 
 Let a contract declare $m$ criteria $\{C_1, \ldots, C_m\}$ (the symbol
 $m$ for the *number of criteria* is used throughout this chapter and
