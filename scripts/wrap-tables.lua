@@ -27,9 +27,13 @@ local CHAR_FRAC = 0.016    -- fraction of \linewidth per monospace char at 11pt
                            --  slight overshoot ensures no overflow)
 local stringify = pandoc.utils.stringify
 
+-- Longest substring with no break opportunities. Whitespace, hyphens,
+-- and underscores all act as break points: whitespace and hyphens
+-- are LaTeX defaults; underscores are inserted as break points by
+-- the breakable-code.lua filter for inline Code elements.
 local function max_word_len(s)
   local m = 0
-  for w in s:gmatch("%S+") do
+  for w in s:gmatch("[^%s%-_]+") do
     if #w > m then m = #w end
   end
   return m
