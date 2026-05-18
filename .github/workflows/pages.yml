@@ -80,7 +80,7 @@ jobs:
         env:
           PANDOC_IMAGE: pandoc/latex:3.9-ubuntu
         run: |
-          PANDOC="docker run --rm -v ${PWD}:/data -w /data ${PANDOC_IMAGE}"
+          PANDOC="docker run --rm --user $(id -u):$(id -g) -v ${PWD}:/data -w /data ${PANDOC_IMAGE}"
           $PANDOC docs/STATISTICAL-MODEL-OVERVIEW.md \
             --from gfm \
             --to html5 \
