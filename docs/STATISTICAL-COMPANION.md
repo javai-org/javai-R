@@ -490,10 +490,7 @@ role in the statistical model.
 **Sampling.** The list of sample inputs posted to the service under
 test in a single experiment or test. A sampling has length $N \geq 1$;
 each *sample entry* in the list is presented once to the service,
-producing $N$ responses. The same underlying input may appear in
-more than one entry — repeated-prompt designs are represented this
-way — in which case the repetitions are recorded as cluster
-structure and handled under §8.2.1. The sampling is shared across
+producing $N$ responses. The sampling is shared across
 every criterion (defined below) that the contract exercises in the
 run: a contract with multiple criteria produces a per-trial vector
 of per-criterion observations over a single shared sampling, and
