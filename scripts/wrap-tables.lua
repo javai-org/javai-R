@@ -10,18 +10,37 @@
 -- not wrap. Setting widths here forces pandoc to emit p{...} columns
 -- that do wrap.
 --
--- Heuristic: weight column = sqrt(total cell text length in that column).
--- Square-root dampens extreme ratios (a 400-char column shouldn't get
--- 100x the width of a 4-char column — it should get ~10x). A minimum
--- fraction per column (MIN_FRAC) prevents narrow columns from becoming
--- unreadably thin.
+-- Width assignment is two-stage:
+--   1. Each column gets a *minimum* fraction sized to its longest
+--      unbreakable token. Long monospace tokens like
+--      `MARGINAL_COUNT_UNEVALUABLE_AS_FAIL` contain no LaTeX break
+--      points (underscores are not break points by default), so the
+--      column must be wide enough to fit the whole token or the text
+--      overflows into adjacent columns.
+--   2. The remaining width is distributed by sqrt(total cell text
+--      length) so long-prose columns still get more room than short
+--      ones, with the square root dampening extreme ratios.
 
-local MIN_FRAC = 0.04   -- every column gets at least 4% of \linewidth
+local MIN_FRAC = 0.04      -- every column gets at least 4% of \linewidth
+local CHAR_FRAC = 0.016    -- fraction of \linewidth per monospace char at 11pt
+                           -- (DejaVu Sans Mono ~6.6pt char on a ~468pt textwidth;
+                           --  slight overshoot ensures no overflow)
 local stringify = pandoc.utils.stringify
 
-local function add_row_lengths(row, lengths)
+local function max_word_len(s)
+  local m = 0
+  for w in s:gmatch("%S+") do
+    if #w > m then m = #w end
+  end
+  return m
+end
+
+local function add_row(row, lengths, maxtok)
   for i, cell in ipairs(row.cells) do
-    lengths[i] = (lengths[i] or 0) + #stringify(cell.contents)
+    local s = stringify(cell.contents)
+    lengths[i] = (lengths[i] or 0) + #s
+    local mt = max_word_len(s)
+    if mt > (maxtok[i] or 0) then maxtok[i] = mt end
   end
 end
 
@@ -29,37 +48,49 @@ function Table(tbl)
   local ncols = #tbl.colspecs
   if ncols == 0 then return nil end
 
-  local lengths = {}
-  for i = 1, ncols do lengths[i] = 0 end
+  local lengths, maxtok = {}, {}
+  for i = 1, ncols do lengths[i] = 0; maxtok[i] = 0 end
 
   if tbl.head and tbl.head.rows then
-    for _, row in ipairs(tbl.head.rows) do add_row_lengths(row, lengths) end
+    for _, row in ipairs(tbl.head.rows) do add_row(row, lengths, maxtok) end
   end
   for _, body in ipairs(tbl.bodies) do
     if body.body then
-      for _, row in ipairs(body.body) do add_row_lengths(row, lengths) end
+      for _, row in ipairs(body.body) do add_row(row, lengths, maxtok) end
     end
     if body.head then
-      for _, row in ipairs(body.head) do add_row_lengths(row, lengths) end
+      for _, row in ipairs(body.head) do add_row(row, lengths, maxtok) end
     end
   end
   if tbl.foot and tbl.foot.rows then
-    for _, row in ipairs(tbl.foot.rows) do add_row_lengths(row, lengths) end
+    for _, row in ipairs(tbl.foot.rows) do add_row(row, lengths, maxtok) end
   end
 
-  -- sqrt-dampened weights; +1 avoids zero for empty columns.
-  local weights = {}
-  local total_w = 0
+  -- Stage 1: per-column minimum sized to the longest unbreakable token.
+  local mins = {}
+  local sum_min = 0
+  for i = 1, ncols do
+    mins[i] = math.max(MIN_FRAC, maxtok[i] * CHAR_FRAC)
+    sum_min = sum_min + mins[i]
+  end
+  -- If minimums alone exceed full width, scale them down proportionally
+  -- so the table still fits the page (some overflow may then occur,
+  -- but no column is starved entirely).
+  if sum_min > 1 then
+    for i = 1, ncols do mins[i] = mins[i] / sum_min end
+    sum_min = 1
+  end
+
+  -- Stage 2: distribute remaining width by sqrt-dampened content weight.
+  local remaining = 1 - sum_min
+  local weights, total_w = {}, 0
   for i = 1, ncols do
     weights[i] = math.sqrt(lengths[i] + 1)
     total_w = total_w + weights[i]
   end
 
-  local remaining = 1.0 - MIN_FRAC * ncols
-  if remaining < 0 then remaining = 0 end
-
   for i = 1, ncols do
-    tbl.colspecs[i][2] = MIN_FRAC + remaining * (weights[i] / total_w)
+    tbl.colspecs[i][2] = mins[i] + remaining * (weights[i] / total_w)
   end
 
   return tbl
