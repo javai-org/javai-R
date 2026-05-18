@@ -649,8 +649,17 @@ smaller than $\max_{c \neq c^*} (1 - p_c)$ produces a change in $1 - p$
 within the sampling noise of an aggregate estimator. A conjunction
 indicator therefore cannot detect movement in $1 - p_{c^*}$ unless that
 movement is comparable to the noise of the dominant criterion. The
-catastrophic-consequence criterion of an asymmetric contract is, by
-construction, the criterion most often dominated.
+masking mechanism is purely a property of frequency: rare per-criterion
+failure rates are absorbed by more frequent ones, regardless of what
+those failures *mean*. The reason this matters for asymmetric contracts
+is empirical, not constructive: catastrophic-consequence outcomes (a
+model that recommends self-harm, a payment service that double-charges,
+a clinical-advice system that produces an unsafe instruction) are, in
+practice, *rare*, often deliberately so — modern LLM safeguards,
+hard-coded blocklists, and validation layers exist precisely to drive
+their rate toward zero. Rarity is what makes them mathematically
+invisible to aggregation; gravity is what makes that invisibility
+intolerable.
 
 **Inverse statement.** Given an observed conjunction rate $\hat{p}$,
 the per-criterion rates $\{\hat{p}_c\}$ are not identified: any
