@@ -384,7 +384,7 @@ illegal content — consequence is no longer operationalised as a
 tight $p^*_c$ at all. The failure mode is admitted as a *categorical*
 clause and discharged architecturally (§1.4.5;
 forthcoming chapter on architectural commitments). The observational
-mode of §1.4.5 is the inferential shape used to evaluate the
+mode of §1.4.5 is the mode used to evaluate the
 *derived* empirical criterion on the architectural component, not a
 limit-case of an empirical clause at $p^*_c \to 1$.
 
@@ -490,7 +490,11 @@ role in the statistical model.
 **Postcondition.** A named predicate over the produced output of a
 single trial. A postcondition has one job: decide pass or fail for a
 single observable property of the output. It carries no threshold and no
-statistical configuration. In the
+statistical configuration of its own. Every postcondition belongs to
+a criterion (see below), which supplies the threshold, confidence
+level, denominator policy, and mode under which the postcondition's
+per-trial verdicts are aggregated into a verdict; a criterion hosts
+one or more postconditions. In the
 clinical-advice example, $P_1$ through $P_4$ above are postconditions.
 
 **Criterion.** The unit of statistical evaluation. A criterion
@@ -498,11 +502,11 @@ clinical-advice example, $P_1$ through $P_4$ above are postconditions.
 criterion produces a per-trial outcome equal to that postcondition's
 verdict; a multi-postcondition criterion produces a per-trial outcome
 equal to the *conjunction* of its hosted postconditions' verdicts
-(§1.4.3 makes this formal). A criterion declares which postcondition
-or postconditions it hosts, the *shape* of the test it conducts
-(inferential or observational, §1.4.5), the threshold and threshold
-origin where applicable, the confidence level $\alpha$, and the
-experiment/sampling in which the criterion is exercised (§1.4.7). Each
+(§1.4.3 makes this formal). A criterion also declares the *mode* under
+which the test is conducted (inferential or observational, §1.4.5), the
+threshold and threshold origin where applicable, the confidence level
+$\alpha$, and the experiment/sampling in which the criterion is
+exercised (§1.4.7). Each
 criterion is its own Bernoulli stream and produces its own verdict. The criterion is the partition unit of the functional
 dimension. Two postconditions whose failures carry materially
 different consequences are addressed by two distinct criteria, never
@@ -678,7 +682,7 @@ reference distribution at $\alpha_c$ (§3.4). Where the gate does not
 admit a verdict — the sample is too small to support an inferential
 claim at the stated threshold and $\alpha_c$, or $n_c = 0$ — the
 verdict is INCONCLUSIVE. The inferential mode is the appropriate
-shape for criteria whose contractual question is *"what is the true
+choice for criteria whose contractual question is *"what is the true
 rate of behaviour $c$, with what confidence, and does it clear the
 demanded threshold?"*.
 
