@@ -1,6 +1,6 @@
 # Probabilistic Testing: A Practical Summary of the javai Statistical Model
 
-This document is the front door to the javai statistical model. It is intended for engineers, reviewers, product owners, and auditors who need to understand what the model is for, what kind of evidence it produces, and what it deliberately does not claim — without working through the full statistical companion.
+This page is the front door to the javai statistical model. It is intended for engineers, reviewers, product owners, and auditors who need to understand what the model is for, what kind of evidence it produces, and what it deliberately does not claim — without working through the full statistical companion.
 
 The [statistical companion](https://r.javai.org/statistical-companion.pdf) remains the canonical reference for formulae, derivations, and edge cases. This document summarises the conceptual frame around it.
 
