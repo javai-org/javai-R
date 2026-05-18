@@ -487,61 +487,61 @@ unchanged.
 The decomposition rests on three primitives, each playing a distinct
 role in the statistical model.
 
-**Postcondition.** A named predicate over the produced output of a
-single trial. A postcondition has one job: decide pass or fail for a
-single observable property of the output. It carries no threshold and no
-statistical configuration of its own. Every postcondition belongs to
-a criterion (see below), which supplies the threshold, confidence
-level, denominator policy, and mode under which the postcondition's
-per-trial verdicts are aggregated into a verdict; a criterion hosts
-one or more postconditions. In the
-clinical-advice example, $P_1$ through $P_4$ above are postconditions.
-
-**Criterion.** The unit of statistical evaluation. A criterion
-**hosts one or more postconditions**: a single-postcondition
-criterion produces a per-trial outcome equal to that postcondition's
-verdict; a multi-postcondition criterion produces a per-trial outcome
-equal to the *conjunction* of its hosted postconditions' verdicts
-(§1.4.3 makes this formal). A criterion also declares the *mode* under
-which the test is conducted (inferential or observational, §1.4.5), the
-threshold and threshold origin where applicable, the confidence level
-$\alpha$, and the experiment/sampling in which the criterion is
-exercised (§1.4.7). Each
-criterion is its own Bernoulli stream and produces its own verdict. The criterion is the partition unit of the functional
-dimension. Two postconditions whose failures carry materially
-different consequences are addressed by two distinct criteria, never
-by sharing a stream.
-
 **Sampling.** The list of sample inputs posted to the service under
-test in a single experiment. A sampling has length $N \geq 1$; each
-*sample entry* in the list is presented once to the service,
+test in a single experiment or test. A sampling has length $N \geq 1$;
+each *sample entry* in the list is presented once to the service,
 producing $N$ responses. The same underlying input may appear in
 more than one entry — repeated-prompt designs are represented this
 way — in which case the repetitions are recorded as cluster
-structure and handled under §8.2.1. The
-experiment's criteria evaluate over those same $N$ samples — each
-criterion's postcondition(s) score each response, producing $N$
-pass/fail observations per criterion. A contract with multiple
-criteria therefore produces a per-trial vector of per-criterion
-observations over a single shared sampling; there is no notion of a
-"per-criterion sampling" within an experiment. A contract that
-requires evidence about a different input distribution runs a
-*separate experiment* with its own sampling. The inferential reach of
-a sampling is elaborated in §1.4.7.
+structure and handled under §8.2.1. The sampling is shared across
+every criterion (defined below) that the contract exercises in the
+run: a contract with multiple criteria produces a per-trial vector
+of per-criterion observations over a single shared sampling, and
+there is no notion of a "per-criterion sampling" within an
+experiment. A contract that requires evidence about a different
+input distribution runs a *separate experiment* with its own
+sampling. The inferential reach of a sampling is elaborated in
+§1.4.7.
+
+**Criterion.** The unit of statistical evaluation. A criterion is
+the partition unit of the functional dimension; each criterion is
+exercised against the sampling and yields its own sequence of
+per-trial pass/fail outcomes, modelled as a Bernoulli stream
+(§1.4.3), from which its own verdict is computed. A criterion declares
+the *mode* under which the test is conducted (inferential or
+observational, §1.4.5), the threshold and threshold origin where
+applicable, the confidence level $\alpha$, and the experiment or test
+in which the criterion is exercised (§1.4.7). It also hosts one or
+more postconditions (defined below), which together determine its
+per-trial outcome: a single-postcondition criterion produces a
+per-trial outcome equal to that postcondition's verdict; a
+multi-postcondition criterion produces a per-trial outcome equal to
+the *conjunction* of its hosted postconditions' verdicts (§1.4.3
+makes this formal). Two postconditions whose failures carry
+materially different consequences are therefore addressed by two
+distinct criteria, never by sharing a stream.
+
+**Postcondition.** A named predicate over the produced output of a
+single trial. A postcondition has one job: decide pass or fail for a
+single observable property of the output. It carries no threshold and
+no statistical configuration of its own; the threshold, confidence
+level, denominator policy, and mode under which its per-trial
+verdicts are aggregated come from the criterion that hosts it. In the
+clinical-advice example, $P_1$ through $P_4$ above are postconditions.
 
 The relationship between the primitives is:
 
 | Primitive      | Role                       |
 |----------------|----------------------------|
-| Postcondition  | Per-trial predicate        |
-| Criterion      | Statistical partition unit; hosts 1+ postconditions |
-| Sampling       | List of $N \geq 1$ samples posted to the service in one experiment; shared by all criteria of the experiment |
+| Sampling       | List of $N \geq 1$ samples posted to the service in one experiment or test; shared by all criteria of the run |
+| Criterion      | Statistical partition unit; exercised against the sampling; hosts 1+ postconditions |
+| Postcondition  | Per-trial predicate; hosted by a criterion |
 
-Each of the three primitives has exactly one job: postconditions
-decide per-trial outcomes; criteria partition the functional
+Each of the three primitives has exactly one job: the sampling
+supplies the $N$ samples the run posts to the service and over which
+every criterion is exercised; criteria partition the functional
 dimension into statistical streams and parameterise each stream's
-inferential test; the sampling supplies the $N$ samples the experiment
-posts to the service and over which every criterion is exercised.
+inferential test; postconditions decide per-trial outcomes.
 
 ---
 
