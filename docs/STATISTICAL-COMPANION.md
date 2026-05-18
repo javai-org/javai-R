@@ -609,11 +609,17 @@ feasibility gate, and the verdict-evaluation rule apply unchanged.
 
 ---
 
-#### 1.4.4 The hiding result
+#### 1.4.4 Why aggregation masks per-criterion failures
 
-The structural claim that the criterion is the appropriate partition
-unit rests on a one-line mathematical result about binomial aggregation
-of heterogeneous failure events.
+Aggregating per-criterion indicators into a single conjunction rate is
+the obvious temptation — one stream, one $p$, one Wilson interval — and
+this section sets out why it is the wrong move. A one-line union-bound
+argument shows that the aggregate rate is bounded above by the sum of
+per-criterion failure rates and dominated by the largest of them; small
+but consequential per-criterion failure rates are absorbed into the
+noise of the dominant ones and become statistically invisible.
+Per-criterion partitioning is what exposes them; the conjunction view
+buries them.
 
 Let $\{C_1, \ldots, C_m\}$ be the contract's criteria, with per-trial
 indicators $X_{i,c}$ as in §1.4.3. Define the conjunction indicator
