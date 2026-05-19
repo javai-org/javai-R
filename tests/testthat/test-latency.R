@@ -125,6 +125,21 @@ test_that("latency_threshold_derive: rank saturates at n_s when infeasible", {
   expect_equal(result$threshold, 500)
 })
 
+test_that("latency_threshold_binomial_rank: flags saturation when k_raw > n", {
+  # n_s = 10, p = 0.99, confidence = 0.95: the binomial-derived rank
+  # exceeds 10, so the construction's existence condition is violated.
+  result <- latency_threshold_binomial_rank(n = 10L, p = 0.99, confidence = 0.95)
+  expect_true(result$saturated)
+  expect_gt(result$k_raw, 10L)
+})
+
+test_that("latency_threshold_binomial_rank: does not flag saturation when k_raw <= n", {
+  # n_s = 935, p = 0.99: well within the existence regime.
+  result <- latency_threshold_binomial_rank(n = 935L, p = 0.99, confidence = 0.95)
+  expect_false(result$saturated)
+  expect_lte(result$k_raw, 935L)
+})
+
 test_that("latency_threshold_derive: identical values collapse to common value", {
   baseline <- rep(150, 100)
 

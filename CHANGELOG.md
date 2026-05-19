@@ -58,6 +58,24 @@ Per `DIR-MULTI-CRITERIA-FIXTURES-javai-R.md` in the orchestrator.
 
 ### Changed
 
+- **`inst/cases/latency_threshold_bootstrap.json`** — every case's
+  `expected` block gains two new fields per **Statistical Companion
+  §12.4.2** (saturation discipline): `k_raw` (the unclamped binomial-
+  derived rank `qbinom(1 - alpha, n, p) + 1`) and `saturated` (TRUE
+  iff `k_raw > n`). When `saturated` is TRUE the published `rank` and
+  `threshold` are advisory at the saturation ceiling (`rank = n`,
+  `threshold = t_{(n)}`) and MUST NOT be presented as exact bounds
+  on Q(p); the suite description now states this explicitly.
+  Consumers must branch on `saturated` before treating `threshold`
+  as inferential. Of the four published cases, `lognormal_n200_p99`
+  is saturated (`k_raw = 201` against `n = 200`); the other three
+  are not (`k_raw == rank`). Per
+  `DIR-LATENCY-SATURATION-FIXTURE-javai-R.md`. Downstream:
+  `LatencyThresholdDeriver` in `punit` already exposes the saturation
+  flag on its `Threshold` record (punit#192); the punit conformance
+  test will be extended to assert against the new fields under a
+  follow-on punit directive. `feotest` follows under its own
+  directive.
 - **`inst/cases/threshold_derivation.json`** — every
   `sample_size_first` case gains three new `expected` fields per
   **SC-RU-02**: `wilson_lower_real` (the real-valued Wilson lower
