@@ -230,7 +230,7 @@ jobs:
           __OVERVIEW_BODY__
                 </article>
 
-                <section class="references">
+                <section class="references" id="reference-materials">
                   <h2>Reference materials</h2>
                   <p>The companion documents below provide the formal foundations underlying the summary above.</p>
                   <div class="doc-grid">

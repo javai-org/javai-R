@@ -2,7 +2,7 @@
 
 This page is the front door to the javai statistical model. It is intended for engineers, reviewers, product owners, and auditors who need to understand what the model is for, what kind of evidence it produces, and what it deliberately does not claim — without working through the full statistical companion.
 
-The [statistical companion](https://r.javai.org/statistical-companion.pdf) remains the canonical reference for formulae, derivations, and edge cases. This document summarises the conceptual frame around it.
+The [statistical companion](#reference-materials) remains the canonical reference for formulae, derivations, and edge cases. This document summarises the conceptual frame around it.
 
 ## 1. Motivation: deterministic testing breaks at uncertainty's boundary
 
@@ -95,4 +95,4 @@ Short definitions of the key statistical terms used above. The full [glossary](h
 
 ---
 
-For the full derivations, formulae, and the rules each implementation must conform to, see the [statistical companion](https://r.javai.org/statistical-companion.pdf). For the language-agnostic conformance fixtures derived from the companion, see [`../inst/cases/`](../inst/cases/).
+For the full derivations, formulae, and the rules each implementation must conform to, see the [statistical companion](#reference-materials). For the language-agnostic conformance fixtures derived from the companion, see [`../inst/cases/`](../inst/cases/).
