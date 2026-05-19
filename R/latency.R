@@ -51,7 +51,9 @@ latency_summary <- function(latencies) {
 #' @param p Numeric. Percentile level (e.g. 0.95).
 #' @param confidence Numeric. One-sided confidence level (e.g. 0.95).
 #' @return A list with rank (k), threshold (t_{(k)}), baseline_percentile
-#'   (Q(p) point estimate), and n (baseline sample count).
+#'   (Q(p) point estimate), and n (baseline sample count). For the
+#'   unclamped binomial-derived rank and the saturation flag (companion
+#'   §12.4.2), see `latency_threshold_binomial_rank()`.
 #' @export
 latency_threshold_derive <- function(baseline_latencies, p, confidence) {
   sorted <- sort(baseline_latencies)
@@ -70,6 +72,31 @@ latency_threshold_derive <- function(baseline_latencies, p, confidence) {
     threshold = sorted[k],
     baseline_percentile = nearest_rank_percentile(sorted, p),
     n = as.integer(n)
+  )
+}
+
+#' Unclamped binomial-derived rank, with saturation flag
+#'
+#' Companion §12.4.2 forbids silently clamping the binomial-derived rank
+#' k_raw = qbinom(1 - alpha, n, p) + 1 to n and presenting t_{(n)} as an
+#' exact upper bound on Q(p). When k_raw > n the construction's existence
+#' condition is violated and the published threshold can only be an
+#' advisory value at the saturation ceiling. This helper exposes both
+#' k_raw and the saturation flag so the published reference data can
+#' make the discipline observable to consumers.
+#'
+#' @param n Integer. Baseline sample count.
+#' @param p Numeric. Percentile level (e.g. 0.99).
+#' @param confidence Numeric. One-sided confidence level (e.g. 0.95).
+#' @return A list with k_raw (integer, unclamped) and saturated (logical,
+#'   TRUE iff k_raw > n).
+#' @export
+latency_threshold_binomial_rank <- function(n, p, confidence) {
+  alpha <- 1 - confidence
+  k_raw <- as.integer(qbinom(1 - alpha, size = as.integer(n), prob = p) + 1L)
+  list(
+    k_raw = k_raw,
+    saturated = k_raw > as.integer(n)
   )
 }
 
@@ -317,6 +344,7 @@ generate_latency_threshold_bootstrap_cases <- function() {
 
   build_case <- function(label, baseline, p, confidence = 0.95) {
     derived <- latency_threshold_derive(baseline, p, confidence)
+    binomial <- latency_threshold_binomial_rank(derived$n, p, confidence)
     point_est <- nearest_rank_percentile(baseline, p)
     boot <- bootstrap_upper(baseline, p, confidence)
     list(
@@ -332,6 +360,8 @@ generate_latency_threshold_bootstrap_cases <- function() {
         threshold = derived$threshold,
         baseline_percentile = derived$baseline_percentile,
         n = derived$n,
+        k_raw = binomial$k_raw,
+        saturated = binomial$saturated,
         # Informational comparison fields — not conformance targets.
         bootstrap_upper = boot,
         point_estimate = point_est,
@@ -352,9 +382,14 @@ generate_latency_threshold_bootstrap_cases <- function() {
     description = paste0(
       "Conformance suite for the exact binomial order-statistic upper bound on the baseline percentile. ",
       "Each case publishes the (ascending-sorted) baseline sample, the derivation parameters, ",
-      "and the expected conformance fields (rank, threshold, baseline_percentile, n). ",
-      "Conformance is exact equality per field: every conformance value is an integer or a specific ",
-      "element of baseline_latencies, so floating-point tolerance does not apply (suite tolerance: 0). ",
+      "and the expected conformance fields (rank, threshold, baseline_percentile, n, k_raw, saturated). ",
+      "Conformance is exact equality per field: every conformance value is an integer, a boolean, ",
+      "or a specific element of baseline_latencies, so floating-point tolerance does not apply ",
+      "(suite tolerance: 0). The k_raw field is the unclamped binomial-derived rank ",
+      "(qbinom(1 - alpha, n, p) + 1); saturated is TRUE iff k_raw > n. Per Statistical Companion ",
+      "§12.4.2, when saturated is TRUE the published rank and threshold are advisory at the ",
+      "saturation ceiling (rank = n, threshold = t_{(n)}) and MUST NOT be presented as exact bounds ",
+      "on Q(p) — consumers must branch on saturated before treating threshold as inferential. ",
       "The fields bootstrap_upper, point_estimate, and diff are preserved as informational comparison ",
       "content (10,000-replicate percentile bootstrap upper bound, raw sample quantile, and the ",
       "difference from the binomial threshold) and are not conformance targets."
