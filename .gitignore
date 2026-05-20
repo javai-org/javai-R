@@ -8,3 +8,6 @@ man/*.Rd
 /.idea/
 *.iml
 .claude/settings.local.json
+
+# Build artefact: generated from docs/glossary.yaml by the Pages workflow
+docs/glossary.json

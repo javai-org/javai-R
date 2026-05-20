@@ -27,9 +27,9 @@ The model does not claim to prove that an AI system is safe, truthful, or correc
 
 ## 3. The core model, in plain language
 
-Each invocation of the service is treated as a trial. For a given criterion — for example, "the response parses as JSON" or "the answer satisfies a rubric" — the trial either passes or fails. Repeating the invocation over a defined set of inputs produces a count: how many trials passed out of how many attempted. Under stated assumptions of approximate independence and stationarity, that count can be treated as binomial evidence about the service's success rate.
+Each invocation of the service is treated as a [trial]{.gloss term="trial"}. For a given criterion — for example, "the response parses as JSON" or "the answer satisfies a rubric" — the trial either passes or fails. Repeating the invocation over a defined set of inputs produces a count: how many trials passed out of how many attempted. Under stated assumptions of approximate [independence]{.gloss term="independence"} and [stationarity]{.gloss term="stationarity"}, that count can be treated as [binomial]{.gloss term="binomial"} evidence about the service's success rate.
 
-The model uses **Wilson score bounds** rather than naive observed percentages. This distinction matters: an observed rate is not the same thing as a reliable lower bound. If a service passes 95 out of 100 trials, the model does not pretend the true success rate is exactly 95%. It asks what lower success rate is still compatible with the evidence at the configured confidence level. That lower bound — not the raw percentage — is what compliance and regression decisions are made against.
+The model uses **[Wilson score bounds]{.gloss term="wilson-score-bound"}** rather than naive observed percentages. This distinction matters: an observed rate is not the same thing as a reliable lower bound. If a service passes 95 out of 100 trials, the model does not pretend the true success rate is exactly 95%. It asks what lower success rate is still compatible with the evidence at the configured [confidence level]{.gloss term="confidence-level"}. That lower bound — not the raw percentage — is what compliance and regression decisions are made against.
 
 ## 4. Compliance vs regression
 

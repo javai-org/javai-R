@@ -79,14 +79,19 @@ jobs:
             -V monofont="DejaVu Sans Mono" \
             -V title="Glossary"
 
+      - name: Build glossary JSON for Lua filter
+        run: |
+          python3 -c "import yaml, json; json.dump(yaml.safe_load(open('docs/glossary.yaml')), open('docs/glossary.json','w'))"
+
       - name: Render Statistical Model Overview to HTML fragment
         env:
           PANDOC_IMAGE: pandoc/latex:3.9-ubuntu
         run: |
           PANDOC="docker run --rm --user $(id -u):$(id -g) -v ${PWD}:/data -w /data ${PANDOC_IMAGE}"
           $PANDOC docs/STATISTICAL-MODEL-OVERVIEW.md \
-            --from gfm \
+            --from gfm+bracketed_spans \
             --to html5 \
+            --lua-filter=scripts/gloss.lua \
             -o _overview-body.html
           # The banner supplies the page title; strip the document's leading <h1>.
           python3 - <<'PY'
@@ -196,6 +201,28 @@ jobs:
               .site-footer a:hover { color: var(--color-white); }
               .footer-links { display: flex; gap: 2rem; }
 
+              /* Glossary popover */
+              .gloss { all: unset; cursor: help; border-bottom: 1px dotted currentColor; }
+              .gloss:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 2px; }
+              .gloss__icon { font-size: 0.75em; margin-left: 0.15em; opacity: 0.55; color: var(--color-accent); }
+              .gloss__pop {
+                max-width: 32rem; padding: 0.85rem 1.1rem;
+                border: 1px solid var(--color-border); border-radius: 6px;
+                background: var(--color-bg); color: var(--color-text);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+                font-family: var(--font-body); font-size: 0.95rem; line-height: 1.55;
+                inset: unset; position: fixed;
+              }
+              .gloss__pop::backdrop { background: transparent; }
+              .gloss__aka {
+                display: block;
+                margin-top: 0.6rem;
+                padding-top: 0.55rem;
+                border-top: 1px dashed var(--color-border);
+                font-size: 0.88rem;
+                color: var(--color-text-secondary);
+              }
+
               @media (max-width: 768px) {
                 .container { padding: 0 1.25rem; }
                 .site-header .container { flex-direction: column; height: auto; padding-top: 1rem; padding-bottom: 1rem; gap: 0.5rem; }
@@ -275,6 +302,34 @@ jobs:
                 </p>
               </div>
             </footer>
+
+            <script>
+            (function () {
+              function place(btn, pop) {
+                const r = btn.getBoundingClientRect();
+                const pw = pop.offsetWidth, ph = pop.offsetHeight;
+                const margin = 6;
+                let left = r.left;
+                if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+                if (left < 8) left = 8;
+                let top = r.bottom + margin;
+                if (top + ph > window.innerHeight - 8) top = r.top - ph - margin;
+                pop.style.left = left + 'px';
+                pop.style.top  = top  + 'px';
+              }
+              document.querySelectorAll('button.gloss').forEach(function (btn) {
+                const id = btn.getAttribute('popovertarget');
+                const pop = document.getElementById(id);
+                if (!pop) return;
+                btn.addEventListener('click', function () {
+                  requestAnimationFrame(function () { place(btn, pop); });
+                });
+                window.addEventListener('resize', function () {
+                  if (pop.matches(':popover-open')) place(btn, pop);
+                });
+              });
+            })();
+            </script>
           </body>
           </html>
           HTMLEOF
