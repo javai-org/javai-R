@@ -405,7 +405,7 @@ larger pool to be binding under VERIFICATION intent, or must be
 declared SMOKE up front.
 Per-criterion feasibility gates surface this asymmetry honestly,
 where an aggregated stream absorbs it. The categorical clause sits off
-this axis: a zero-tolerance failure mode is not admitted to the
+this axis: a 'zero-failures' failure mode is not admitted to the
 contract as a rate-bounded criterion at all, and so has no baseline
 to enter the comparison.
 
@@ -416,10 +416,10 @@ share the input distribution because they share the inputs
 themselves. A sampling sized for parseability serves register and
 other rate-bounded judge-mediated criteria without trouble, because
 their baselines are commensurate. What it cannot do is discharge a
-zero-tolerance failure mode: the rule-of-three bound on the failure
+'zero-failures' failure mode: the rule-of-three bound on the failure
 rate with zero observed failures is $\approx 3/n$, which approaches
 zero only in the limit, and no $n$ reachable inside one experiment
-closes the gap. The zero-tolerance case is therefore discharged at
+closes the gap. The zero-failures case is therefore discharged at
 the architectural layer (see *Clause Types: Empirical and
 Categorical*); the architectural component is evaluated in a separate
 experiment over an adversarial sampling. The categorical postcondition
@@ -736,7 +736,7 @@ $1.0$ as an inferential parameter. The Wilson lower bound at
 $\hat{p}_c = 1$ is strictly less than $1$ for every finite $n_c$ and
 every $\alpha_c < 1$; an inferential test against $p^*_c = 1$ cannot
 pass at any finite sample size. The observational mode is the honest
-expression of zero-tolerance contracts: the verdict reports the
+expression of zero-failures contracts: the verdict reports the
 observation, and the population claim is deferred to sentinel-scale
 accumulation or to the guardrail-validation pattern (the subjects of
 follow-on chapters).
@@ -759,7 +759,7 @@ Empirical and Categorical*). The methodology recognises three uses:
    already running, so the cost is incidental. The verdict does not
    discharge the categorical clause — the rule-of-three bound on a
    representative sampling sits orders of magnitude above any
-   zero-tolerance rate — but it answers a question the
+   zero-failures rate — but it answers a question the
    adversarial-sampling evaluation cannot: *do failures appear in
    representative production traffic at all?* A non-zero result is
    loud, because the rest of the architecture should be suppressing
