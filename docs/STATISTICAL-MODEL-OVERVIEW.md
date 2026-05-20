@@ -65,7 +65,7 @@ Four claims:
 
 1. It turns flaky-looking behaviour into **measurable** behaviour.
 2. It separates **observed rates** from **statistically supported claims**.
-3. It records the **assumptions** under which a verdict is meaningful: model version, factor configuration, covariates, baseline age, sampling design, and population claim.
+3. It records the **assumptions** under which a verdict is meaningful: factor configuration (e.g. model version, temperature), covariates (e.g. model version, deployment region, time of day), baseline age, sampling design, and population claim.
 4. It produces **audit-friendly evidence**: counts, thresholds, confidence bounds, cutoffs, caveats, and provenance.
 
 The model's transparent-statistics mode is designed for exactly this audience: auditors, stakeholders, educators, and regulators who need to see the reasoning behind a verdict, not just the verdict.
